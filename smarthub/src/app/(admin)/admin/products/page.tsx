@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "@/hooks/useTranslation";
 import { useUIStore } from "@/stores/ui-store";
 
 interface Category {
@@ -27,7 +26,6 @@ interface ProductsResponse {
 }
 
 export default function AdminProductsPage() {
-  const { t } = useTranslation();
   const router = useRouter();
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
   const [data, setData] = useState<ProductsResponse | null>(null);
@@ -91,7 +89,7 @@ export default function AdminProductsPage() {
             <button className="md:hidden p-2 text-on-surface-variant active:scale-95 transition-transform" onClick={() => setMobileMenuOpen(true)}>
               <span className="material-symbols-outlined">menu</span>
             </button>
-            <h1 className="font-headline-md text-headline-md-mobile md:text-headline-md text-primary">{t("admin.products")}</h1>
+            <h1 className="font-headline-md text-headline-md-mobile md:text-headline-md text-primary">{"Products"}</h1>
           </div>
           <div className="flex items-center gap-3">
             <button className="p-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-full transition-colors">
@@ -115,7 +113,7 @@ export default function AdminProductsPage() {
                   value={search}
                   onChange={(e) => { setSearch(e.target.value); setPage(1); }}
                   className="w-full h-10 pl-10 pr-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md focus:ring-2 focus:ring-primary/20 outline-none"
-                  placeholder={t("common.search_products")}
+                  placeholder={"Search products..."}
                 />
               </div>
               <select
@@ -123,7 +121,7 @@ export default function AdminProductsPage() {
                 onChange={(e) => { setCategory(e.target.value); setPage(1); }}
                 className="h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20"
               >
-                <option value="all">{t("admin.all_categories")}</option>
+                <option value="all">{"All Categories"}</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.slug}>{c.name}</option>
                 ))}
@@ -133,21 +131,21 @@ export default function AdminProductsPage() {
                 onChange={(e) => { setStockStatus(e.target.value); setPage(1); }}
                 className="h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20"
               >
-                <option value="all">{t("admin.all_stock")}</option>
-                <option value="low">{t("admin.low_stock")}</option>
-                <option value="out">{t("admin.out_of_stock")}</option>
+                <option value="all">{"All Stock"}</option>
+                <option value="low">{"Low Stock"}</option>
+                <option value="out">{"Out of Stock"}</option>
               </select>
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
                 className="h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20"
               >
-                <option value="newest">{t("admin.newest")}</option>
-                <option value="name">{t("admin.name")}</option>
-                <option value="price_asc">{t("admin.price_low")}</option>
-                <option value="price_desc">{t("admin.price_high")}</option>
-                <option value="stock">{t("admin.stock")}</option>
-                <option value="rating">{t("admin.rating")}</option>
+                <option value="newest">{"Newest"}</option>
+                <option value="name">{"Name"}</option>
+                <option value="price_asc">{"Price: Low to High"}</option>
+                <option value="price_desc">{"Price: High to Low"}</option>
+                <option value="stock">{"Stock"}</option>
+                <option value="rating">{"Rating"}</option>
               </select>
             </div>
             <button
@@ -155,7 +153,7 @@ export default function AdminProductsPage() {
               className="flex items-center gap-2 px-4 h-10 bg-primary text-on-primary rounded-lg font-label-md hover:bg-primary/90 transition-colors"
             >
               <span className="material-symbols-outlined text-[18px]">add</span>
-              {t("admin.add_product")}
+              { "Add Product"}
             </button>
           </div>
 
@@ -164,22 +162,22 @@ export default function AdminProductsPage() {
               <table className="w-full text-left border-collapse">
                 <thead>
                   <tr className="bg-surface-container-low/50">
-                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{t("admin.product")}</th>
-                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{t("admin.category")}</th>
-                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{t("admin.price")}</th>
-                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{t("admin.stock")}</th>
-                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-center">{t("admin.status")}</th>
-                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{t("admin.actions")}</th>
+                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{"Product"}</th>
+                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{"Category"}</th>
+                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Price"}</th>
+                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Stock"}</th>
+                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-center">{"Status"}</th>
+                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Actions"}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-outline-variant/10">
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="px-lg py-12 text-center text-outline">{t("common.loading")}</td>
+                      <td colSpan={6} className="px-lg py-12 text-center text-outline">{"Loading..."}</td>
                     </tr>
                   ) : data?.products.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-lg py-12 text-center text-outline">{t("admin.no_products")}</td>
+                      <td colSpan={6} className="px-lg py-12 text-center text-outline">{"No products found"}</td>
                     </tr>
                   ) : (
                     data?.products.map((product) => (
@@ -222,7 +220,7 @@ export default function AdminProductsPage() {
                             <span className={`w-1.5 h-1.5 rounded-full ${
                               product.featured ? "bg-primary" : product.inStock ? "bg-green-500" : "bg-error"
                             }`} />
-                            {product.featured ? t("admin.featured") : product.inStock ? t("admin.active") : t("admin.inactive")}
+                            {product.featured ? "Featured" : product.inStock ? "Active" : "Inactive"}
                           </span>
                         </td>
                         <td className="px-lg py-4 text-right">
@@ -230,7 +228,7 @@ export default function AdminProductsPage() {
                             <button
                               onClick={() => router.push(`/admin/products/${product.id}/edit`)}
                               className="p-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-lg transition-colors"
-                              title={t("admin.edit")}
+                              title={"Edit"}
                             >
                               <span className="material-symbols-outlined text-[18px]">edit</span>
                             </button>
@@ -254,7 +252,7 @@ export default function AdminProductsPage() {
                               <button
                                 onClick={() => setDeleteId(product.id)}
                                 className="p-2 text-on-surface-variant hover:bg-error-container/20 hover:text-error rounded-lg transition-colors"
-                                title={t("admin.delete")}
+                                title={"Delete"}
                               >
                                 <span className="material-symbols-outlined text-[18px]">delete</span>
                               </button>
@@ -272,7 +270,7 @@ export default function AdminProductsPage() {
           {data && data.totalPages > 1 && (
             <div className="flex items-center justify-between">
               <p className="font-body-md text-outline">
-                {t("admin.showing")} {(data.page - 1) * data.limit + 1}-{Math.min(data.page * data.limit, data.total)} {t("admin.of")} {data.total}
+                {"Showing"} {(data.page - 1) * data.limit + 1}-{Math.min(data.page * data.limit, data.total)} {"of"} {data.total}
               </p>
               <div className="flex items-center gap-2">
                 <button
@@ -311,23 +309,23 @@ export default function AdminProductsPage() {
         <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-2 h-16 bg-surface border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard">
             <span className="material-symbols-outlined">dashboard</span>
-            <span className="font-label-sm text-label-sm">{t("admin.dashboard")}</span>
+            <span className="font-label-sm text-label-sm">{"Dashboard"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-primary bg-primary-container/30 rounded-full px-4 py-1" href="/admin/products">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>inventory_2</span>
-            <span className="font-label-sm text-label-sm">{t("admin.products")}</span>
+            <span className="font-label-sm text-label-sm">{"Products"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/financial">
             <span className="material-symbols-outlined">account_balance</span>
-            <span className="font-label-sm text-label-sm">{t("admin.financial_reports")}</span>
+            <span className="font-label-sm text-label-sm">{"Financial Reports"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/profit-loss">
             <span className="material-symbols-outlined">analytics</span>
-            <span className="font-label-sm text-label-sm">{t("admin.profit_loss")}</span>
+            <span className="font-label-sm text-label-sm">{"Profit & Loss"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard">
             <span className="material-symbols-outlined">dashboard</span>
-            <span className="font-label-sm text-label-sm">{t("admin.dashboard")}</span>
+            <span className="font-label-sm text-label-sm">{"Dashboard"}</span>
           </a>
         </nav>
       </main>

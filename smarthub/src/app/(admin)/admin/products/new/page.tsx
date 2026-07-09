@@ -2,14 +2,14 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useTranslation } from "@/hooks/useTranslation";
+
 import { useUIStore } from "@/stores/ui-store";
 
 interface Category { id: string; name: string; slug: string; }
 interface Vendor { id: string; name: string; }
 
 export default function NewProductPage() {
-  const { t } = useTranslation();
+
   const router = useRouter();
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -114,11 +114,11 @@ export default function NewProductPage() {
             <button className="md:hidden p-2 text-on-surface-variant active:scale-95 transition-transform" onClick={() => setMobileMenuOpen(true)}>
               <span className="material-symbols-outlined">menu</span>
             </button>
-            <h1 className="font-headline-md text-headline-md-mobile md:text-headline-md text-primary">{t("admin.add_product")}</h1>
+            <h1 className="font-headline-md text-headline-md-mobile md:text-headline-md text-primary">{"Add Product"}</h1>
           </div>
           <div className="flex items-center gap-3">
             <button onClick={() => router.push("/admin/products")} className="px-4 h-10 border border-outline-variant rounded-lg font-label-md text-on-surface-variant hover:bg-surface-variant/50 transition-colors">
-              {t("common.cancel")}
+              {"Cancel"}
             </button>
             <button
               onClick={handleSubmit}
@@ -126,7 +126,7 @@ export default function NewProductPage() {
               className="px-4 h-10 bg-primary text-on-primary rounded-lg font-label-md hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
             >
               {saving && <span className="material-symbols-outlined text-[16px] animate-spin">hourglass_top</span>}
-              {t("admin.save_product")}
+              {"Save Product"}
             </button>
           </div>
         </header>
@@ -137,61 +137,61 @@ export default function NewProductPage() {
             )}
 
             <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
-              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{t("admin.basic_info")}</h2>
+              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{"Basic Info"}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg md:gap-xl">
                 <div className="md:col-span-2 lg:col-span-3">
-                  <label className={labelCls}>{t("admin.product_name")} *</label>
+                  <label className={labelCls}>{"Product Name"} *</label>
                   <input value={form.name} onChange={(e) => handleNameChange(e.target.value)} className={inputCls} placeholder="e.g. Wireless Headphones Pro" />
                 </div>
                 <div>
-                  <label className={labelCls}>{t("admin.slug")}</label>
+                  <label className={labelCls}>{"Slug"}</label>
                   <input value={form.slug} onChange={(e) => update("slug", e.target.value)} className={inputCls} placeholder="auto-generated" />
                 </div>
                 <div>
-                  <label className={labelCls}>{t("admin.brand")} *</label>
+                  <label className={labelCls}>{"Brand"} *</label>
                   <input value={form.brand} onChange={(e) => update("brand", e.target.value)} className={inputCls} placeholder="e.g. Sony" />
                 </div>
                 <div className="md:col-span-2 lg:col-span-3">
-                  <label className={labelCls}>{t("admin.description")} *</label>
+                  <label className={labelCls}>{"Description"} *</label>
                   <textarea value={form.description} onChange={(e) => update("description", e.target.value)} rows={4} className={`${inputCls} h-auto py-3 resize-none`} placeholder="Product description..." />
                 </div>
               </div>
             </div>
 
             <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
-              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{t("admin.pricing_stock")}</h2>
+              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{"Pricing & Stock"}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg md:gap-xl">
                 <div>
-                  <label className={labelCls}>{t("admin.price")} *</label>
+                  <label className={labelCls}>{"Price"} *</label>
                   <input value={form.price} onChange={(e) => update("price", e.target.value)} type="number" step="0.01" min="0" className={inputCls} placeholder="0.00" />
                 </div>
                 <div>
-                  <label className={labelCls}>{t("admin.original_price")}</label>
+                  <label className={labelCls}>{"Original Price"}</label>
                   <input value={form.originalPrice} onChange={(e) => update("originalPrice", e.target.value)} type="number" step="0.01" min="0" className={inputCls} placeholder="0.00" />
                 </div>
                 <div>
-                  <label className={labelCls}>{t("admin.stock")}</label>
+                  <label className={labelCls}>{"Stock"}</label>
                   <input value={form.stock} onChange={(e) => update("stock", e.target.value)} type="number" min="0" className={inputCls} placeholder="0" />
                 </div>
               </div>
             </div>
 
             <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
-              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{t("admin.organization")}</h2>
+              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{"Organization"}</h2>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg md:gap-xl">
                 <div>
-                  <label className={labelCls}>{t("admin.category")} *</label>
+                  <label className={labelCls}>{"Category"} *</label>
                   <select value={form.categoryId} onChange={(e) => update("categoryId", e.target.value)} className={inputCls}>
-                    <option value="">{t("admin.select_category")}</option>
+                    <option value="">{"Select category"}</option>
                     {categories.map((c) => (
                       <option key={c.id} value={c.id}>{c.name}</option>
                     ))}
                   </select>
                 </div>
                 <div>
-                  <label className={labelCls}>{t("admin.vendor")} *</label>
+                  <label className={labelCls}>{"Vendor"} *</label>
                   <select value={form.vendorId} onChange={(e) => update("vendorId", e.target.value)} className={inputCls}>
-                    <option value="">{t("admin.select_vendor")}</option>
+                    <option value="">{"Select vendor"}</option>
                     {vendors.map((v) => (
                       <option key={v.id} value={v.id}>{v.name}</option>
                     ))}
@@ -205,22 +205,22 @@ export default function NewProductPage() {
                       onChange={(e) => update("featured", e.target.checked)}
                       className="w-5 h-5 md:w-6 md:h-6 rounded border-outline-variant text-primary focus:ring-primary"
                     />
-                    <span className="font-body-md md:font-body-lg text-on-surface">{t("admin.featured_product")}</span>
+                    <span className="font-body-md md:font-body-lg text-on-surface">{"Featured Product"}</span>
                   </label>
                 </div>
               </div>
             </div>
 
             <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
-              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{t("admin.media_specs")}</h2>
+              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{"Media & Specs"}</h2>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg md:gap-xl">
                 <div>
-                  <label className={labelCls}>{t("admin.image_urls")}</label>
+                  <label className={labelCls}>{"Image URLs"}</label>
                   <textarea value={form.images} onChange={(e) => update("images", e.target.value)} rows={4} className={`${inputCls} h-auto py-3 resize-none font-mono text-label-sm md:text-body-md`} placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg" />
-                  <p className="font-label-sm md:font-label-md text-outline mt-1">{t("admin.image_urls_hint")}</p>
+                  <p className="font-label-sm md:font-label-md text-outline mt-1">{"Enter one URL per line"}</p>
                 </div>
                 <div>
-                  <label className={labelCls}>{t("admin.specs")}</label>
+                  <label className={labelCls}>{"Specs"}</label>
                   <textarea value={form.specs} onChange={(e) => update("specs", e.target.value)} rows={4} className={`${inputCls} h-auto py-3 resize-none font-mono text-label-sm md:text-body-md`} placeholder='{"weight": "0.5 kg", "color": "Black"}' />
                 </div>
               </div>
@@ -228,11 +228,11 @@ export default function NewProductPage() {
           </form>
         </div>
         <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-2 h-16 bg-surface border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard"><span className="material-symbols-outlined">dashboard</span><span className="font-label-sm text-label-sm">{t("admin.dashboard")}</span></a>
-          <a className="flex flex-col items-center justify-center text-primary bg-primary-container/30 rounded-full px-4 py-1" href="/admin/products"><span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>inventory_2</span><span className="font-label-sm text-label-sm">{t("admin.products")}</span></a>
-          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/financial"><span className="material-symbols-outlined">account_balance</span><span className="font-label-sm text-label-sm">{t("admin.financial_reports")}</span></a>
-          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/profit-loss"><span className="material-symbols-outlined">analytics</span><span className="font-label-sm text-label-sm">{t("admin.profit_loss")}</span></a>
-           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard"><span className="material-symbols-outlined">dashboard</span><span className="font-label-sm text-label-sm">{t("admin.dashboard")}</span></a>
+          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard"><span className="material-symbols-outlined">dashboard</span><span className="font-label-sm text-label-sm">{"Dashboard"}</span></a>
+          <a className="flex flex-col items-center justify-center text-primary bg-primary-container/30 rounded-full px-4 py-1" href="/admin/products"><span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>inventory_2</span><span className="font-label-sm text-label-sm">{"Products"}</span></a>
+          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/financial"><span className="material-symbols-outlined">account_balance</span><span className="font-label-sm text-label-sm">{"Financial Reports"}</span></a>
+          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/profit-loss"><span className="material-symbols-outlined">analytics</span><span className="font-label-sm text-label-sm">{"Profit & Loss"}</span></a>
+           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard"><span className="material-symbols-outlined">dashboard</span><span className="font-label-sm text-label-sm">{"Dashboard"}</span></a>
         </nav>
       </main>
   );

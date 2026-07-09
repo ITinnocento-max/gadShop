@@ -1,6 +1,5 @@
 "use client"
 
-import { useTranslation } from "@/hooks/useTranslation"
 
 const kpis = [
   { label: "Total Expenses", value: "Rwf 320,450.15" },
@@ -24,12 +23,10 @@ const claims = [
 ]
 
 export default function ExpensesPage() {
-  const { t } = useTranslation()
-
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-text">{t("admin.expenses")}</h1>
+        <h1 className="text-3xl font-bold text-text">{"Expenses"}</h1>
         <p className="text-text-secondary mt-1">Track and manage business expenses</p>
       </div>
 

@@ -1,7 +1,5 @@
 "use client"
 
-import { useTranslation } from "@/hooks/useTranslation"
-
 const kpis = [
   { label: "Total Invoiced", value: "Rwf 892,400" },
   { label: "Paid", value: "Rwf 645,300" },
@@ -20,12 +18,10 @@ const invoices = [
 const quickLinks = ["Sales Invoices", "Purchase Invoices", "Credit Notes", "Debit Notes", "Quotations", "Receipts"]
 
 export default function InvoicingPage() {
-  const { t } = useTranslation()
-
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-text">{t("admin.invoicing")}</h1>
+        <h1 className="text-3xl font-bold text-text">{"Invoicing"}</h1>
         <p className="text-text-secondary mt-1">Create and manage invoices</p>
       </div>
 

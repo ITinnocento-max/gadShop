@@ -1,7 +1,5 @@
 "use client"
 
-import { useTranslation } from "@/hooks/useTranslation"
-
 const summaries = [
   { label: "VAT Collected", value: "Rwf 124,500" },
   { label: "GST Collected", value: "Rwf 0" },
@@ -19,12 +17,10 @@ const taxRates = [
 const links = ["VAT", "GST", "Withholding Tax", "Tax Rates", "Tax Rules", "Tax Reports"]
 
 export default function TaxPage() {
-  const { t } = useTranslation()
-
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-text">{t("admin.tax")}</h1>
+        <h1 className="text-3xl font-bold text-text">{"Tax"}</h1>
         <p className="text-text-secondary mt-1">Manage tax rates, rules, and filings</p>
       </div>
 

@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslation } from "@/hooks/useTranslation";
-
 const summaryCards = [
   { label: "Output VAT (Collected)", value: "Rwf 124,500.00", color: "" },
   { label: "Input VAT (Paid)", value: "Rwf 78,200.00", color: "" },
@@ -18,12 +16,10 @@ const transactions = [
 ];
 
 export default function VatGstPage() {
-  const { t } = useTranslation();
-
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{t("admin.vat_gst")}</h1>
+        <h1 className="text-2xl font-bold">{"VAT/GST"}</h1>
         <p className="text-gray-400 text-sm mt-1">Tax Period: Q4 2024</p>
       </div>
 

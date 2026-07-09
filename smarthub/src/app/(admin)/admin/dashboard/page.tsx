@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
 import { useUIStore } from "@/stores/ui-store";
 
 interface DashboardData {
@@ -24,7 +23,6 @@ const statusStyles: Record<string, string> = {
 };
 
 export default function AdminDashboardPage() {
-  const { t } = useTranslation();
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
   const [data, setData] = useState<DashboardData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -44,7 +42,7 @@ export default function AdminDashboardPage() {
         <header className="sticky top-0 z-50 flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop h-16 shadow-soft bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-md">
           <div className="flex items-center gap-3">
             <button className="md:hidden material-symbols-outlined text-on-surface-variant dark:text-outline active:scale-95 transition-transform" onClick={() => setMobileMenuOpen(true)}>menu</button>
-            <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-inverse-primary tracking-tighter">{t("common.app_name")}</h1>
+            <h1 className="font-headline-lg-mobile text-headline-lg-mobile text-primary dark:text-inverse-primary tracking-tighter">{"SmartHub"}</h1>
           </div>
           <div className="flex items-center gap-4">
             <button className="relative material-symbols-outlined text-on-surface-variant dark:text-outline active:scale-95 transition-transform">
@@ -63,15 +61,15 @@ export default function AdminDashboardPage() {
         <div className="flex-1 overflow-y-auto px-margin-mobile md:px-margin-desktop pt-lg pb-28 md:pb-12 space-y-lg">
           <section>
             <div className="flex flex-col">
-              <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline uppercase tracking-wider">{t("admin.super_admin")}</p>
-              <h2 className="font-headline-md text-headline-md-mobile text-on-surface dark:text-white">{t("admin.welcome_back")}</h2>
+              <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline uppercase tracking-wider">{"Super Admin"}</p>
+              <h2 className="font-headline-md text-headline-md-mobile text-on-surface dark:text-white">{"Welcome Back"}</h2>
             </div>
           </section>
           <section className="grid grid-cols-2 gap-md">
             <div className="col-span-2 bg-surface/70 dark:bg-inverse-surface/70 backdrop-blur-md border border-outline-variant/20 rounded-xl p-md shadow-soft">
               <div className="flex justify-between items-start mb-base">
                 <div>
-                  <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline">{t("admin.todays_sales")}</p>
+                  <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline">{"Today's Sales"}</p>
                   <p className="font-headline-md text-headline-md text-primary dark:text-inverse-primary">
                     {loading ? "—" : formatCurrency(data?.todaySales ?? 0)}
                   </p>
@@ -92,7 +90,7 @@ export default function AdminDashboardPage() {
             <div className="bg-surface/70 dark:bg-inverse-surface/70 backdrop-blur-md border border-outline-variant/20 rounded-xl p-md shadow-soft">
               <div className="flex items-center gap-2 mb-xs">
                 <span className="material-symbols-outlined text-secondary dark:text-secondary-fixed text-[20px]">payments</span>
-                <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline">{t("admin.revenue")}</p>
+                <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline">{"Revenue"}</p>
               </div>
               <p className="font-headline-md text-headline-md text-on-surface dark:text-white">
                 {loading ? "—" : formatCurrency(data?.totalRevenue ?? 0)}
@@ -101,7 +99,7 @@ export default function AdminDashboardPage() {
             <div className="bg-surface/70 dark:bg-inverse-surface/70 backdrop-blur-md border border-outline-variant/20 rounded-xl p-md shadow-soft">
               <div className="flex items-center gap-2 mb-xs">
                 <span className="material-symbols-outlined text-primary dark:text-inverse-primary text-[20px]">package_2</span>
-                <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline">{t("admin.active_orders")}</p>
+                <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline">{"Active Orders"}</p>
               </div>
               <p className="font-headline-md text-headline-md text-on-surface dark:text-white">
                 {loading ? "—" : (data?.activeOrders ?? 0).toLocaleString()}
@@ -110,7 +108,7 @@ export default function AdminDashboardPage() {
             <div className="bg-surface/70 dark:bg-inverse-surface/70 backdrop-blur-md border border-outline-variant/20 rounded-xl p-md shadow-soft">
               <div className="flex items-center gap-2 mb-xs">
                 <span className="material-symbols-outlined text-tertiary dark:text-tertiary-fixed-dim text-[20px]">person_add</span>
-                <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline">{t("admin.new_customers")}</p>
+                <p className="font-label-md text-label-md text-on-surface-variant dark:text-outline">{"New Customers"}</p>
               </div>
               <p className="font-headline-md text-headline-md text-on-surface dark:text-white">
                 {loading ? "—" : (data?.newCustomers ?? 0).toLocaleString()}
@@ -119,7 +117,7 @@ export default function AdminDashboardPage() {
             <div className="bg-error-container/10 border border-error/20 rounded-xl p-md shadow-soft">
               <div className="flex items-center gap-2 mb-xs">
                 <span className="material-symbols-outlined text-error text-[20px]">warning</span>
-                <p className="font-label-md text-label-md text-error">{t("admin.low_stock")}</p>
+                <p className="font-label-md text-label-md text-error">{"Low Stock"}</p>
               </div>
               <p className="font-headline-md text-headline-md text-on-error-container">
                 {loading ? "—" : `${data?.lowStockItems ?? 0} Items`}
@@ -128,12 +126,12 @@ export default function AdminDashboardPage() {
           </section>
           <section className="space-y-md">
             <div className="flex justify-between items-center">
-              <h3 className="font-headline-md text-on-surface dark:text-white">{t("admin.recent_orders")}</h3>
-              <button className="text-primary dark:text-inverse-primary font-label-md text-label-md hover:underline">{t("common.view_all")}</button>
+              <h3 className="font-headline-md text-on-surface dark:text-white">{"Recent Orders"}</h3>
+              <button className="text-primary dark:text-inverse-primary font-label-md text-label-md hover:underline">{"View All"}</button>
             </div>
             <div className="space-y-sm">
               {loading ? (
-                <div className="text-center py-8 text-on-surface-variant">{t("common.loading")}</div>
+                <div className="text-center py-8 text-on-surface-variant">{"Loading..."}</div>
               ) : data?.recentOrders.map((order) => (
                 <div key={order.id} className="flex items-center justify-between p-md bg-surface-container-low dark:bg-surface-variant/10 rounded-xl border border-outline-variant/10">
                   <div className="flex items-center gap-md">
@@ -146,17 +144,17 @@ export default function AdminDashboardPage() {
                     </div>
                   </div>
                   <span className={`px-3 py-1 rounded-full font-label-sm text-label-sm ${statusStyles[order.status] || "bg-surface-container-high text-on-surface-variant"}`}>
-                    {t(`orders.${order.status.toLowerCase()}`)}
+                    {order.status.charAt(0).toUpperCase() + order.status.slice(1).toLowerCase()}
                   </span>
                 </div>
               ))}
             </div>
           </section>
           <section className="space-y-md">
-            <h3 className="font-headline-md text-on-surface dark:text-white">{t("admin.inventory_alerts")}</h3>
+            <h3 className="font-headline-md text-on-surface dark:text-white">{"Inventory Alerts"}</h3>
             <div className="flex gap-md overflow-x-auto no-scrollbar pb-xs">
               {loading ? (
-                <div className="text-center py-8 text-on-surface-variant w-full">{t("common.loading")}</div>
+                <div className="text-center py-8 text-on-surface-variant w-full">{"Loading..."}</div>
               ) : data?.lowStockProducts.map((p) => (
                 <div key={p.id} className="min-w-[200px] bg-surface/70 dark:bg-inverse-surface/70 backdrop-blur-md border border-outline-variant/20 rounded-xl overflow-hidden shadow-soft">
                   <div className="h-32 w-full relative">
@@ -181,19 +179,19 @@ export default function AdminDashboardPage() {
         <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-2 h-16 bg-surface border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
           <a className="flex flex-col items-center justify-center text-primary bg-primary-container/30 rounded-full px-4 py-1" href="/admin/dashboard">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>dashboard</span>
-            <span className="font-label-sm text-label-sm">{t("admin.dashboard")}</span>
+            <span className="font-label-sm text-label-sm">{"Dashboard"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/products">
             <span className="material-symbols-outlined">inventory_2</span>
-            <span className="font-label-sm text-label-sm">{t("admin.products")}</span>
+            <span className="font-label-sm text-label-sm">{"Products"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/financial">
             <span className="material-symbols-outlined">account_balance</span>
-            <span className="font-label-sm text-label-sm">{t("admin.financial_reports")}</span>
+            <span className="font-label-sm text-label-sm">{"Financial Reports"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/profit-loss">
             <span className="material-symbols-outlined">settings</span>
-            <span className="font-label-sm text-label-sm">{t("admin.settings")}</span>
+            <span className="font-label-sm text-label-sm">{"Settings"}</span>
           </a>
         </nav>
       </main>

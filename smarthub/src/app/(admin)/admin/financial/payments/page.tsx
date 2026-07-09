@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslation } from "@/hooks/useTranslation";
-
 const gateways = [
   { icon: "smartphone", name: "MTN MoMo", total: "Rwf 45,200", successful: 342, failed: 12, color: "text-[#f59e0b]", bg: "bg-[#f59e0b]/10" },
   { icon: "smartphone", name: "Airtel Money", total: "Rwf 28,400", successful: 198, failed: 8, color: "text-error", bg: "bg-error/10" },
@@ -11,10 +9,10 @@ const gateways = [
 ];
 
 const statusSummaries = [
-  { icon: "check_circle", key: "successful_payments", count: 852, amount: "Rwf 128,430", color: "text-secondary", bg: "bg-secondary/10" },
-  { icon: "cancel", key: "failed_payments", count: 30, amount: "Rwf 4,520", color: "text-error", bg: "bg-error/10" },
-  { icon: "schedule", key: "pending_payments", count: 45, amount: "Rwf 6,780", color: "text-tertiary", bg: "bg-tertiary/10" },
-  { icon: "undo", key: "refunds", count: 22, amount: "Rwf 3,210", color: "text-outline", bg: "bg-surface-container-high" },
+  { icon: "check_circle", key: "successful_payments", label: "Successful Payments", count: 852, amount: "Rwf 128,430", color: "text-secondary", bg: "bg-secondary/10" },
+  { icon: "cancel", key: "failed_payments", label: "Failed Payments", count: 30, amount: "Rwf 4,520", color: "text-error", bg: "bg-error/10" },
+  { icon: "schedule", key: "pending_payments", label: "Pending Payments", count: 45, amount: "Rwf 6,780", color: "text-tertiary", bg: "bg-tertiary/10" },
+  { icon: "undo", key: "refunds", label: "Refunds", count: 22, amount: "Rwf 3,210", color: "text-outline", bg: "bg-surface-container-high" },
 ];
 
 const recentTransactions = [
@@ -37,12 +35,11 @@ const statusBadge = (status: string) => {
 };
 
 export default function PaymentsPage() {
-  const { t } = useTranslation();
 
   return (
     <div className="space-y-xl">
       <div>
-        <h2 className="font-headline-lg text-headline-lg text-on-surface">{t("admin.payment_monitoring")}</h2>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Payment Monitoring"}</h2>
         <p className="font-body-md text-body-md text-outline mt-1">Monitor and reconcile payment transactions across all gateways</p>
       </div>
       {/* Gateway Summary Cards */}
@@ -73,7 +70,7 @@ export default function PaymentsPage() {
               <span className="material-symbols-outlined">{s.icon}</span>
             </div>
             <div>
-              <p className="text-outline font-label-sm text-label-sm">{t(`admin.${s.key}`)}</p>
+              <p className="text-outline font-label-sm text-label-sm">{s.label}</p>
               <p className="text-headline-sm font-headline-sm text-on-surface">{s.count}</p>
               <p className="text-label-sm font-label-sm text-on-surface-variant">{s.amount}</p>
             </div>

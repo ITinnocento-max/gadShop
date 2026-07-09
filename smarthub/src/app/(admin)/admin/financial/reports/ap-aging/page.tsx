@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslation } from "@/hooks/useTranslation";
-
 const summaryCards = [
   { label: "Total Payables", value: "Rwf 310,000", color: "" },
   { label: "Current (0-30 Days)", value: "Rwf 165,000", color: "" },
@@ -19,12 +17,10 @@ const suppliers = [
 ];
 
 export default function ApAgingPage() {
-  const { t } = useTranslation();
-
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{t("admin.ap_aging")}</h1>
+        <h1 className="text-2xl font-bold">{"AP Aging"}</h1>
         <p className="text-gray-400 text-sm mt-1">As of December 31, 2024</p>
       </div>
 

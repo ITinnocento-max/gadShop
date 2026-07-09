@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslation } from "@/hooks/useTranslation";
-
 const LineItem = ({ label, value, bold, section, indent }: { label: string; value: string; bold?: boolean; section?: boolean; indent?: boolean }) => (
   <tr className={`${section ? "bg-surface-container-low/20" : ""} ${bold ? "font-bold" : "font-body-md"} border-b border-outline-variant/10`}>
     <td className={`py-2 px-4 ${indent ? "pl-8" : ""} ${bold ? "text-on-surface" : "text-on-surface-variant"}`}>{label}</td>
@@ -31,12 +29,10 @@ const TotalRow = ({ label, value, double }: { label: string; value: string; doub
 );
 
 export default function CashFlowPage() {
-  const { t } = useTranslation();
-
   return (
     <div className="space-y-xl">
       <div>
-        <h2 className="font-headline-lg text-headline-lg text-on-surface">{t("admin.cash_flow_statement")}</h2>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Cash Flow Statement"}</h2>
         <p className="font-body-md text-body-md text-outline mt-1">For the Year Ended December 31, 2024</p>
       </div>
       <div className="bg-surface rounded-2xl shadow-soft border border-outline-variant/10 overflow-hidden">

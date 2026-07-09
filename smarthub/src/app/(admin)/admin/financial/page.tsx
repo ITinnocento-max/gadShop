@@ -1,8 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslation } from "@/hooks/useTranslation";
-
 interface Gateway {
   name: string;
   key: string;
@@ -25,26 +23,25 @@ interface FinancialData {
 }
 
 const quickLinks = [
-  { icon: "description", key: "reports", href: "/admin/financial/reports" },
-  { icon: "account_balance", key: "banking", href: "/admin/financial/banking" },
-  { icon: "receipt", key: "expenses", href: "/admin/financial/expenses" },
-  { icon: "request_quote", key: "tax", href: "/admin/financial/tax" },
-  { icon: "receipt_long", key: "invoicing", href: "/admin/financial/invoicing" },
-  { icon: "payments", key: "payments", href: "/admin/financial/payments" },
-  { icon: "insights", key: "analytics", href: "/admin/financial/analytics" },
+  { icon: "description", key: "reports", label: "Reports", href: "/admin/financial/reports" },
+  { icon: "account_balance", key: "banking", label: "Banking", href: "/admin/financial/banking" },
+  { icon: "receipt", key: "expenses", label: "Expenses", href: "/admin/financial/expenses" },
+  { icon: "request_quote", key: "tax", label: "Tax", href: "/admin/financial/tax" },
+  { icon: "receipt_long", key: "invoicing", label: "Invoicing", href: "/admin/financial/invoicing" },
+  { icon: "payments", key: "payments", label: "Payments", href: "/admin/financial/payments" },
+  { icon: "insights", key: "analytics", label: "Analytics", href: "/admin/financial/analytics" },
 ];
 
 const summaryMeta = [
-  { icon: "payments", key: "total_revenue", color: "text-primary", bg: "bg-primary/10" },
-  { icon: "account_balance_wallet", key: "gross_profit", color: "text-secondary", bg: "bg-secondary/10" },
-  { icon: "show_chart", key: "net_profit", color: "text-tertiary", bg: "bg-tertiary/10" },
-  { icon: "account_tree", key: "cash_flow", color: "text-outline", bg: "bg-surface-container-high" },
+  { icon: "payments", key: "total_revenue", label: "Total Revenue", color: "text-primary", bg: "bg-primary/10" },
+  { icon: "account_balance_wallet", key: "gross_profit", label: "Gross Profit", color: "text-secondary", bg: "bg-secondary/10" },
+  { icon: "show_chart", key: "net_profit", label: "Net Profit", color: "text-tertiary", bg: "bg-tertiary/10" },
+  { icon: "account_tree", key: "cash_flow", label: "Cash Flow", color: "text-outline", bg: "bg-surface-container-high" },
 ];
 
 const gatewayColors = ["bg-[#f9db3d]", "bg-error", "bg-primary", "bg-secondary", "bg-tertiary"];
 
 export default function FinancialOverviewPage() {
-  const { t } = useTranslation();
   const [data, setData] = useState<FinancialData | null>(null);
   const [loading, setLoading] = useState(true);
 
@@ -60,8 +57,8 @@ export default function FinancialOverviewPage() {
   return (
     <div className="space-y-xl">
       <div>
-        <h2 className="font-headline-lg text-headline-lg text-on-surface">{t("admin.financial_overview")}</h2>
-        <p className="font-body-md text-body-md text-outline mt-1">{t("admin.yearly_performance")}</p>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Financial Overview"}</h2>
+        <p className="font-body-md text-body-md text-outline mt-1">{"Yearly Performance"}</p>
       </div>
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
         {summaryMeta.map((card, i) => {
@@ -78,7 +75,7 @@ export default function FinancialOverviewPage() {
                 </span>
               </div>
               <div>
-                <p className="text-outline font-label-md text-label-md">{t(`admin.${card.key}`)}</p>
+                <p className="text-outline font-label-md text-label-md">{card.label}</p>
                 <h3 className="text-headline-lg font-headline-lg mt-xs">{loading ? "—" : fmt(value)}</h3>
               </div>
             </div>
@@ -93,17 +90,17 @@ export default function FinancialOverviewPage() {
             className="flex flex-col items-center gap-2 p-md bg-surface-container-lowest rounded-xl border border-outline-variant/10 hover:bg-surface-container hover:shadow-sm transition-all active:scale-[0.97]"
           >
             <span className="material-symbols-outlined text-primary text-[24px]">{link.icon}</span>
-            <span className="font-label-sm text-label-sm text-center text-on-surface-variant">{t(`admin.${link.key}`)}</span>
+            <span className="font-label-sm text-label-sm text-center text-on-surface-variant">{link.label}</span>
           </a>
         ))}
       </div>
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg">
         <div className="bg-surface p-lg rounded-2xl shadow-soft border border-outline-variant/10">
-          <h3 className="font-headline-md text-headline-md mb-1">{t("checkout.payment_method")}</h3>
-          <p className="text-outline font-label-md mb-xl">{t("admin.transaction_breakdown")}</p>
+          <h3 className="font-headline-md text-headline-md mb-1">{"Payment Method"}</h3>
+          <p className="text-outline font-label-md mb-xl">{"Transaction Breakdown"}</p>
           <div className="space-y-lg">
             {loading ? (
-              <div className="text-center py-8 text-outline">{t("common.loading")}</div>
+              <div className="text-center py-8 text-outline">{"Loading..."}</div>
             ) : data?.gatewayBreakdown.map((gw, i) => (
               <div key={gw.key}>
                 <div className="flex justify-between items-center mb-2">
@@ -120,11 +117,11 @@ export default function FinancialOverviewPage() {
           </div>
         </div>
         <div className="bg-surface p-lg rounded-2xl shadow-soft border border-outline-variant/10">
-          <h3 className="font-headline-md text-headline-md mb-1">{t("orders.title")}</h3>
-          <p className="text-outline font-label-md mb-xl">{t("orders.subtitle")}</p>
+          <h3 className="font-headline-md text-headline-md mb-1">{"Recent Transactions"}</h3>
+          <p className="text-outline font-label-md mb-xl">{"Latest payment activity across all gateways"}</p>
           <div className="space-y-md">
             {loading ? (
-              <div className="text-center py-8 text-outline">{t("common.loading")}</div>
+              <div className="text-center py-8 text-outline">{"Loading..."}</div>
             ) : data?.recentTransactions.map((tx) => (
               <div key={tx.id} className="flex items-center justify-between py-2 border-b border-outline-variant/10 last:border-0">
                 <div className="flex items-center gap-3">
@@ -139,7 +136,7 @@ export default function FinancialOverviewPage() {
                 <div className="text-right">
                   <p className="font-label-md text-primary">{fmt(tx.amount)}</p>
                   <span className={`font-label-sm px-2 py-0.5 rounded-full ${tx.status === "completed" ? "bg-secondary-container/30 text-on-secondary-container" : "bg-error-container/20 text-error"}`}>
-                    {t(`account.${tx.status}`)}
+                    {tx.status.charAt(0).toUpperCase() + tx.status.slice(1)}
                   </span>
                 </div>
               </div>

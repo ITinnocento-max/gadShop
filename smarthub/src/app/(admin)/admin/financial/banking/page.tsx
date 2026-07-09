@@ -1,7 +1,5 @@
 "use client"
 
-import { useTranslation } from "@/hooks/useTranslation"
-
 const accounts = [
   { name: "Main Operating Account", balance: 284500.0, bank: "Chase Bank", last4: "4521" },
   { name: "Savings Account", balance: 150000.0, bank: "Chase Bank", last4: "7890" },
@@ -18,12 +16,10 @@ const transfers = [
 const quickActions = ["New Transfer", "Reconcile", "Deposit", "Withdrawal"]
 
 export default function BankingPage() {
-  const { t } = useTranslation()
-
   return (
     <div className="space-y-8">
       <div>
-        <h1 className="text-3xl font-bold text-text">{t("admin.banking")}</h1>
+        <h1 className="text-3xl font-bold text-text">{"Banking"}</h1>
         <p className="text-text-secondary mt-1">Manage bank accounts and transactions</p>
       </div>
 

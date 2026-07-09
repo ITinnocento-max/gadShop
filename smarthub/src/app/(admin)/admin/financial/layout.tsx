@@ -1,12 +1,10 @@
 "use client";
 
-import { useTranslation } from "@/hooks/useTranslation";
 import { useUIStore } from "@/stores/ui-store";
 
 import { FinancialSidebar } from "@/components/admin/financial-sidebar";
 
 export default function FinancialLayout({ children }: { children: React.ReactNode }) {
-  const { t } = useTranslation();
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
 
   return (
@@ -21,7 +19,7 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
             <button className="lg:hidden p-2 text-on-surface-variant active:scale-95 transition-transform" onClick={() => setMobileMenuOpen(true)}>
               <span className="material-symbols-outlined">finance</span>
             </button>
-            <h1 className="font-headline-md text-headline-md-mobile md:text-headline-md text-primary">{t("admin.financial_reports")}</h1>
+            <h1 className="font-headline-md text-headline-md-mobile md:text-headline-md text-primary">{"Financial Reports"}</h1>
           </div>
           <div className="flex items-center gap-3">
             <button className="p-2 text-on-surface-variant hover:bg-surface-variant/50 rounded-full transition-colors">
@@ -43,19 +41,19 @@ export default function FinancialLayout({ children }: { children: React.ReactNod
         <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-2 h-16 bg-surface border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard">
             <span className="material-symbols-outlined">dashboard</span>
-            <span className="font-label-sm text-label-sm">{t("admin.dashboard")}</span>
+            <span className="font-label-sm text-label-sm">{"Dashboard"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/products">
             <span className="material-symbols-outlined">inventory_2</span>
-            <span className="font-label-sm text-label-sm">{t("admin.products")}</span>
+            <span className="font-label-sm text-label-sm">{"Products"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-primary bg-primary-container/30 rounded-full px-4 py-1" href="/admin/financial">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>account_balance</span>
-            <span className="font-label-sm text-label-sm">{t("admin.financial_reports")}</span>
+            <span className="font-label-sm text-label-sm">{"Financial Reports"}</span>
           </a>
           <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/profit-loss">
             <span className="material-symbols-outlined">analytics</span>
-            <span className="font-label-sm text-label-sm">{t("admin.profit_loss")}</span>
+            <span className="font-label-sm text-label-sm">{"Profit & Loss"}</span>
           </a>
         </nav>
       </main>

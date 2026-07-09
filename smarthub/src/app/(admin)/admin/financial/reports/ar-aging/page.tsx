@@ -1,7 +1,5 @@
 "use client";
 
-import { useTranslation } from "@/hooks/useTranslation";
-
 const summaryCards = [
   { label: "Total Receivables", value: "Rwf 385,000", color: "" },
   { label: "Current (0-30 Days)", value: "Rwf 210,000", color: "" },
@@ -19,12 +17,10 @@ const customers = [
 ];
 
 export default function ArAgingPage() {
-  const { t } = useTranslation();
-
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-bold">{t("admin.ar_aging")}</h1>
+        <h1 className="text-2xl font-bold">{"AR Aging"}</h1>
         <p className="text-gray-400 text-sm mt-1">As of December 31, 2024</p>
       </div>
 

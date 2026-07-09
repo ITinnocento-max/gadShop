@@ -1,21 +1,25 @@
 "use client";
 
-import { useTranslation } from "@/hooks/useTranslation";
-
-const timePeriods = ["daily", "weekly", "monthly", "quarterly", "yearly"] as const;
+const timePeriods = [
+  { key: "daily", label: "Daily" },
+  { key: "weekly", label: "Weekly" },
+  { key: "monthly", label: "Monthly" },
+  { key: "quarterly", label: "Quarterly" },
+  { key: "yearly", label: "Yearly" },
+];
 
 const metrics = [
-  { key: "sales_analytics", icon: "shopping_cart", value: "Rwf 892,400", trend: "up" },
-  { key: "customer_analytics", icon: "people", value: "2,847", trend: "up" },
-  { key: "product_analytics", icon: "inventory_2", value: "1,243", trend: "down" },
-  { key: "inventory_analytics", icon: "warehouse", value: "Rwf 620,000", trend: "down" },
-  { key: "marketing_analytics", icon: "campaign", value: "Rwf 135,000", trend: "up" },
-  { key: "finance_analytics", icon: "account_balance", value: "Rwf 1.2M", trend: "up" },
-  { key: "tax_analytics", icon: "request_quote", value: "Rwf 142,700", trend: "up" },
-  { key: "payment_analytics", icon: "payments", value: "924", trend: "up" },
-  { key: "revenue_analytics", icon: "trending_up", value: "Rwf 1.45M", trend: "up" },
-  { key: "profit_analytics", icon: "savings", value: "Rwf 520,712", trend: "up" },
-  { key: "expense_analytics", icon: "money_off", value: "Rwf 320,450", trend: "down" },
+  { key: "sales_analytics", icon: "shopping_cart", value: "Rwf 892,400", trend: "up", label: "Sales Analytics" },
+  { key: "customer_analytics", icon: "people", value: "2,847", trend: "up", label: "Customer Analytics" },
+  { key: "product_analytics", icon: "inventory_2", value: "1,243", trend: "down", label: "Product Analytics" },
+  { key: "inventory_analytics", icon: "warehouse", value: "Rwf 620,000", trend: "down", label: "Inventory Analytics" },
+  { key: "marketing_analytics", icon: "campaign", value: "Rwf 135,000", trend: "up", label: "Marketing Analytics" },
+  { key: "finance_analytics", icon: "account_balance", value: "Rwf 1.2M", trend: "up", label: "Finance Analytics" },
+  { key: "tax_analytics", icon: "request_quote", value: "Rwf 142,700", trend: "up", label: "Tax Analytics" },
+  { key: "payment_analytics", icon: "payments", value: "924", trend: "up", label: "Payment Analytics" },
+  { key: "revenue_analytics", icon: "trending_up", value: "Rwf 1.45M", trend: "up", label: "Revenue Analytics" },
+  { key: "profit_analytics", icon: "savings", value: "Rwf 520,712", trend: "up", label: "Profit Analytics" },
+  { key: "expense_analytics", icon: "money_off", value: "Rwf 320,450", trend: "down", label: "Expense Analytics" },
 ];
 
 const barData = [
@@ -36,12 +40,11 @@ const gatewayDistribution = [
 ];
 
 export default function AnalyticsPage() {
-  const { t } = useTranslation();
 
   return (
     <div className="space-y-xl">
       <div>
-        <h2 className="font-headline-lg text-headline-lg text-on-surface">{t("admin.analytics")}</h2>
+        <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Analytics"}</h2>
         <p className="font-body-md text-body-md text-outline mt-1">Interactive dashboards with daily, weekly, monthly, quarterly, and yearly comparisons</p>
       </div>
       {/* Time Period Filter */}
@@ -55,7 +58,7 @@ export default function AnalyticsPage() {
                 : "bg-surface text-outline border border-outline-variant/10 hover:bg-surface-container-high"
             }`}
           >
-            {t(`admin.${period}`)}
+            {period.label}
           </button>
         ))}
       </div>
@@ -72,7 +75,7 @@ export default function AnalyticsPage() {
               </span>
             </div>
             <p className="text-headline-sm font-headline-sm text-on-surface">{m.value}</p>
-            <p className="text-label-sm font-label-sm text-outline">{t(`admin.${m.key}`)}</p>
+            <p className="text-label-sm font-label-sm text-outline">{m.label}</p>
           </div>
         ))}
       </div>
