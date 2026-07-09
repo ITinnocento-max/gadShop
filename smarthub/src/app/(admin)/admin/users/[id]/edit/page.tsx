@@ -102,8 +102,8 @@ export default function EditUserPage() {
   const update = (key: string, value: string | boolean) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  const inputCls = "w-full h-10 md:h-12 lg:h-14 px-3 md:px-4 lg:px-5 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20 text-body-md md:text-body-lg";
-  const labelCls = "font-label-md text-label-md md:text-label-lg text-on-surface-variant mb-1.5 md:mb-2 block";
+  const inputCls = "w-full h-12 sm:h-14 md:h-16 px-4 md:px-5 lg:px-6 bg-surface-container-low border border-outline-variant/20 rounded-xl font-body-md outline-none focus:ring-2 focus:ring-primary/20 text-body-md md:text-body-lg lg:text-body-xl";
+  const labelCls = "font-label-md text-label-md md:text-label-lg lg:text-headline-sm text-on-surface-variant mb-2 md:mb-2.5 lg:mb-3 block";
 
   if (loading) {
     return (
@@ -137,15 +137,15 @@ export default function EditUserPage() {
         </div>
       </header>
       <div className="flex-1 overflow-y-auto px-margin-mobile md:px-margin-desktop py-lg pb-28 md:pb-12">
-        <form onSubmit={handleSubmit} className="w-full max-w-3xl mx-auto space-y-lg md:space-y-xl">
+        <form onSubmit={handleSubmit} className="w-full max-w-7xl mx-auto space-y-lg md:space-y-xl lg:space-y-2xl">
           {error && (
             <div className="p-md bg-error-container/20 border border-error/30 rounded-xl text-error font-body-md">{error}</div>
           )}
 
-          <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
-            <h2 className="font-headline-md md:font-headline-lg text-on-surface">Account Information</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-lg md:gap-xl">
-              <div className="md:col-span-2">
+          <div className="bg-surface-container-lowest p-xl md:p-2xl lg:p-3xl rounded-2xl border border-outline-variant/10 space-y-xl md:space-y-2xl lg:space-y-3xl">
+            <h2 className="font-headline-md md:font-headline-lg lg:font-headline-xl text-on-surface">Account Information</h2>
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg md:gap-xl lg:gap-2xl">
+              <div className="md:col-span-2 lg:col-span-3">
                 <label className={labelCls}>Full Name *</label>
                 <input value={form.name} onChange={(e) => update("name", e.target.value)} className={inputCls} />
               </div>
@@ -178,15 +178,15 @@ export default function EditUserPage() {
                   ))}
                 </select>
               </div>
-              <div className="flex items-end pb-1 md:pb-2 lg:pb-3">
+              <div className="flex items-end pb-1 md:pb-2 lg:pb-4">
                 <label className="flex items-center gap-3 cursor-pointer">
                   <input
                     type="checkbox"
                     checked={form.emailVerified}
                     onChange={(e) => update("emailVerified", e.target.checked)}
-                    className="w-5 h-5 md:w-6 md:h-6 rounded border-outline-variant text-primary focus:ring-primary"
+                    className="w-5 h-5 md:w-6 md:h-6 lg:w-7 lg:h-7 rounded border-outline-variant text-primary focus:ring-primary"
                   />
-                  <span className="font-body-md md:font-body-lg text-on-surface">Email Verified</span>
+                  <span className="font-body-md md:font-body-lg lg:font-headline-sm text-on-surface">Email Verified</span>
                 </label>
               </div>
             </div>
