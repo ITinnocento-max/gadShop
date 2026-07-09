@@ -32,11 +32,38 @@ export async function GET() {
 
     // Test DB connection
     try {
-      const result = await prisma.$queryRaw`SELECT 1 as ok`;
+      await prisma.$queryRaw`SELECT 1 as ok`;
       checks.DB_CONNECTION = "OK";
     } catch (dbErr: unknown) {
       checks.DB_CONNECTION = "FAILED";
       checks.DB_ERROR = dbErr instanceof Error ? dbErr.message : String(dbErr);
+    }
+
+    // Test user lookup
+    try {
+      const user = await prisma.user.findUnique({ where: { email: "admin@smarthub.com" } });
+      checks.USER_FOUND = !!user;
+      if (user) {
+        checks.USER_NAME = user.name;
+        checks.USER_ROLE = user.role;
+        checks.PASSWORD_HASH_LENGTH = user.password.length;
+        checks.PASSWORD_HASH_PREFIX = user.password.substring(0, 7);
+      }
+    } catch (userErr: unknown) {
+      checks.USER_LOOKUP = "FAILED";
+      checks.USER_ERROR = userErr instanceof Error ? userErr.message : String(userErr);
+    }
+
+    // Test bcrypt compare
+    try {
+      const bcrypt = await import("bcryptjs");
+      const user = await prisma.user.findUnique({ where: { email: "admin@smarthub.com" } });
+      if (user) {
+        const valid = await bcrypt.compare("1234567890", user.password);
+        checks.PASSWORD_MATCH = valid;
+      }
+    } catch (bcryptErr: unknown) {
+      checks.BCRYPT_ERROR = bcryptErr instanceof Error ? bcryptErr.message : String(bcryptErr);
     }
 
     return NextResponse.json(checks);
