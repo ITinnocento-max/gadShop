@@ -104,8 +104,8 @@ export default function NewProductPage() {
   const update = (key: string, value: string | boolean) =>
     setForm((f) => ({ ...f, [key]: value }));
 
-  const inputCls = "w-full h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20";
-  const labelCls = "font-label-md text-label-md text-on-surface-variant mb-1.5 block";
+  const inputCls = "w-full h-10 md:h-12 lg:h-14 px-3 md:px-4 lg:px-5 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20 text-body-md md:text-body-lg";
+  const labelCls = "font-label-md text-label-md md:text-label-lg text-on-surface-variant mb-1.5 md:mb-2 block";
 
   return (
     <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
@@ -131,15 +131,15 @@ export default function NewProductPage() {
           </div>
         </header>
         <div className="flex-1 overflow-y-auto px-margin-mobile md:px-margin-desktop py-lg pb-28 md:pb-12">
-          <form onSubmit={handleSubmit} className="max-w-3xl mx-auto space-y-lg">
+          <form onSubmit={handleSubmit} className="w-full max-w-7xl mx-auto space-y-lg md:space-y-xl">
             {error && (
               <div className="p-md bg-error-container/20 border border-error/30 rounded-xl text-error font-body-md">{error}</div>
             )}
 
-            <div className="bg-surface-container-lowest p-lg rounded-2xl border border-outline-variant/10 space-y-lg">
-              <h2 className="font-headline-md text-on-surface">{t("admin.basic_info")}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
-                <div className="md:col-span-2">
+            <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
+              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{t("admin.basic_info")}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg md:gap-xl">
+                <div className="md:col-span-2 lg:col-span-3">
                   <label className={labelCls}>{t("admin.product_name")} *</label>
                   <input value={form.name} onChange={(e) => handleNameChange(e.target.value)} className={inputCls} placeholder="e.g. Wireless Headphones Pro" />
                 </div>
@@ -151,16 +151,16 @@ export default function NewProductPage() {
                   <label className={labelCls}>{t("admin.brand")} *</label>
                   <input value={form.brand} onChange={(e) => update("brand", e.target.value)} className={inputCls} placeholder="e.g. Sony" />
                 </div>
-                <div className="md:col-span-2">
+                <div className="md:col-span-2 lg:col-span-3">
                   <label className={labelCls}>{t("admin.description")} *</label>
                   <textarea value={form.description} onChange={(e) => update("description", e.target.value)} rows={4} className={`${inputCls} h-auto py-3 resize-none`} placeholder="Product description..." />
                 </div>
               </div>
             </div>
 
-            <div className="bg-surface-container-lowest p-lg rounded-2xl border border-outline-variant/10 space-y-lg">
-              <h2 className="font-headline-md text-on-surface">{t("admin.pricing_stock")}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-lg">
+            <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
+              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{t("admin.pricing_stock")}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg md:gap-xl">
                 <div>
                   <label className={labelCls}>{t("admin.price")} *</label>
                   <input value={form.price} onChange={(e) => update("price", e.target.value)} type="number" step="0.01" min="0" className={inputCls} placeholder="0.00" />
@@ -176,9 +176,9 @@ export default function NewProductPage() {
               </div>
             </div>
 
-            <div className="bg-surface-container-lowest p-lg rounded-2xl border border-outline-variant/10 space-y-lg">
-              <h2 className="font-headline-md text-on-surface">{t("admin.organization")}</h2>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-lg">
+            <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
+              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{t("admin.organization")}</h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg md:gap-xl">
                 <div>
                   <label className={labelCls}>{t("admin.category")} *</label>
                   <select value={form.categoryId} onChange={(e) => update("categoryId", e.target.value)} className={inputCls}>
@@ -197,28 +197,32 @@ export default function NewProductPage() {
                     ))}
                   </select>
                 </div>
+                <div className="flex items-end pb-1 md:pb-2 lg:pb-3">
+                  <label className="flex items-center gap-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={form.featured}
+                      onChange={(e) => update("featured", e.target.checked)}
+                      className="w-5 h-5 md:w-6 md:h-6 rounded border-outline-variant text-primary focus:ring-primary"
+                    />
+                    <span className="font-body-md md:font-body-lg text-on-surface">{t("admin.featured_product")}</span>
+                  </label>
+                </div>
               </div>
-              <label className="flex items-center gap-3 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={form.featured}
-                  onChange={(e) => update("featured", e.target.checked)}
-                  className="w-5 h-5 rounded border-outline-variant text-primary focus:ring-primary"
-                />
-                <span className="font-body-md text-on-surface">{t("admin.featured_product")}</span>
-              </label>
             </div>
 
-            <div className="bg-surface-container-lowest p-lg rounded-2xl border border-outline-variant/10 space-y-lg">
-              <h2 className="font-headline-md text-on-surface">{t("admin.media_specs")}</h2>
-              <div>
-                <label className={labelCls}>{t("admin.image_urls")}</label>
-                <textarea value={form.images} onChange={(e) => update("images", e.target.value)} rows={3} className={`${inputCls} h-auto py-3 resize-none font-mono text-label-sm`} placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg" />
-                <p className="font-label-sm text-outline mt-1">{t("admin.image_urls_hint")}</p>
-              </div>
-              <div>
-                <label className={labelCls}>{t("admin.specs")}</label>
-                <textarea value={form.specs} onChange={(e) => update("specs", e.target.value)} rows={4} className={`${inputCls} h-auto py-3 resize-none font-mono text-label-sm`} placeholder='{"weight": "0.5 kg", "color": "Black"}' />
+            <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
+              <h2 className="font-headline-md md:font-headline-lg text-on-surface">{t("admin.media_specs")}</h2>
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg md:gap-xl">
+                <div>
+                  <label className={labelCls}>{t("admin.image_urls")}</label>
+                  <textarea value={form.images} onChange={(e) => update("images", e.target.value)} rows={4} className={`${inputCls} h-auto py-3 resize-none font-mono text-label-sm md:text-body-md`} placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg" />
+                  <p className="font-label-sm md:font-label-md text-outline mt-1">{t("admin.image_urls_hint")}</p>
+                </div>
+                <div>
+                  <label className={labelCls}>{t("admin.specs")}</label>
+                  <textarea value={form.specs} onChange={(e) => update("specs", e.target.value)} rows={4} className={`${inputCls} h-auto py-3 resize-none font-mono text-label-sm md:text-body-md`} placeholder='{"weight": "0.5 kg", "color": "Black"}' />
+                </div>
               </div>
             </div>
           </form>
