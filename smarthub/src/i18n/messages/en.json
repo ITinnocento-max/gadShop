@@ -259,6 +259,7 @@
   },
   "admin": {
     "dashboard": "Dashboard",
+    "users": "Users",
     "products": "Products",
     "orders": "Orders",
     "customers": "Customers",
