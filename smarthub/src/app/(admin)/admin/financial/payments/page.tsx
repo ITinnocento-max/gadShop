@@ -38,6 +38,13 @@ const statusStyles: Record<string, string> = {
   REFUNDED: "bg-surface-container-high text-outline",
 };
 
+const statusBgIcons: Record<string, string> = {
+  COMPLETED: "bg-secondary/10",
+  FAILED: "bg-error/10",
+  PENDING: "bg-tertiary/10",
+  REFUNDED: "bg-surface-container-high",
+};
+
 const statusLabels: Record<string, string> = {
   COMPLETED: "Completed",
   FAILED: "Failed",
@@ -157,7 +164,7 @@ export default function PaymentsPage() {
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-lg">
           {data.statusSummary.map((s) => (
             <div key={s.status} className="bg-surface p-xl rounded-2xl shadow-soft border border-outline-variant/10 flex items-center gap-5">
-              <div className={`w-16 h-16 ${statusStyles[s.status]?.replace("text-", "bg-").replace("secondary", "secondary/10").replace("error", "error/10").replace("tertiary", "tertiary/10") || "bg-surface-container-high"} rounded-2xl flex items-center justify-center shrink-0`}>
+              <div className={`w-16 h-16 ${statusBgIcons[s.status] || "bg-surface-container-high"} rounded-2xl flex items-center justify-center shrink-0`}>
                 <span className="material-symbols-outlined text-[28px] text-on-surface-variant">{s.status === "COMPLETED" ? "check_circle" : s.status === "FAILED" ? "cancel" : s.status === "PENDING" ? "schedule" : "undo"}</span>
               </div>
               <div>
