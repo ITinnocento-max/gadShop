@@ -95,6 +95,17 @@ export default function NewProductPage() {
       return;
     }
 
+    let parsedSpecs = null;
+    if (form.specs) {
+      try {
+        parsedSpecs = JSON.parse(form.specs);
+      } catch {
+        setError("Specs must be valid JSON");
+        setSaving(false);
+        return;
+      }
+    }
+
     try {
       const res = await fetch("/api/admin/products", {
         method: "POST",
@@ -111,7 +122,7 @@ export default function NewProductPage() {
           vendorId: form.vendorId,
           featured: form.featured,
           images: form.images ? form.images.split("\n").filter(Boolean).map((s) => s.trim()) : [],
-          specs: form.specs ? JSON.parse(form.specs) : null,
+          specs: parsedSpecs,
         }),
       });
 
