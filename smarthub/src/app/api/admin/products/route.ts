@@ -38,7 +38,13 @@ export async function GET(request: Request) {
     else if (sortBy === "stock") orderBy = { stock: "asc" };
     else if (sortBy === "rating") orderBy = { rating: "desc" };
 
-    const [products, total] = await Promise.all([
+    const vendorParam = searchParams.get("vendor");
+
+    if (vendorParam && vendorParam !== "all") {
+      where.vendorId = vendorParam;
+    }
+
+    const [products, total, vendors] = await Promise.all([
       prisma.product.findMany({
         where,
         orderBy,
@@ -50,7 +56,13 @@ export async function GET(request: Request) {
         },
       }),
       prisma.product.count({ where }),
+      prisma.product.findMany({
+        select: { vendor: { select: { id: true, name: true } } },
+        distinct: ["vendorId"],
+      }),
     ]);
+
+    const uniqueVendors = vendors.map((v) => v.vendor);
 
     return NextResponse.json(
       serializeResponse({
@@ -59,6 +71,7 @@ export async function GET(request: Request) {
         page,
         limit,
         totalPages: Math.ceil(total / limit),
+        vendors: uniqueVendors,
       })
     );
   } catch (error) {

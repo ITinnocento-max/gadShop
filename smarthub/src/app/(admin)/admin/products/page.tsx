@@ -17,12 +17,23 @@ interface Product {
   vendor: { id: string; name: string };
 }
 
+interface Vendor {
+  id: string; name: string;
+}
+
 interface ProductsResponse {
   products: Product[];
   total: number;
   page: number;
   limit: number;
   totalPages: number;
+  vendors?: Vendor[];
+}
+
+function stockBadge(stock: number) {
+  if (stock <= 0) return { label: "Out of Stock", cls: "bg-error-container/20 text-error" };
+  if (stock <= 5) return { label: "Low Stock", cls: "bg-tertiary-container/20 text-tertiary" };
+  return { label: "In Stock", cls: "bg-secondary-container/30 text-on-secondary-container" };
 }
 
 export default function AdminProductsPage() {
@@ -33,6 +44,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [category, setCategory] = useState("all");
+  const [vendor, setVendor] = useState("all");
   const [stockStatus, setStockStatus] = useState("all");
   const [sortBy, setSortBy] = useState("newest");
   const [page, setPage] = useState(1);
@@ -44,6 +56,7 @@ export default function AdminProductsPage() {
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (category !== "all") params.set("category", category);
+    if (vendor !== "all") params.set("vendor", vendor);
     if (stockStatus !== "all") params.set("stock", stockStatus);
     if (sortBy !== "newest") params.set("sortBy", sortBy);
     params.set("page", String(page));
@@ -60,7 +73,7 @@ export default function AdminProductsPage() {
       // ignore
     }
     setLoading(false);
-  }, [search, category, stockStatus, sortBy, page]);
+  }, [search, category, vendor, stockStatus, sortBy, page]);
 
   useEffect(() => {
     fetchProducts();
@@ -127,6 +140,16 @@ export default function AdminProductsPage() {
                 ))}
               </select>
               <select
+                value={vendor}
+                onChange={(e) => { setVendor(e.target.value); setPage(1); }}
+                className="h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <option value="all">{"All Vendors"}</option>
+                {data?.vendors?.map((v) => (
+                  <option key={v.id} value={v.id}>{v.name}</option>
+                ))}
+              </select>
+              <select
                 value={stockStatus}
                 onChange={(e) => { setStockStatus(e.target.value); setPage(1); }}
                 className="h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20"
@@ -164,6 +187,7 @@ export default function AdminProductsPage() {
                   <tr className="bg-surface-container-low/50">
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{"Product"}</th>
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{"Category"}</th>
+                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{"Vendor"}</th>
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Price"}</th>
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Stock"}</th>
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-center">{"Status"}</th>
@@ -173,11 +197,11 @@ export default function AdminProductsPage() {
                 <tbody className="divide-y divide-outline-variant/10">
                   {loading ? (
                     <tr>
-                      <td colSpan={6} className="px-lg py-12 text-center text-outline">{"Loading..."}</td>
+                      <td colSpan={7} className="px-lg py-12 text-center text-outline">{"Loading..."}</td>
                     </tr>
                   ) : data?.products.length === 0 ? (
                     <tr>
-                      <td colSpan={6} className="px-lg py-12 text-center text-outline">{"No products found"}</td>
+                      <td colSpan={7} className="px-lg py-12 text-center text-outline">{"No products found"}</td>
                     </tr>
                   ) : (
                     data?.products.map((product) => (
@@ -198,6 +222,7 @@ export default function AdminProductsPage() {
                           </div>
                         </td>
                         <td className="px-lg py-4 font-body-md text-on-surface-variant">{product.category.name}</td>
+                        <td className="px-lg py-4 font-body-md text-on-surface-variant">{product.vendor.name}</td>
                         <td className="px-lg py-4 text-right font-label-md">
                           <span className="text-on-surface">{fmt(product.price)}</span>
                           {product.originalPrice && (
@@ -205,9 +230,14 @@ export default function AdminProductsPage() {
                           )}
                         </td>
                         <td className="px-lg py-4 text-right">
-                          <span className={`font-label-md ${product.stock <= 5 ? "text-error" : "text-on-surface"}`}>
-                            {product.stock}
-                          </span>
+                          <div className="flex flex-col items-end gap-1">
+                            <span className={`font-label-md ${product.stock <= 5 ? "text-error" : "text-on-surface"}`}>
+                              {product.stock}
+                            </span>
+                            <span className={`px-2 py-0.5 rounded-full font-label-sm text-label-sm whitespace-nowrap ${stockBadge(product.stock).cls}`}>
+                              {stockBadge(product.stock).label}
+                            </span>
+                          </div>
                         </td>
                         <td className="px-lg py-4 text-center">
                           <span className={`inline-flex items-center gap-1 px-2.5 py-1 rounded-full font-label-sm text-label-sm ${
