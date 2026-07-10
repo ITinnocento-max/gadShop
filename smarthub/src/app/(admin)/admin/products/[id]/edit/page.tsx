@@ -238,7 +238,7 @@ export default function EditProductPage() {
 
               {showNewCategory && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-margin-mobile">
-                  <div className="w-full max-w-lg bg-surface-container-lowest rounded-2xl p-lg md:p-xl shadow-xl border border-outline-variant/10 space-y-lg">
+                  <div className="w-full max-w-xl bg-surface-container-lowest rounded-2xl p-lg md:p-xl shadow-xl border border-outline-variant/10 space-y-lg">
                     <h3 className="font-headline-sm text-on-surface">{"New Category"}</h3>
                     <input
                       value={newCategoryName}
