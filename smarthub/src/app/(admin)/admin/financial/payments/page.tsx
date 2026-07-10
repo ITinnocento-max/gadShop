@@ -132,19 +132,19 @@ export default function PaymentsPage() {
       </div>
 
       {data && (
-        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-md">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-lg">
           {data.methodSummary.map((m) => {
             const cfg = paymentMethods[m.method] || { icon: "payments", label: m.method, color: "text-primary", bg: "bg-primary/10" };
             return (
-              <div key={m.method} className="bg-surface p-lg rounded-xl shadow-soft border border-outline-variant/10 flex flex-col gap-3">
-                <div className="flex items-center gap-3">
-                  <div className={`w-10 h-10 ${cfg.bg} ${cfg.color} rounded-xl flex items-center justify-center`}>
-                    <span className="material-symbols-outlined">{cfg.icon}</span>
+              <div key={m.method} className="bg-surface p-xl rounded-2xl shadow-soft border border-outline-variant/10 flex flex-col gap-4">
+                <div className="flex items-center gap-4">
+                  <div className={`w-14 h-14 ${cfg.bg} ${cfg.color} rounded-2xl flex items-center justify-center`}>
+                    <span className="material-symbols-outlined text-[28px]">{cfg.icon}</span>
                   </div>
-                  <span className="font-label-md text-on-surface font-semibold">{cfg.label}</span>
+                  <span className="font-headline-sm text-on-surface font-semibold">{cfg.label}</span>
                 </div>
-                <p className="text-headline-md font-headline-md text-on-surface">{fmt(m.total)}</p>
-                <div className="flex justify-between text-label-sm font-label-sm text-outline">
+                <p className="text-headline-lg font-headline-lg text-on-surface">{fmt(m.total)}</p>
+                <div className="flex justify-between text-label-md font-label-md text-outline">
                   <span>{m.count} Payments</span>
                 </div>
               </div>
@@ -154,16 +154,16 @@ export default function PaymentsPage() {
       )}
 
       {data && (
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-lg">
           {data.statusSummary.map((s) => (
-            <div key={s.status} className="bg-surface p-md rounded-xl shadow-soft border border-outline-variant/10 flex items-center gap-4">
-              <div className={`w-12 h-12 ${statusStyles[s.status]?.replace("text-", "bg-").replace("secondary", "secondary/10").replace("error", "error/10").replace("tertiary", "tertiary/10") || "bg-surface-container-high"} rounded-xl flex items-center justify-center shrink-0`}>
-                <span className="material-symbols-outlined text-on-surface-variant">{s.status === "COMPLETED" ? "check_circle" : s.status === "FAILED" ? "cancel" : s.status === "PENDING" ? "schedule" : "undo"}</span>
+            <div key={s.status} className="bg-surface p-xl rounded-2xl shadow-soft border border-outline-variant/10 flex items-center gap-5">
+              <div className={`w-16 h-16 ${statusStyles[s.status]?.replace("text-", "bg-").replace("secondary", "secondary/10").replace("error", "error/10").replace("tertiary", "tertiary/10") || "bg-surface-container-high"} rounded-2xl flex items-center justify-center shrink-0`}>
+                <span className="material-symbols-outlined text-[28px] text-on-surface-variant">{s.status === "COMPLETED" ? "check_circle" : s.status === "FAILED" ? "cancel" : s.status === "PENDING" ? "schedule" : "undo"}</span>
               </div>
               <div>
-                <p className="text-outline font-label-sm text-label-sm">{statusLabels[s.status] || s.status}</p>
-                <p className="text-headline-sm font-headline-sm text-on-surface">{s.count}</p>
-                <p className="text-label-sm font-label-sm text-on-surface-variant">{fmt(s.total)}</p>
+                <p className="text-outline font-label-md text-label-md">{statusLabels[s.status] || s.status}</p>
+                <p className="text-headline-md font-headline-md text-on-surface">{s.count}</p>
+                <p className="text-body-md font-body-md text-on-surface-variant">{fmt(s.total)}</p>
               </div>
             </div>
           ))}
