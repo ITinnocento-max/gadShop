@@ -15,6 +15,7 @@ export default function NewProductPage() {
   const [categories, setCategories] = useState<Category[]>([]);
   const [vendors, setVendors] = useState<Vendor[]>([]);
   const [saving, setSaving] = useState(false);
+  const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
 
   const [form, setForm] = useState({
@@ -54,6 +55,33 @@ export default function NewProductPage() {
       name,
       slug: f.slug === generateSlug(form.name) || !form.slug ? generateSlug(name) : f.slug,
     }));
+  };
+
+  const handleMediaUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    setUploading(true);
+    try {
+      const urls: string[] = [];
+      for (const file of Array.from(files)) {
+        const fd = new FormData();
+        fd.append("file", file);
+        const res = await fetch("/api/upload", { method: "POST", body: fd });
+        if (!res.ok) throw new Error("Upload failed");
+        const data = await res.json();
+        urls.push(data.url);
+      }
+      setForm((f) => ({
+        ...f,
+        images: f.images ? f.images + "\n" + urls.join("\n") : urls.join("\n"),
+      }));
+    } catch {
+      setError("Failed to upload media");
+    } finally {
+      setUploading(false);
+      e.target.value = "";
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -214,7 +242,15 @@ export default function NewProductPage() {
             <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
               <h2 className="font-headline-md md:font-headline-lg text-on-surface">{"Media & Specs"}</h2>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-lg md:gap-xl">
-                <div>
+                <div className="space-y-3">
+                  <label className={labelCls}>{"Media Upload"}</label>
+                  <div className="flex items-center gap-3">
+                    <label className={`flex-1 flex items-center justify-center gap-2 h-10 md:h-12 px-4 border-2 border-dashed border-outline-variant/40 rounded-lg cursor-pointer hover:border-primary/50 hover:bg-primary/5 transition-colors font-body-md text-on-surface-variant ${uploading ? "opacity-50 pointer-events-none" : ""}`}>
+                      <span className="material-symbols-outlined text-[18px]">{uploading ? "hourglass_top" : "cloud_upload"}</span>
+                      {uploading ? "Uploading..." : "Choose images or videos"}
+                      <input type="file" accept="image/*,video/*" multiple onChange={handleMediaUpload} className="hidden" disabled={uploading} />
+                    </label>
+                  </div>
                   <label className={labelCls}>{"Image URLs"}</label>
                   <textarea value={form.images} onChange={(e) => update("images", e.target.value)} rows={4} className={`${inputCls} h-auto py-3 resize-none font-mono text-label-sm md:text-body-md`} placeholder="https://example.com/image1.jpg&#10;https://example.com/image2.jpg" />
                   <p className="font-label-sm md:font-label-md text-outline mt-1">{"Enter one URL per line"}</p>
