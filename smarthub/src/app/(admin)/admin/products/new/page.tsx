@@ -100,9 +100,7 @@ export default function NewProductPage() {
       try {
         parsedSpecs = JSON.parse(form.specs);
       } catch {
-        setError("Specs must be valid JSON");
-        setSaving(false);
-        return;
+        parsedSpecs = null;
       }
     }
 
