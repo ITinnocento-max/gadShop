@@ -1,127 +1,298 @@
 "use client";
 
-const gateways = [
-  { icon: "smartphone", name: "MTN MoMo", total: "Rwf 45,200", successful: 342, failed: 12, color: "text-[#f59e0b]", bg: "bg-[#f59e0b]/10" },
-  { icon: "smartphone", name: "Airtel Money", total: "Rwf 28,400", successful: 198, failed: 8, color: "text-error", bg: "bg-error/10" },
-  { icon: "credit_card", name: "Visa", total: "Rwf 38,100", successful: 156, failed: 3, color: "text-primary", bg: "bg-primary/10" },
-  { icon: "credit_card", name: "Mastercard", total: "Rwf 12,630", successful: 67, failed: 2, color: "text-secondary", bg: "bg-secondary/10" },
-  { icon: "payments", name: "Cash on Delivery", total: "Rwf 4,100", successful: 89, failed: 5, color: "text-tertiary", bg: "bg-tertiary/10" },
-];
+import { useEffect, useState, useCallback } from "react";
+import { useUIStore } from "@/stores/ui-store";
 
-const statusSummaries = [
-  { icon: "check_circle", key: "successful_payments", label: "Successful Payments", count: 852, amount: "Rwf 128,430", color: "text-secondary", bg: "bg-secondary/10" },
-  { icon: "cancel", key: "failed_payments", label: "Failed Payments", count: 30, amount: "Rwf 4,520", color: "text-error", bg: "bg-error/10" },
-  { icon: "schedule", key: "pending_payments", label: "Pending Payments", count: 45, amount: "Rwf 6,780", color: "text-tertiary", bg: "bg-tertiary/10" },
-  { icon: "undo", key: "refunds", label: "Refunds", count: 22, amount: "Rwf 3,210", color: "text-outline", bg: "bg-surface-container-high" },
-];
+interface PaymentUser { id: string; name: string; email: string; }
+interface PaymentOrder { id: string; total: number; status: string; }
 
-const recentTransactions = [
-  { id: "TXN-89234", date: "2026-07-08", gateway: "MTN MoMo", customer: "Alex Johnson", amount: "Rwf 1,240.00", status: "successful", reference: "INV-9082" },
-  { id: "TXN-89233", date: "2026-07-08", gateway: "Visa", customer: "Modern Tech Ltd", amount: "Rwf 5,800.00", status: "successful", reference: "INV-9081" },
-  { id: "TXN-89232", date: "2026-07-07", gateway: "Mastercard", customer: "Sarah Williams", amount: "Rwf 450.00", status: "pending", reference: "INV-9080" },
-  { id: "TXN-89231", date: "2026-07-07", gateway: "Airtel Money", customer: "Growth Corp", amount: "Rwf 12,000.00", status: "failed", reference: "INV-9079" },
-  { id: "TXN-89230", date: "2026-07-06", gateway: "Cash on Delivery", customer: "Emily Davis", amount: "Rwf 89.00", status: "refunded", reference: "INV-9078" },
-  { id: "TXN-89229", date: "2026-07-06", gateway: "MTN MoMo", customer: "James Wilson", amount: "Rwf 320.00", status: "successful", reference: "INV-9077" },
-];
+interface Payment {
+  id: string; method: string; status: string; transactionId: string | null;
+  amount: number; createdAt: string;
+  user: PaymentUser; order: PaymentOrder;
+}
 
-const statusBadge = (status: string) => {
-  const styles: Record<string, string> = {
-    successful: "bg-secondary/10 text-secondary",
-    failed: "bg-error/10 text-error",
-    pending: "bg-tertiary/10 text-tertiary",
-    refunded: "bg-surface-container-high text-outline",
-  };
-  return styles[status] || "bg-surface-container-high text-outline";
+interface MethodSummary { method: string; count: number; total: number; }
+interface StatusSummary { status: string; count: number; total: number; }
+
+interface PaymentsResponse {
+  payments: Payment[];
+  total: number; page: number; limit: number; totalPages: number;
+  methodSummary: MethodSummary[];
+  statusSummary: StatusSummary[];
+}
+
+const paymentMethods: Record<string, { icon: string; label: string; color: string; bg: string }> = {
+  "MTN MoMo": { icon: "smartphone", label: "MTN MoMo", color: "text-[#f59e0b]", bg: "bg-[#f59e0b]/10" },
+  "Airtel Money": { icon: "smartphone", label: "Airtel Money", color: "text-error", bg: "bg-error/10" },
+  CARD: { icon: "credit_card", label: "Card", color: "text-primary", bg: "bg-primary/10" },
+  Visa: { icon: "credit_card", label: "Visa", color: "text-primary", bg: "bg-primary/10" },
+  Mastercard: { icon: "credit_card", label: "Mastercard", color: "text-secondary", bg: "bg-secondary/10" },
+  "Cash on Delivery": { icon: "payments", label: "Cash on Delivery", color: "text-tertiary", bg: "bg-tertiary/10" },
 };
 
+const statusStyles: Record<string, string> = {
+  COMPLETED: "bg-secondary/10 text-secondary",
+  FAILED: "bg-error/10 text-error",
+  PENDING: "bg-tertiary/10 text-tertiary",
+  REFUNDED: "bg-surface-container-high text-outline",
+};
+
+const statusLabels: Record<string, string> = {
+  COMPLETED: "Completed",
+  FAILED: "Failed",
+  PENDING: "Pending",
+  REFUNDED: "Refunded",
+};
+
+const statusFlow: Record<string, string[]> = {
+  PENDING: ["COMPLETED", "FAILED"],
+  COMPLETED: ["REFUNDED"],
+  FAILED: ["PENDING"],
+  REFUNDED: [],
+};
+
+function fmt(v: number) {
+  return "RWF " + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function fmtDate(dateStr: string) {
+  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+}
+
 export default function PaymentsPage() {
+  const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
+  const [data, setData] = useState<PaymentsResponse | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [search, setSearch] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+  const [methodFilter, setMethodFilter] = useState("all");
+  const [page, setPage] = useState(1);
+  const [updating, setUpdating] = useState<string | null>(null);
+
+  const fetchPayments = useCallback(async () => {
+    setLoading(true);
+    const params = new URLSearchParams();
+    if (search) params.set("search", search);
+    if (statusFilter !== "all") params.set("status", statusFilter);
+    if (methodFilter !== "all") params.set("method", methodFilter);
+    params.set("page", String(page));
+    params.set("limit", "20");
+
+    try {
+      const res = await fetch(`/api/admin/payments?${params}`).then((r) => r.json());
+      setData(res);
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false);
+    }
+  }, [search, statusFilter, methodFilter, page]);
+
+  useEffect(() => { fetchPayments(); }, [fetchPayments]);
+
+  const updateStatus = async (paymentId: string, newStatus: string) => {
+    setUpdating(paymentId);
+    try {
+      const res = await fetch(`/api/admin/payments/${paymentId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) fetchPayments();
+    } catch {
+      // ignore
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const gatewayIcons: Record<string, string> = {
+    "MTN MoMo": "smartphone",
+    "Airtel Money": "smartphone",
+    CARD: "credit_card",
+    Visa: "credit_card",
+    Mastercard: "credit_card",
+    "Cash on Delivery": "payments",
+  };
+
+  const inputCls = "w-full h-10 md:h-12 px-3 md:px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20";
+  const selectCls = "h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20";
 
   return (
     <div className="space-y-xl">
-      <div>
-        <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Payment Monitoring"}</h2>
-        <p className="font-body-md text-body-md text-outline mt-1">Monitor and reconcile payment transactions across all gateways</p>
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Payment Monitoring"}</h2>
+          <p className="font-body-md text-body-md text-outline mt-1">Manage and reconcile payment transactions across all gateways</p>
+        </div>
+        <button className="md:hidden p-2 text-on-surface-variant" onClick={() => setMobileMenuOpen(true)}>
+          <span className="material-symbols-outlined">menu</span>
+        </button>
       </div>
-      {/* Gateway Summary Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-md">
-        {gateways.map((gw) => (
-          <div key={gw.name} className="bg-surface p-lg rounded-xl shadow-soft border border-outline-variant/10 flex flex-col gap-3">
-            <div className="flex items-center gap-3">
-              <div className={`w-10 h-10 ${gw.bg} ${gw.color} rounded-xl flex items-center justify-center`}>
-                <span className="material-symbols-outlined">{gw.icon}</span>
+
+      {data && (
+        <div className="grid grid-cols-1 md:grid-cols-3 xl:grid-cols-5 gap-md">
+          {data.methodSummary.map((m) => {
+            const cfg = paymentMethods[m.method] || { icon: "payments", label: m.method, color: "text-primary", bg: "bg-primary/10" };
+            return (
+              <div key={m.method} className="bg-surface p-lg rounded-xl shadow-soft border border-outline-variant/10 flex flex-col gap-3">
+                <div className="flex items-center gap-3">
+                  <div className={`w-10 h-10 ${cfg.bg} ${cfg.color} rounded-xl flex items-center justify-center`}>
+                    <span className="material-symbols-outlined">{cfg.icon}</span>
+                  </div>
+                  <span className="font-label-md text-on-surface font-semibold">{cfg.label}</span>
+                </div>
+                <p className="text-headline-md font-headline-md text-on-surface">{fmt(m.total)}</p>
+                <div className="flex justify-between text-label-sm font-label-sm text-outline">
+                  <span>{m.count} Payments</span>
+                </div>
               </div>
-              <span className="font-label-md text-on-surface font-semibold">{gw.name}</span>
+            );
+          })}
+        </div>
+      )}
+
+      {data && (
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
+          {data.statusSummary.map((s) => (
+            <div key={s.status} className="bg-surface p-md rounded-xl shadow-soft border border-outline-variant/10 flex items-center gap-4">
+              <div className={`w-12 h-12 ${statusStyles[s.status]?.replace("text-", "bg-").replace("secondary", "secondary/10").replace("error", "error/10").replace("tertiary", "tertiary/10") || "bg-surface-container-high"} rounded-xl flex items-center justify-center shrink-0`}>
+                <span className="material-symbols-outlined text-on-surface-variant">{s.status === "COMPLETED" ? "check_circle" : s.status === "FAILED" ? "cancel" : s.status === "PENDING" ? "schedule" : "undo"}</span>
+              </div>
+              <div>
+                <p className="text-outline font-label-sm text-label-sm">{statusLabels[s.status] || s.status}</p>
+                <p className="text-headline-sm font-headline-sm text-on-surface">{s.count}</p>
+                <p className="text-label-sm font-label-sm text-on-surface-variant">{fmt(s.total)}</p>
+              </div>
             </div>
-            <div>
-              <p className="text-headline-md font-headline-md text-on-surface">{gw.total}</p>
-            </div>
-            <div className="flex justify-between text-label-sm font-label-sm text-outline">
-              <span>{gw.successful} Successful</span>
-              <span>{gw.failed} Failed</span>
-            </div>
-          </div>
-        ))}
+          ))}
+        </div>
+      )}
+
+      <div className="flex flex-col md:flex-row gap-md">
+        <div className="flex-1">
+          <input
+            value={search}
+            onChange={(e) => { setSearch(e.target.value); setPage(1); }}
+            className={inputCls}
+            placeholder="Search by transaction ID, order ID, or customer..."
+          />
+        </div>
+        <select value={methodFilter} onChange={(e) => { setMethodFilter(e.target.value); setPage(1); }} className={selectCls}>
+          <option value="all">{"All Gateways"}</option>
+          {data?.methodSummary.map((m) => (
+            <option key={m.method} value={m.method}>{m.method}</option>
+          ))}
+        </select>
+        <select value={statusFilter} onChange={(e) => { setStatusFilter(e.target.value); setPage(1); }} className={selectCls}>
+          <option value="all">{"All Statuses"}</option>
+          {["PENDING", "COMPLETED", "FAILED", "REFUNDED"].map((s) => (
+            <option key={s} value={s}>{statusLabels[s] || s}</option>
+          ))}
+        </select>
       </div>
-      {/* Transaction Status Summary */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-md">
-        {statusSummaries.map((s) => (
-          <div key={s.key} className="bg-surface p-md rounded-xl shadow-soft border border-outline-variant/10 flex items-center gap-4">
-            <div className={`w-12 h-12 ${s.bg} ${s.color} rounded-xl flex items-center justify-center shrink-0`}>
-              <span className="material-symbols-outlined">{s.icon}</span>
-            </div>
-            <div>
-              <p className="text-outline font-label-sm text-label-sm">{s.label}</p>
-              <p className="text-headline-sm font-headline-sm text-on-surface">{s.count}</p>
-              <p className="text-label-sm font-label-sm text-on-surface-variant">{s.amount}</p>
-            </div>
-          </div>
-        ))}
-      </div>
-      {/* Recent Transactions Table */}
+
       <div className="bg-surface p-lg rounded-xl shadow-soft border border-outline-variant/10 overflow-x-auto">
-        <h3 className="font-headline-md text-headline-md mb-1">Recent Transactions</h3>
-        <p className="text-outline font-label-md mb-xl">Latest payment activity across all gateways</p>
-        <table className="w-full text-left">
-          <thead>
-            <tr className="border-b border-outline-variant/10 text-label-sm font-label-sm text-outline uppercase">
-              <th className="pb-3 pr-4">Transaction ID</th>
-              <th className="pb-3 pr-4">Date</th>
-              <th className="pb-3 pr-4">Gateway</th>
-              <th className="pb-3 pr-4">Customer</th>
-              <th className="pb-3 pr-4 text-right">Amount</th>
-              <th className="pb-3 pr-4">Status</th>
-              <th className="pb-3">Reference</th>
-            </tr>
-          </thead>
-          <tbody>
-            {recentTransactions.map((tx) => (
-              <tr key={tx.id} className="border-b border-outline-variant/10 last:border-0">
-                <td className="py-3 pr-4 font-label-md text-on-surface">{tx.id}</td>
-                <td className="py-3 pr-4 font-label-md text-on-surface-variant">{tx.date}</td>
-                <td className="py-3 pr-4 font-label-md text-on-surface-variant">{tx.gateway}</td>
-                <td className="py-3 pr-4 font-label-md text-on-surface">{tx.customer}</td>
-                <td className="py-3 pr-4 font-label-md text-right text-on-surface">{tx.amount}</td>
-                <td className="py-3 pr-4">
-                  <span className={`font-label-sm text-label-sm px-2 py-0.5 rounded-full ${statusBadge(tx.status)}`}>
-                    {tx.status}
-                  </span>
-                </td>
-                <td className="py-3 font-label-md text-outline">{tx.reference}</td>
+        <h3 className="font-headline-md text-headline-md mb-1">{"Transactions"}</h3>
+        <p className="text-outline font-label-md mb-xl">{data ? `${data.total} total transactions` : ""}</p>
+        {loading ? (
+          <div className="text-center py-12 text-outline">{"Loading..."}</div>
+        ) : data?.payments.length === 0 ? (
+          <div className="text-center py-12 text-outline">{"No transactions found"}</div>
+        ) : (
+          <table className="w-full text-left">
+            <thead>
+              <tr className="border-b border-outline-variant/10 text-label-sm font-label-sm text-outline uppercase">
+                <th className="pb-3 pr-4">Transaction</th>
+                <th className="pb-3 pr-4">Date</th>
+                <th className="pb-3 pr-4">Gateway</th>
+                <th className="pb-3 pr-4">Customer</th>
+                <th className="pb-3 pr-4 text-right">Amount</th>
+                <th className="pb-3 pr-4">Status</th>
+                <th className="pb-3">Actions</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody>
+              {data?.payments.map((tx) => {
+                const allowedStatuses = statusFlow[tx.status] || [];
+                const icon = gatewayIcons[tx.method] || "payments";
+                return (
+                <tr key={tx.id} className="border-b border-outline-variant/10 last:border-0">
+                  <td className="py-3 pr-4">
+                    <div className="font-label-md text-on-surface">#{tx.id.slice(-8).toUpperCase()}</div>
+                    <div className="text-label-sm text-outline">{tx.transactionId || "—"}</div>
+                  </td>
+                  <td className="py-3 pr-4 font-label-md text-on-surface-variant">{fmtDate(tx.createdAt)}</td>
+                  <td className="py-3 pr-4 flex items-center gap-2 font-label-md text-on-surface-variant">
+                    <span className="material-symbols-outlined text-[16px]">{icon}</span>
+                    {tx.method}
+                  </td>
+                  <td className="py-3 pr-4">
+                    <div className="font-label-md text-on-surface">{tx.user.name}</div>
+                    <div className="text-label-sm text-outline">{tx.user.email}</div>
+                  </td>
+                  <td className="py-3 pr-4 font-label-md text-right text-on-surface">{fmt(tx.amount)}</td>
+                  <td className="py-3 pr-4">
+                    {allowedStatuses.length > 0 ? (
+                      <select
+                        value={tx.status}
+                        onChange={(e) => updateStatus(tx.id, e.target.value)}
+                        disabled={updating === tx.id}
+                        className="px-2 py-1 rounded-lg font-label-sm text-label-sm border border-outline-variant/20 bg-surface-container-low outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                      >
+                        <option value={tx.status} disabled>{statusLabels[tx.status] || tx.status}</option>
+                        {allowedStatuses.map((s) => (
+                          <option key={s} value={s}>{statusLabels[s] || s}</option>
+                        ))}
+                      </select>
+                    ) : (
+                      <span className={`font-label-sm text-label-sm px-2 py-0.5 rounded-full ${statusStyles[tx.status] || "bg-surface-container-high text-outline"}`}>
+                        {statusLabels[tx.status] || tx.status}
+                      </span>
+                    )}
+                    {updating === tx.id && (
+                      <span className="material-symbols-outlined text-[14px] animate-spin ml-1 align-middle">hourglass_top</span>
+                    )}
+                  </td>
+                  <td className="py-3">
+                    {tx.status === "COMPLETED" && (
+                      <button
+                        onClick={() => updateStatus(tx.id, "REFUNDED")}
+                        disabled={updating === tx.id}
+                        className="text-label-sm font-label-sm text-error hover:bg-error-container/20 px-2 py-1 rounded-lg transition-colors"
+                      >
+                        {"Refund"}
+                      </button>
+                    )}
+                  </td>
+                </tr>
+                );
+              })}
+            </tbody>
+          </table>
+        )}
       </div>
-      {/* Settlement Reports Button */}
-      <div className="flex justify-end">
-        <a
-          href="#"
-          className="inline-flex items-center gap-2 bg-surface px-lg py-3 rounded-xl shadow-soft border border-outline-variant/10 text-primary font-label-md hover:bg-surface-container-high transition-all active:scale-[0.97]"
-        >
-          <span className="material-symbols-outlined">description</span>
-          Settlement Reports
-        </a>
-      </div>
+
+      {data && data.totalPages > 1 && (
+        <div className="flex justify-center items-center gap-3">
+          <button
+            disabled={page <= 1}
+            onClick={() => setPage((p) => Math.max(1, p - 1))}
+            className="px-4 h-10 border border-outline-variant rounded-lg font-label-md text-on-surface-variant hover:bg-surface-variant/50 disabled:opacity-30 transition-colors"
+          >
+            {"Previous"}
+          </button>
+          <span className="font-label-md text-on-surface-variant">Page {data.page} of {data.totalPages}</span>
+          <button
+            disabled={page >= data.totalPages}
+            onClick={() => setPage((p) => p + 1)}
+            className="px-4 h-10 border border-outline-variant rounded-lg font-label-md text-on-surface-variant hover:bg-surface-variant/50 disabled:opacity-30 transition-colors"
+          >
+            {"Next"}
+          </button>
+        </div>
+      )}
     </div>
   );
 }
