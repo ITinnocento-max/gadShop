@@ -35,25 +35,36 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
 
         for (const item of items) {
           if (isCancelling) {
-            await tx.product.update({
+            const updated = await tx.product.update({
               where: { id: item.productId },
-              data: {
-                stock: { increment: item.quantity },
-                inStock: true,
-              },
+              data: { stock: { increment: item.quantity } },
+              select: { id: true, stock: true },
             });
+            if (updated.stock > 0) {
+              await tx.product.update({
+                where: { id: item.productId },
+                data: { inStock: true },
+              });
+            }
           } else {
             const product = await tx.product.findUnique({
               where: { id: item.productId },
               select: { stock: true },
             });
             if (!product || product.stock < item.quantity) {
-              throw new Error(`Insufficient stock to restore order. Product ${item.productId} has only ${product?.stock ?? 0} units.`);
+              throw new Error(`Insufficient stock to fulfill order. Product "${item.productId}" has only ${product?.stock ?? 0} units.`);
             }
-            await tx.product.update({
+            const updated = await tx.product.update({
               where: { id: item.productId },
               data: { stock: { decrement: item.quantity } },
+              select: { id: true, stock: true },
             });
+            if (updated.stock <= 0) {
+              await tx.product.update({
+                where: { id: item.productId },
+                data: { inStock: false },
+              });
+            }
           }
         }
       }

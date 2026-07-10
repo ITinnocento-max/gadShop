@@ -39,10 +39,17 @@ export async function POST(request: Request) {
 
     const order = await prisma.$transaction(async (tx) => {
       for (const item of items) {
-        await tx.product.update({
+        const updated = await tx.product.update({
           where: { id: item.id },
           data: { stock: { decrement: item.quantity } },
+          select: { id: true, stock: true },
         });
+        if (updated.stock <= 0) {
+          await tx.product.update({
+            where: { id: item.id },
+            data: { inStock: false },
+          });
+        }
       }
 
       return tx.order.create({
