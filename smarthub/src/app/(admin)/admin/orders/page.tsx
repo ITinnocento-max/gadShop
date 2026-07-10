@@ -11,10 +11,15 @@ interface Payment {
   method: string; status: string; amount: number;
 }
 
+interface ShippingAddress {
+  street: string; city: string; state: string; zip: string; country: string;
+}
+
 interface Order {
   id: string; status: string; total: number; paymentMethod: string | null;
   createdAt: string; paidAt: string | null;
   user: { id: string; name: string; email: string };
+  shippingAddress: ShippingAddress;
   items: OrderItem[];
   payments: Payment[];
 }
@@ -51,6 +56,14 @@ function formatDate(dateStr: string) {
   return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
 }
 
+const statusFlow: Record<string, string[]> = {
+  PENDING: ["PROCESSING", "CANCELLED"],
+  PROCESSING: ["SHIPPED", "CANCELLED"],
+  SHIPPED: ["DELIVERED", "CANCELLED"],
+  DELIVERED: [],
+  CANCELLED: [],
+};
+
 export default function AdminOrdersPage() {
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
   const [data, setData] = useState<OrdersResponse | null>(null);
@@ -58,6 +71,7 @@ export default function AdminOrdersPage() {
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [page, setPage] = useState(1);
+  const [updating, setUpdating] = useState<string | null>(null);
 
   const fetchOrders = useCallback(async () => {
     setLoading(true);
@@ -79,6 +93,23 @@ export default function AdminOrdersPage() {
 
   useEffect(() => { fetchOrders(); }, [fetchOrders]);
 
+  const updateStatus = async (orderId: string, newStatus: string) => {
+    setUpdating(orderId);
+    try {
+      const res = await fetch(`/api/admin/orders/${orderId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      });
+      if (res.ok) fetchOrders();
+    } catch {
+      // ignore
+    } finally {
+      setUpdating(null);
+    }
+  };
+
+  const selectCls = "px-2 py-1 rounded-lg font-label-sm text-label-sm border border-outline-variant/20 bg-surface-container-low outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer";
   const inputCls = "w-full h-10 md:h-12 px-3 md:px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20";
 
   return (
@@ -134,34 +165,63 @@ export default function AdminOrdersPage() {
                   <th className="p-md pr-2">Customer</th>
                   <th className="p-md pr-2">Items</th>
                   <th className="p-md pr-2 text-right">Total</th>
-                  <th className="p-md pr-2">Status</th>
+                  <th className="p-md pr-2">Shipping</th>
                   <th className="p-md pr-2">Payment</th>
+                  <th className="p-md pr-2">Status</th>
                   <th className="p-md">Date</th>
                 </tr>
               </thead>
               <tbody>
-                {data?.orders.map((order) => (
+                {data?.orders.map((order) => {
+                  const addr = order.shippingAddress;
+                  const allowedStatuses = statusFlow[order.status] || [];
+                  return (
                   <tr key={order.id} className="border-b border-outline-variant/10 last:border-0 hover:bg-surface-variant/20 transition-colors">
                     <td className="p-md pr-2 font-label-md text-on-surface">#{order.id.slice(-8).toUpperCase()}</td>
                     <td className="p-md pr-2">
                       <div className="font-label-md text-on-surface">{order.user.name}</div>
                       <div className="text-label-sm text-outline">{order.user.email}</div>
                     </td>
-                    <td className="p-md pr-2 font-body-md text-on-surface-variant">{order.items.length} item{order.items.length !== 1 ? "s" : ""}</td>
+                    <td className="p-md pr-2 font-body-md text-on-surface-variant">
+                      {order.items.length} item{order.items.length !== 1 ? "s" : ""}
+                      <div className="text-label-sm text-outline truncate max-w-[160px]">{order.items.map((i) => i.name).join(", ")}</div>
+                    </td>
                     <td className="p-md pr-2 font-label-md text-right text-on-surface">{formatCurrency(order.total)}</td>
                     <td className="p-md pr-2">
-                      <span className={`px-3 py-1 rounded-full font-label-sm text-label-sm ${statusColors[order.status] || "bg-surface-container-high text-on-surface-variant"}`}>
-                        {statusLabels[order.status] || order.status}
-                      </span>
+                      <div className="font-label-sm text-on-surface">{addr?.street}</div>
+                      <div className="text-label-sm text-outline">{addr?.city}, {addr?.state} {addr?.zip}</div>
                     </td>
                     <td className="p-md pr-2">
                       <span className={`font-label-sm ${order.payments?.[0]?.status === "COMPLETED" ? "text-secondary" : "text-tertiary"}`}>
                         {order.payments?.[0]?.method || "—"}
                       </span>
                     </td>
+                    <td className="p-md pr-2">
+                      {allowedStatuses.length > 0 ? (
+                        <select
+                          value={order.status}
+                          onChange={(e) => updateStatus(order.id, e.target.value)}
+                          disabled={updating === order.id}
+                          className={selectCls}
+                        >
+                          <option value={order.status} disabled>{statusLabels[order.status] || order.status}</option>
+                          {allowedStatuses.map((s) => (
+                            <option key={s} value={s}>{statusLabels[s] || s}</option>
+                          ))}
+                        </select>
+                      ) : (
+                        <span className={`px-3 py-1 rounded-full font-label-sm text-label-sm ${statusColors[order.status] || "bg-surface-container-high text-on-surface-variant"}`}>
+                          {statusLabels[order.status] || order.status}
+                        </span>
+                      )}
+                      {updating === order.id && (
+                        <span className="material-symbols-outlined text-[14px] animate-spin ml-1 align-middle">hourglass_top</span>
+                      )}
+                    </td>
                     <td className="p-md font-label-md text-outline">{formatDate(order.createdAt)}</td>
                   </tr>
-                ))}
+                  );
+                })}
               </tbody>
             </table>
           </div>

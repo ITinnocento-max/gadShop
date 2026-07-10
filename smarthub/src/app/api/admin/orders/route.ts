@@ -31,6 +31,7 @@ export async function GET(request: Request) {
         take: limit,
         include: {
           user: { select: { id: true, name: true, email: true } },
+          shippingAddress: { select: { street: true, city: true, state: true, zip: true, country: true } },
           items: { select: { id: true, name: true, price: true, quantity: true } },
           payments: { select: { method: true, status: true, amount: true } },
         },
