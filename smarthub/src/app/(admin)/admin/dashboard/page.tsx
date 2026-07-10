@@ -124,10 +124,36 @@ export default function AdminDashboardPage() {
               </p>
             </div>
           </section>
+          <section className="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <a href="/admin/orders" className="group bg-surface/70 dark:bg-inverse-surface/70 backdrop-blur-md border border-outline-variant/20 rounded-xl p-md shadow-soft hover:shadow-raised hover:-translate-y-0.5 transition-all">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-primary-container/20 dark:bg-primary-container/10 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-primary dark:text-inverse-primary text-[28px]">receipt_long</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-headline-sm text-on-surface dark:text-white">{"Manage Orders"}</p>
+                  <p className="font-body-md text-outline mt-1">View, update, and track all customer orders</p>
+                </div>
+                <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">arrow_forward</span>
+              </div>
+            </a>
+            <a href="/admin/financial/payments" className="group bg-surface/70 dark:bg-inverse-surface/70 backdrop-blur-md border border-outline-variant/20 rounded-xl p-md shadow-soft hover:shadow-raised hover:-translate-y-0.5 transition-all">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-secondary-container/20 flex items-center justify-center">
+                  <span className="material-symbols-outlined text-secondary text-[28px]">payments</span>
+                </div>
+                <div className="flex-1">
+                  <p className="font-headline-sm text-on-surface dark:text-white">{"Payment Monitoring"}</p>
+                  <p className="font-body-md text-outline mt-1">Monitor and reconcile payment transactions</p>
+                </div>
+                <span className="material-symbols-outlined text-on-surface-variant group-hover:text-primary transition-colors">arrow_forward</span>
+              </div>
+            </a>
+          </section>
           <section className="space-y-md">
             <div className="flex justify-between items-center">
               <h3 className="font-headline-md text-on-surface dark:text-white">{"Recent Orders"}</h3>
-              <button className="text-primary dark:text-inverse-primary font-label-md text-label-md hover:underline">{"View All"}</button>
+              <a href="/admin/orders" className="text-primary dark:text-inverse-primary font-label-md text-label-md hover:underline">{"View All"}</a>
             </div>
             <div className="space-y-sm">
               {loading ? (
