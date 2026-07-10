@@ -17,6 +17,9 @@ export default function NewProductPage() {
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
   const [error, setError] = useState("");
+  const [showNewCategory, setShowNewCategory] = useState(false);
+  const [newCategoryName, setNewCategoryName] = useState("");
+  const [creatingCategory, setCreatingCategory] = useState(false);
 
   const [form, setForm] = useState({
     name: "", slug: "", description: "", brand: "",
@@ -218,12 +221,18 @@ export default function NewProductPage() {
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-lg md:gap-xl">
                 <div>
                   <label className={labelCls}>{"Category"} *</label>
-                  <select value={form.categoryId} onChange={(e) => update("categoryId", e.target.value)} className={inputCls}>
-                    <option value="">{"Select category"}</option>
-                    {categories.map((c) => (
-                      <option key={c.id} value={c.id}>{c.name}</option>
-                    ))}
-                  </select>
+                  <div className="flex gap-2">
+                    <select value={form.categoryId} onChange={(e) => update("categoryId", e.target.value)} className={inputCls}>
+                      <option value="">{"Select category"}</option>
+                      {categories.map((c) => (
+                        <option key={c.id} value={c.id}>{c.name}</option>
+                      ))}
+                    </select>
+                    <button type="button" onClick={() => setShowNewCategory(true)} className="shrink-0 h-10 md:h-12 lg:h-14 px-3 border border-outline-variant/20 rounded-lg bg-surface-container-low text-on-surface-variant hover:bg-surface-variant/50 transition-colors flex items-center gap-1" title="Add new category">
+                      <span className="material-symbols-outlined text-[18px]">add</span>
+                      <span className="hidden sm:inline font-label-md">{"New"}</span>
+                    </button>
+                  </div>
                 </div>
                 <div>
                   <label className={labelCls}>{"Vendor"} *</label>
@@ -246,6 +255,62 @@ export default function NewProductPage() {
                   </label>
                 </div>
               </div>
+
+              {showNewCategory && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 px-margin-mobile">
+                  <div className="w-full max-w-md bg-surface-container-lowest rounded-2xl p-lg md:p-xl shadow-xl border border-outline-variant/10 space-y-lg">
+                    <h3 className="font-headline-sm text-on-surface">{"New Category"}</h3>
+                    <input
+                      value={newCategoryName}
+                      onChange={(e) => setNewCategoryName(e.target.value)}
+                      className={inputCls}
+                      placeholder="Category name"
+                      autoFocus
+                    />
+                    <div className="flex justify-end gap-3">
+                      <button
+                        type="button"
+                        onClick={() => { setShowNewCategory(false); setNewCategoryName(""); }}
+                        className="px-4 h-10 border border-outline-variant rounded-lg font-label-md text-on-surface-variant hover:bg-surface-variant/50 transition-colors"
+                      >
+                        {"Cancel"}
+                      </button>
+                      <button
+                        type="button"
+                        disabled={creatingCategory || !newCategoryName.trim()}
+                        onClick={async () => {
+                          setCreatingCategory(true);
+                          try {
+                            const res = await fetch("/api/categories", {
+                              method: "POST",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ name: newCategoryName.trim() }),
+                            });
+                            if (!res.ok) {
+                              const err = await res.json();
+                              setError(err.error || "Failed to create category");
+                              return;
+                            }
+                            const cat = await res.json();
+                            setCategories((prev) => [...prev, cat]);
+                            setForm((f) => ({ ...f, categoryId: cat.id }));
+                            setShowNewCategory(false);
+                            setNewCategoryName("");
+                          } catch {
+                            setError("Failed to create category");
+                          } finally {
+                            setCreatingCategory(false);
+                          }
+                        }}
+                        className="px-4 h-10 bg-primary text-on-primary rounded-lg font-label-md hover:bg-primary/90 disabled:opacity-50 transition-colors flex items-center gap-2"
+                      >
+                        {creatingCategory && <span className="material-symbols-outlined text-[16px] animate-spin">hourglass_top</span>}
+                        {"Create"}
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="bg-surface-container-lowest p-lg md:p-xl lg:p-2xl rounded-2xl border border-outline-variant/10 space-y-lg md:space-y-xl">
