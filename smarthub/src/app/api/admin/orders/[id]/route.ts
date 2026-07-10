@@ -11,22 +11,68 @@ export async function PATCH(req: Request, { params }: { params: Promise<{ id: st
       return NextResponse.json({ error: "Invalid status" }, { status: 400 });
     }
 
+    const current = await prisma.order.findUnique({
+      where: { id },
+      select: { status: true },
+    });
+    if (!current) {
+      return NextResponse.json({ error: "Order not found" }, { status: 404 });
+    }
+
+    const previousStatus = current.status;
     const data: Record<string, unknown> = { status };
     if (status === "DELIVERED") data.deliveredAt = new Date();
 
-    const order = await prisma.order.update({
-      where: { id },
-      data,
-      include: {
-        user: { select: { id: true, name: true, email: true } },
-        shippingAddress: { select: { street: true, city: true, state: true, zip: true, country: true } },
-        items: { select: { id: true, name: true, price: true, quantity: true } },
-        payments: { select: { method: true, status: true, amount: true } },
-      },
+    const order = await prisma.$transaction(async (tx) => {
+      const isCancelling = status === "CANCELLED" && previousStatus !== "CANCELLED";
+      const isUncancelling = previousStatus === "CANCELLED" && status !== "CANCELLED";
+
+      if (isCancelling || isUncancelling) {
+        const items = await tx.orderItem.findMany({
+          where: { orderId: id },
+          select: { productId: true, quantity: true },
+        });
+
+        for (const item of items) {
+          if (isCancelling) {
+            await tx.product.update({
+              where: { id: item.productId },
+              data: {
+                stock: { increment: item.quantity },
+                inStock: true,
+              },
+            });
+          } else {
+            const product = await tx.product.findUnique({
+              where: { id: item.productId },
+              select: { stock: true },
+            });
+            if (!product || product.stock < item.quantity) {
+              throw new Error(`Insufficient stock to restore order. Product ${item.productId} has only ${product?.stock ?? 0} units.`);
+            }
+            await tx.product.update({
+              where: { id: item.productId },
+              data: { stock: { decrement: item.quantity } },
+            });
+          }
+        }
+      }
+
+      return tx.order.update({
+        where: { id },
+        data,
+        include: {
+          user: { select: { id: true, name: true, email: true } },
+          shippingAddress: { select: { street: true, city: true, state: true, zip: true, country: true } },
+          items: { select: { id: true, name: true, price: true, quantity: true } },
+          payments: { select: { method: true, status: true, amount: true } },
+        },
+      });
     });
 
     return NextResponse.json(order);
-  } catch {
-    return NextResponse.json({ error: "Failed to update order" }, { status: 500 });
+  } catch (error) {
+    const message = error instanceof Error ? error.message : "Failed to update order";
+    return NextResponse.json({ error: message }, { status: 500 });
   }
 }

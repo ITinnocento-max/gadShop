@@ -10,6 +10,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
+    const products = await prisma.product.findMany({
+      where: { id: { in: items.map((i: { id: string }) => i.id) } },
+      select: { id: true, stock: true },
+    });
+    const productMap = new Map(products.map((p) => [p.id, p.stock]));
+
+    for (const item of items) {
+      const available = productMap.get(item.id) ?? 0;
+      if (available < item.quantity) {
+        return NextResponse.json(
+          { error: `Insufficient stock for "${item.name}". Available: ${available}, requested: ${item.quantity}` },
+          { status: 409 }
+        );
+      }
+    }
+
     const address = await prisma.address.create({
       data: {
         street: shippingAddress?.street || "Default Street",
@@ -21,37 +37,46 @@ export async function POST(request: Request) {
       },
     });
 
-    const order = await prisma.order.create({
-      data: {
-        userId,
-        total,
-        paymentMethod,
-        shippingAddressId: address.id,
-        status: "PENDING",
-        paidAt: new Date(),
-        items: {
-          create: items.map((item: { id: string; name: string; price: number; quantity: number; image?: string }) => ({
-            name: item.name,
-            price: item.price,
-            quantity: item.quantity,
-            image: item.image || null,
-            productId: item.id,
-          })),
-        },
-        payments: {
-          create: {
-            method: paymentMethod || "CARD",
-            status: "COMPLETED",
-            amount: total,
-            userId,
+    const order = await prisma.$transaction(async (tx) => {
+      for (const item of items) {
+        await tx.product.update({
+          where: { id: item.id },
+          data: { stock: { decrement: item.quantity } },
+        });
+      }
+
+      return tx.order.create({
+        data: {
+          userId,
+          total,
+          paymentMethod,
+          shippingAddressId: address.id,
+          status: "PENDING",
+          paidAt: new Date(),
+          items: {
+            create: items.map((item: { id: string; name: string; price: number; quantity: number; image?: string }) => ({
+              name: item.name,
+              price: item.price,
+              quantity: item.quantity,
+              image: item.image || null,
+              productId: item.id,
+            })),
+          },
+          payments: {
+            create: {
+              method: paymentMethod || "CARD",
+              status: "COMPLETED",
+              amount: total,
+              userId,
+            },
           },
         },
-      },
-      include: {
-        items: { include: { product: { select: { images: true } } } },
-        payments: true,
-        shippingAddress: true,
-      },
+        include: {
+          items: { include: { product: { select: { images: true } } } },
+          payments: true,
+          shippingAddress: true,
+        },
+      });
     });
 
     return NextResponse.json(serializeResponse(order), { status: 201 });
