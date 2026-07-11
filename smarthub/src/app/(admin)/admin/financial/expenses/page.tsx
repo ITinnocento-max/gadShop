@@ -315,7 +315,7 @@ export default function ExpensesPage() {
       {modalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setModalOpen(false)}>
           <div
-            className="bg-surface w-[calc(100vw-2rem)] max-w-2xl rounded-2xl shadow-xl border border-outline-variant/10 p-6 max-h-[90vh] overflow-y-auto"
+            className="bg-surface w-[calc(100vw-2rem)] max-w-5xl rounded-2xl shadow-xl border border-outline-variant/10 p-6 max-h-[90vh] overflow-y-auto"
             onClick={(e) => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6">
