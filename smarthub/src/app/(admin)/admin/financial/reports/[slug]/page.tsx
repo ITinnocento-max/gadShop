@@ -1,8 +1,10 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useUIStore } from "@/stores/ui-store"
+import html2canvas from "html2canvas"
+import jsPDF from "jspdf"
 
 const reportMeta: Record<string, { label: string; desc: string; icon: string }> = {
   "balance-sheet": { label: "Balance Sheet", desc: "Snapshot of assets, liabilities, and equity", icon: "account_balance" },
@@ -47,6 +49,8 @@ export default function ReportDetailPage() {
   const params = useParams()
   const slug = params.slug as string
   const meta = reportMeta[slug]
+  const reportRef = useRef<HTMLDivElement>(null)
+  const [downloading, setDownloading] = useState(false)
 
   const [summaryData, setSummaryData] = useState<Record<string, number> | null>(null)
   const [loading, setLoading] = useState(true)
@@ -60,6 +64,62 @@ export default function ReportDetailPage() {
       .catch(() => {})
       .finally(() => setLoading(false))
   }, [slug, meta])
+
+  const buildReportContent = useCallback(() => {
+    const reportTitle = meta?.label || slug
+    const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    let content = `${reportTitle}\n${meta?.desc || ""}\nGenerated: ${dateStr}\n\n`
+
+    if (summaryData) {
+      for (const [key, val] of Object.entries(summaryData)) {
+        content += `${key.replace(/_/g, " ")}: ${fmt(val)}\n`
+      }
+    }
+    return { reportTitle, dateStr, content }
+  }, [meta, slug, summaryData])
+
+  const downloadPDF = useCallback(async () => {
+    if (!reportRef.current) return
+    setDownloading(true)
+    try {
+      const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true })
+      const imgData = canvas.toDataURL("image/png")
+      const pdf = new jsPDF("p", "mm", "a4")
+      const pdfWidth = pdf.internal.pageSize.getWidth()
+      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
+      let heightLeft = pdfHeight
+      let position = 0
+
+      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight)
+      heightLeft -= pdf.internal.pageSize.getHeight()
+
+      while (heightLeft > 0) {
+        position = heightLeft - pdfHeight
+        pdf.addPage()
+        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight)
+        heightLeft -= pdf.internal.pageSize.getHeight()
+      }
+
+      const { reportTitle, dateStr } = buildReportContent()
+      pdf.save(`${reportTitle.replace(/\s+/g, "_")}_${dateStr.replace(/\s+/g, "_")}.pdf`)
+    } catch {
+      // fallback to print
+      window.print()
+    } finally {
+      setDownloading(false)
+    }
+  }, [buildReportContent])
+
+  const printReport = useCallback(() => {
+    window.print()
+  }, [])
+
+  const emailReport = useCallback(() => {
+    const { reportTitle, dateStr, content } = buildReportContent()
+    const subject = encodeURIComponent(`${reportTitle} - SmartHub Shop`)
+    const body = encodeURIComponent(content)
+    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank")
+  }, [buildReportContent])
 
   if (!meta) {
     return (
@@ -86,15 +146,39 @@ export default function ReportDetailPage() {
             <p className="font-body-md text-body-md text-outline mt-1">{meta.desc}</p>
           </div>
         </div>
-        <button className="md:hidden p-2 text-on-surface-variant" onClick={() => setMobileMenuOpen(true)}>
-          <span className="material-symbols-outlined">menu</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button
+            onClick={downloadPDF}
+            disabled={downloading}
+            className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-[16px]">{downloading ? "hourglass_top" : "download"}</span>
+            <span className="hidden sm:inline">{"PDF"}</span>
+          </button>
+          <button
+            onClick={printReport}
+            className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-[16px]">print</span>
+            <span className="hidden sm:inline">{"Print"}</span>
+          </button>
+          <button
+            onClick={emailReport}
+            className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5"
+          >
+            <span className="material-symbols-outlined text-[16px]">email</span>
+            <span className="hidden sm:inline">{"Email"}</span>
+          </button>
+          <button className="md:hidden p-2 text-on-surface-variant" onClick={() => setMobileMenuOpen(true)}>
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (
         <div className="text-center py-12 text-outline">{"Loading..."}</div>
       ) : (
-        <div className="bg-surface p-lg rounded-xl shadow-soft border border-outline-variant/10">
+        <div ref={reportRef} className="bg-surface p-lg rounded-xl shadow-soft border border-outline-variant/10">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
               <span className="material-symbols-outlined text-[32px]">{meta.icon}</span>
