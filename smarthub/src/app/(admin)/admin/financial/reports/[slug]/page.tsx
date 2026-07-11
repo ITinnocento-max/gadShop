@@ -3,7 +3,6 @@
 import { useEffect, useState, useRef, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useUIStore } from "@/stores/ui-store"
-import html2canvas from "html2canvas"
 import jsPDF from "jspdf"
 
 const reportMeta: Record<string, { label: string; desc: string; icon: string }> = {
@@ -78,37 +77,109 @@ export default function ReportDetailPage() {
     return { reportTitle, dateStr, content }
   }, [meta, slug, summaryData])
 
-  const downloadPDF = useCallback(async () => {
-    if (!reportRef.current) return
+  const downloadPDF = useCallback(() => {
     setDownloading(true)
     try {
-      const canvas = await html2canvas(reportRef.current, { scale: 2, useCORS: true })
-      const imgData = canvas.toDataURL("image/png")
+      const { reportTitle, dateStr } = buildReportContent()
       const pdf = new jsPDF("p", "mm", "a4")
-      const pdfWidth = pdf.internal.pageSize.getWidth()
-      const pdfHeight = (canvas.height * pdfWidth) / canvas.width
-      let heightLeft = pdfHeight
-      let position = 0
+      const pageW = pdf.internal.pageSize.getWidth()
+      const margin = 20
+      const yStart = 30
+      let y = yStart
 
-      pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight)
-      heightLeft -= pdf.internal.pageSize.getHeight()
-
-      while (heightLeft > 0) {
-        position = heightLeft - pdfHeight
-        pdf.addPage()
-        pdf.addImage(imgData, "PNG", 0, position, pdfWidth, pdfHeight)
-        heightLeft -= pdf.internal.pageSize.getHeight()
+      const heading = (text: string, size: number, style: "bold" | "normal" = "bold") => {
+        pdf.setFont("helvetica", style)
+        pdf.setFontSize(size)
+        pdf.text(text, margin, y)
+        y += size * 0.5
       }
 
-      const { reportTitle, dateStr } = buildReportContent()
+      const body = (text: string, size = 10) => {
+        pdf.setFont("helvetica", "normal")
+        pdf.setFontSize(size)
+        const lines = pdf.splitTextToSize(text, pageW - margin * 2)
+        for (const line of lines) {
+          if (y > 270) { pdf.addPage(); y = yStart }
+          pdf.text(line as string, margin, y)
+          y += size * 0.45
+        }
+      }
+
+      const separator = () => {
+        y += 3
+        pdf.setDrawColor(200, 200, 200)
+        pdf.line(margin, y, pageW - margin, y)
+        y += 6
+      }
+
+      // Header
+      pdf.setFillColor(59, 130, 246)
+      pdf.rect(0, 0, pageW, 20, "F")
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(14)
+      pdf.setTextColor(255, 255, 255)
+      pdf.text(reportTitle, margin, 13)
+      pdf.setFontSize(8)
+      pdf.text(`Generated: ${dateStr}`, pageW - margin, 13, { align: "right" })
+
+      pdf.setTextColor(0, 0, 0)
+      heading(reportTitle, 18)
+      pdf.setFont("helvetica", "normal")
+      pdf.setFontSize(10)
+      pdf.setTextColor(100, 100, 100)
+      pdf.text(meta?.desc || "", margin, y)
+      y += 8
+      pdf.setTextColor(0, 0, 0)
+
+      separator()
+
+      // Summary section
+      if (summaryData && Object.keys(summaryData).length > 0) {
+        heading("Summary", 14)
+        y += 2
+
+        const entries = Object.entries(summaryData)
+        const colW = (pageW - margin * 2) / 2
+
+        pdf.setFont("helvetica", "bold")
+        pdf.setFontSize(9)
+        pdf.setTextColor(100, 100, 100)
+        pdf.text("Metric", margin, y)
+        pdf.text("Value", margin + colW, y)
+        y += 5
+        pdf.setDrawColor(200, 200, 200)
+        pdf.line(margin, y, pageW - margin, y)
+        y += 4
+
+        pdf.setFont("helvetica", "normal")
+        pdf.setFontSize(10)
+        pdf.setTextColor(0, 0, 0)
+
+        for (const [key, val] of entries) {
+          if (y > 260) { pdf.addPage(); y = yStart }
+          pdf.text(key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()), margin, y)
+          pdf.text(fmt(val), margin + colW, y)
+          y += 7
+        }
+      }
+
+      separator()
+
+      // Footer
+      y = Math.max(y, 275)
+      pdf.setFont("helvetica", "italic")
+      pdf.setFontSize(8)
+      pdf.setTextColor(150, 150, 150)
+      pdf.text("SmartHub Shop - Financial Report", margin, y + 5)
+      pdf.text(`Page ${pdf.getNumberOfPages()}`, pageW - margin, y + 5, { align: "right" })
+
       pdf.save(`${reportTitle.replace(/\s+/g, "_")}_${dateStr.replace(/\s+/g, "_")}.pdf`)
     } catch {
-      // fallback to print
       window.print()
     } finally {
       setDownloading(false)
     }
-  }, [buildReportContent])
+  }, [buildReportContent, summaryData, meta])
 
   const printReport = useCallback(() => {
     window.print()
