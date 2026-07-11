@@ -103,13 +103,13 @@ export default function InvoicingPage() {
         <>
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-lg">
             {kpiEntries.map((kpi) => (
-              <div key={kpi.key} className={`bg-surface p-lg rounded-xl shadow-soft border ${kpi.error ? "border-error/20" : "border-outline-variant/10"} flex items-center gap-4`}>
-                <div className={`w-12 h-12 ${kpi.error ? "bg-error/10 text-error" : "bg-primary/10 text-primary"} rounded-xl flex items-center justify-center shrink-0`}>
-                  <span className="material-symbols-outlined text-[24px]">{kpi.icon}</span>
+              <div key={kpi.key} className={`bg-surface p-lg rounded-xl shadow-soft border ${kpi.error ? "border-error/20" : "border-outline-variant/10"} flex items-center gap-3`}>
+                <div className={`w-10 h-10 ${kpi.error ? "bg-error/10 text-error" : "bg-primary/10 text-primary"} rounded-xl flex items-center justify-center shrink-0`}>
+                  <span className="material-symbols-outlined text-[18px]">{kpi.icon}</span>
                 </div>
                 <div>
                   <p className="text-label-sm font-label-sm text-outline">{kpi.label}</p>
-                  <p className={`text-headline-sm font-headline-sm ${kpi.error ? "text-error" : "text-on-surface"}`}>{fmt(kpi.value)}</p>
+                  <p className={`text-label-lg font-label-lg ${kpi.error ? "text-error" : "text-on-surface"}`}>{fmt(kpi.value)}</p>
                 </div>
               </div>
             ))}
@@ -117,14 +117,14 @@ export default function InvoicingPage() {
 
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-lg">
             {data.statusSummary.filter((s) => s.status !== "Cancelled").map((s) => (
-              <div key={s.status} className="bg-surface p-xl rounded-2xl shadow-soft border border-outline-variant/10 flex items-center gap-5">
-                <div className={`w-16 h-16 rounded-2xl flex items-center justify-center shrink-0 ${s.status === "Paid" ? "bg-secondary/10" : s.status === "Overdue" ? "bg-error/10" : "bg-tertiary/10"}`}>
-                  <span className="material-symbols-outlined text-[28px] text-on-surface-variant">{statusIcons[s.status]}</span>
+              <div key={s.status} className="bg-surface px-lg py-md rounded-2xl shadow-soft border border-outline-variant/10 flex items-center gap-4">
+                <div className={`w-12 h-12 rounded-2xl flex items-center justify-center shrink-0 ${s.status === "Paid" ? "bg-secondary/10" : s.status === "Overdue" ? "bg-error/10" : "bg-tertiary/10"}`}>
+                  <span className="material-symbols-outlined text-[20px] text-on-surface-variant">{statusIcons[s.status]}</span>
                 </div>
                 <div>
-                  <p className="text-outline font-label-md text-label-md">{s.status}</p>
-                  <p className="text-headline-md font-headline-md text-on-surface">{s.count}</p>
-                  <p className="text-body-md font-body-md text-on-surface-variant">{fmt(s.total)}</p>
+                  <p className="text-outline font-label-sm text-label-sm">{s.status}</p>
+                  <p className="text-label-lg font-label-lg text-on-surface">{s.count}</p>
+                  <p className="text-label-sm font-label-sm text-on-surface-variant">{fmt(s.total)}</p>
                 </div>
               </div>
             ))}
@@ -167,6 +167,21 @@ export default function InvoicingPage() {
                 </tbody>
               </table>
             )}
+          </div>
+          <div>
+            <h3 className="font-headline-md text-headline-md text-on-surface mb-4">{"Quick Actions"}</h3>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              {["Sales Invoices", "Purchase Invoices", "Credit Notes", "Debit Notes", "Quotations", "Receipts"].map((link) => (
+                <a
+                  key={link}
+                  href="#"
+                  className="bg-surface p-lg rounded-xl shadow-soft border border-outline-variant/10 flex items-center gap-3 text-on-surface font-label-md hover:bg-outline-variant/5 transition-colors"
+                >
+                  <span className="material-symbols-outlined text-icon text-on-surface-variant">description</span>
+                  {link}
+                </a>
+              ))}
+            </div>
           </div>
         </>
       )}
