@@ -185,7 +185,7 @@ export default function ProductDetailsPage() {
           <button onClick={() => addItem({ id: product.id, name: product.name, price: product.price, image: product.images[0] || "", quantity: 1 })} className="flex-1 h-14 bg-surface-container-highest dark:bg-surface-variant/25 text-primary dark:text-inverse-primary border border-primary/20 font-label-md rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2">
             <span className="material-symbols-outlined">shopping_cart</span> {t("product.add_to_cart")}
           </button>
-          <button onClick={() => router.push("/checkout/shipping")} className="flex-1 h-14 bg-primary text-on-primary font-label-md rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
+          <button onClick={() => { addItem({ id: product.id, name: product.name, price: product.price, image: product.images[0] || "", quantity: 1 }); router.push("/checkout/shipping"); }} className="flex-1 h-14 bg-primary text-on-primary font-label-md rounded-2xl shadow-lg active:scale-95 transition-all flex items-center justify-center gap-2">
             {t("product.buy_now")} <span className="material-symbols-outlined">flash_on</span>
           </button>
         </div>
