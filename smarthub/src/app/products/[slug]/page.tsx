@@ -180,7 +180,7 @@ export default function ProductDetailsPage() {
           </div>
         </section>
       </main>
-      <footer className="fixed bottom-0 left-0 w-full z-50 bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-xl border-t border-outline-variant/30 px-margin-mobile pt-sm pb-8 md:hidden">
+      <footer className="fixed bottom-0 left-0 w-full z-50 bg-surface/90 dark:bg-inverse-surface/90 backdrop-blur-xl border-t border-outline-variant/30 px-margin-mobile pt-sm pb-8">
         <div className="flex gap-4">
           <button onClick={() => addItem({ id: product.id, name: product.name, price: product.price, image: product.images[0] || "", quantity: 1 })} className="flex-1 h-14 bg-surface-container-highest dark:bg-surface-variant/25 text-primary dark:text-inverse-primary border border-primary/20 font-label-md rounded-2xl active:scale-95 transition-all flex items-center justify-center gap-2">
             <span className="material-symbols-outlined">shopping_cart</span> {t("product.add_to_cart")}
