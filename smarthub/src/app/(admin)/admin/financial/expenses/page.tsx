@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useUIStore } from "@/stores/ui-store"
 
 interface ClaimItem {
@@ -43,11 +43,20 @@ interface Kpis {
   recurringTotal: number
 }
 
+interface Category { id: string; name: string }
+
 interface ExpensesResponse {
   kpis: Kpis
   categoryBreakdown: CategoryBreakdown[]
   claims: Claim[]
   recurringExpenses: RecurringExpense[]
+  categories: Category[]
+}
+
+interface FormItem {
+  description: string
+  amount: string
+  categoryId: string
 }
 
 const statusStyles: Record<string, string> = {
@@ -85,21 +94,81 @@ export default function ExpensesPage() {
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen)
   const [data, setData] = useState<ExpensesResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const [modalOpen, setModalOpen] = useState(false)
+  const [submitting, setSubmitting] = useState(false)
+  const [formTitle, setFormTitle] = useState("")
+  const [formDescription, setFormDescription] = useState("")
+  const [formItems, setFormItems] = useState<FormItem[]>([
+    { description: "", amount: "", categoryId: "" },
+  ])
+
+  const fetchData = useCallback(async () => {
+    setLoading(true)
+    try {
+      const res = await fetch("/api/admin/financial/expenses").then((r) => r.json())
+      setData(res)
+    } catch {
+      // ignore
+    } finally {
+      setLoading(false)
+    }
+  }, [])
 
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true)
-      try {
-        const res = await fetch("/api/admin/financial/expenses").then((r) => r.json())
-        setData(res)
-      } catch {
-        // ignore
-      } finally {
-        setLoading(false)
-      }
-    }
     fetchData()
-  }, [])
+  }, [fetchData])
+
+  const resetForm = () => {
+    setFormTitle("")
+    setFormDescription("")
+    setFormItems([{ description: "", amount: "", categoryId: "" }])
+  }
+
+  const addItem = () => {
+    setFormItems((prev) => [...prev, { description: "", amount: "", categoryId: "" }])
+  }
+
+  const removeItem = (idx: number) => {
+    setFormItems((prev) => prev.filter((_, i) => i !== idx))
+  }
+
+  const updateItem = (idx: number, field: keyof FormItem, value: string) => {
+    setFormItems((prev) =>
+      prev.map((item, i) => (i === idx ? { ...item, [field]: value } : item))
+    )
+  }
+
+  const handleSubmit = async () => {
+    if (!formTitle || formItems.some((i) => !i.description || !i.amount || !i.categoryId)) return
+    setSubmitting(true)
+    try {
+      const res = await fetch("/api/admin/financial/expenses", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          title: formTitle,
+          description: formDescription || undefined,
+          submittedById: "admin",
+          items: formItems.map((i) => ({
+            description: i.description,
+            amount: parseFloat(i.amount),
+            categoryId: i.categoryId,
+          })),
+        }),
+      })
+      if (res.ok) {
+        setModalOpen(false)
+        resetForm()
+        fetchData()
+      }
+    } catch {
+      // ignore
+    } finally {
+      setSubmitting(false)
+    }
+  }
+
+  const itemTotal = formItems.reduce((sum, i) => sum + (parseFloat(i.amount) || 0), 0)
 
   const kpiEntries = data
     ? [
@@ -111,15 +180,25 @@ export default function ExpensesPage() {
     : []
 
   return (
+    <>
     <div className="space-y-xl">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Expenses"}</h2>
           <p className="font-body-md text-body-md text-outline mt-1">Track and manage business expenses</p>
         </div>
-        <button className="md:hidden p-2 text-on-surface-variant" onClick={() => setMobileMenuOpen(true)}>
-          <span className="material-symbols-outlined">menu</span>
-        </button>
+        <div className="flex items-center gap-3">
+          <button
+            onClick={() => setModalOpen(true)}
+            className="h-10 px-4 bg-primary text-white rounded-lg font-label-md hover:bg-primary/90 transition-colors flex items-center gap-2"
+          >
+            <span className="material-symbols-outlined text-[18px]">add</span>
+            {"New Expense"}
+          </button>
+          <button className="md:hidden p-2 text-on-surface-variant" onClick={() => setMobileMenuOpen(true)}>
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (
@@ -232,5 +311,116 @@ export default function ExpensesPage() {
         </>
       )}
     </div>
+
+      {modalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40" onClick={() => setModalOpen(false)}>
+          <div
+            className="bg-surface w-[calc(100vw-2rem)] max-w-2xl rounded-2xl shadow-xl border border-outline-variant/10 p-6 max-h-[90vh] overflow-y-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h3 className="font-headline-md text-headline-md text-on-surface">{"New Expense Claim"}</h3>
+              <button onClick={() => { setModalOpen(false); resetForm(); }} className="p-1 text-on-surface-variant hover:text-on-surface">
+                <span className="material-symbols-outlined">close</span>
+              </button>
+            </div>
+
+            <div className="space-y-5">
+              <div>
+                <label className="block text-label-sm font-label-sm text-outline mb-1.5">{"Title"}</label>
+                <input
+                  value={formTitle}
+                  onChange={(e) => setFormTitle(e.target.value)}
+                  className="w-full h-11 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20"
+                  placeholder="e.g. Office supplies for Q3"
+                />
+              </div>
+
+              <div>
+                <label className="block text-label-sm font-label-sm text-outline mb-1.5">{"Description (optional)"}</label>
+                <textarea
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  className="w-full h-20 px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20 resize-none"
+                  placeholder="Additional details..."
+                />
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-2">
+                  <label className="text-label-sm font-label-sm text-outline">{"Items"}</label>
+                  <button
+                    onClick={addItem}
+                    className="text-label-sm font-label-sm text-primary hover:text-primary/80 flex items-center gap-1"
+                  >
+                    <span className="material-symbols-outlined text-[16px]">add</span>
+                    {"Add Item"}
+                  </button>
+                </div>
+                <div className="space-y-3">
+                  {formItems.map((item, idx) => (
+                    <div key={idx} className="flex gap-2 items-start">
+                      <select
+                        value={item.categoryId}
+                        onChange={(e) => updateItem(idx, "categoryId", e.target.value)}
+                        className="w-44 h-11 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20"
+                      >
+                        <option value="">{"Category"}</option>
+                        {data?.categories.map((cat) => (
+                          <option key={cat.id} value={cat.id}>{cat.name}</option>
+                        ))}
+                      </select>
+                      <input
+                        value={item.description}
+                        onChange={(e) => updateItem(idx, "description", e.target.value)}
+                        className="flex-1 h-11 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20"
+                        placeholder="Description"
+                      />
+                      <input
+                        type="number"
+                        step="0.01"
+                        min="0"
+                        value={item.amount}
+                        onChange={(e) => updateItem(idx, "amount", e.target.value)}
+                        className="w-28 h-11 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md outline-none focus:ring-2 focus:ring-primary/20"
+                        placeholder="Amount"
+                      />
+                      {formItems.length > 1 && (
+                        <button
+                          onClick={() => removeItem(idx)}
+                          className="h-11 w-11 flex items-center justify-center text-error hover:bg-error/10 rounded-lg transition-colors"
+                        >
+                          <span className="material-symbols-outlined text-[18px]">remove</span>
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                </div>
+                <div className="text-right mt-2 text-label-sm font-label-sm text-on-surface-variant">
+                  {"Total: "}{fmt(itemTotal)}
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-2">
+                <button
+                  onClick={() => { setModalOpen(false); resetForm(); }}
+                  className="h-10 px-5 border border-outline-variant/20 rounded-lg font-label-md text-on-surface-variant hover:bg-surface-variant/50 transition-colors"
+                >
+                  {"Cancel"}
+                </button>
+                <button
+                  onClick={handleSubmit}
+                  disabled={submitting || !formTitle || formItems.some((i) => !i.description || !i.amount || !i.categoryId)}
+                  className="h-10 px-5 bg-primary text-white rounded-lg font-label-md hover:bg-primary/90 disabled:opacity-40 transition-colors flex items-center gap-2"
+                >
+                  {submitting && <span className="material-symbols-outlined text-[16px] animate-spin">hourglass_top</span>}
+                  {"Submit Claim"}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   )
 }

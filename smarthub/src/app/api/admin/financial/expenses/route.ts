@@ -9,6 +9,7 @@ export async function GET() {
       allClaims,
       recurringList,
       categoryItems,
+      allCategories,
     ] = await Promise.all([
       prisma.expenseClaim.findMany({
         orderBy: { createdAt: "desc" },
@@ -30,6 +31,11 @@ export async function GET() {
         by: ["categoryId"],
         _sum: { amount: true },
         _count: { id: true },
+      }),
+      prisma.expenseCategory.findMany({
+        where: { isActive: true },
+        orderBy: { name: "asc" },
+        select: { id: true, name: true },
       }),
     ]);
 
@@ -107,12 +113,101 @@ export async function GET() {
           frequency: r.frequency,
           nextDueDate: r.nextDueDate,
         })),
+        categories: allCategories.map((c) => ({ id: c.id, name: c.name })),
       })
     );
   } catch (error) {
     console.error("Admin expenses API error:", error);
     return NextResponse.json(
       { error: "Failed to fetch expenses" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function POST(request: Request) {
+  try {
+    const body = await request.json();
+    const { title, description, submittedById, notes, items } = body;
+
+    if (!title || !submittedById || !items || !Array.isArray(items) || items.length === 0) {
+      return NextResponse.json(
+        { error: "title, submittedById, and items (non-empty array) are required" },
+        { status: 400 }
+      );
+    }
+
+    for (const item of items) {
+      if (!item.description || !item.amount || !item.categoryId) {
+        return NextResponse.json(
+          { error: "Each item requires description, amount, and categoryId" },
+          { status: 400 }
+        );
+      }
+    }
+
+    const lastClaim = await prisma.expenseClaim.findFirst({
+      orderBy: { createdAt: "desc" },
+      select: { claimNumber: true },
+    });
+    const nextNum = lastClaim
+      ? String(parseInt(lastClaim.claimNumber.replace("EXP-", ""), 10) + 1).padStart(5, "0")
+      : "00001";
+    const claimNumber = `EXP-${nextNum}`;
+
+    const totalAmount = items.reduce(
+      (sum: number, i: { amount: number }) => sum + Number(i.amount),
+      0
+    );
+
+    const claim = await prisma.expenseClaim.create({
+      data: {
+        claimNumber,
+        title,
+        description: description || null,
+        status: "DRAFT",
+        totalAmount,
+        notes: notes || null,
+        submittedById,
+        items: {
+          create: items.map((i: { description: string; amount: number; categoryId: string; receiptDate?: string }) => ({
+            description: i.description,
+            amount: Number(i.amount),
+            categoryId: i.categoryId,
+            receiptDate: i.receiptDate ? new Date(i.receiptDate) : null,
+          })),
+        },
+      },
+      include: {
+        items: {
+          include: { category: { select: { id: true, name: true } } },
+        },
+      },
+    });
+
+    return NextResponse.json(
+      serializeResponse({
+        id: claim.id,
+        claimNumber: claim.claimNumber,
+        title: claim.title,
+        description: claim.description,
+        status: claim.status,
+        totalAmount: Number(claim.totalAmount),
+        createdAt: claim.createdAt,
+        submittedById: claim.submittedById,
+        items: claim.items.map((i) => ({
+          id: i.id,
+          description: i.description,
+          amount: Number(i.amount),
+          categoryName: i.category.name,
+        })),
+      }),
+      { status: 201 }
+    );
+  } catch (error) {
+    console.error("Admin expenses POST error:", error);
+    return NextResponse.json(
+      { error: "Failed to create expense claim" },
       { status: 500 }
     );
   }
