@@ -59,6 +59,14 @@ interface FormItem {
   categoryId: string
 }
 
+const statusFlow: Record<string, string[]> = {
+  DRAFT: ["SUBMITTED"],
+  SUBMITTED: ["APPROVED", "REJECTED"],
+  APPROVED: ["PAID"],
+  REJECTED: ["SUBMITTED"],
+  PAID: [],
+}
+
 const statusStyles: Record<string, string> = {
   APPROVED: "bg-secondary/10 text-secondary",
   PAID: "bg-primary/10 text-primary",
@@ -101,6 +109,7 @@ export default function ExpensesPage() {
   const [formItems, setFormItems] = useState<FormItem[]>([
     { description: "", amount: "", categoryId: "" },
   ])
+  const [updating, setUpdating] = useState<string | null>(null)
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -165,6 +174,22 @@ export default function ExpensesPage() {
       // ignore
     } finally {
       setSubmitting(false)
+    }
+  }
+
+  const updateStatus = async (claimId: string, newStatus: string) => {
+    setUpdating(claimId)
+    try {
+      const res = await fetch(`/api/admin/financial/expenses/${claimId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ status: newStatus }),
+      })
+      if (res.ok) fetchData()
+    } catch {
+      // ignore
+    } finally {
+      setUpdating(null)
     }
   }
 
@@ -277,7 +302,8 @@ export default function ExpensesPage() {
                     <th className="pb-3 pr-4">Category</th>
                     <th className="pb-3 pr-4">Description</th>
                     <th className="pb-3 pr-4 text-right">Amount</th>
-                    <th className="pb-3">Status</th>
+                    <th className="pb-3 pr-4">Status</th>
+                    <th className="pb-3">Actions</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -297,10 +323,30 @@ export default function ExpensesPage() {
                         {c.description && <p className="text-label-sm text-outline">{c.description}</p>}
                       </td>
                       <td className="py-3 pr-4 font-label-md text-right text-on-surface">{fmt(c.totalAmount)}</td>
-                      <td className="py-3">
+                      <td className="py-3 pr-4">
                         <span className={`font-label-sm text-label-sm px-2 py-0.5 rounded-full ${statusStyles[c.status] || "bg-surface-container-high text-outline"}`}>
                           {statusLabels[c.status] || c.status}
                         </span>
+                      </td>
+                      <td className="py-3">
+                        {statusFlow[c.status]?.length > 0 ? (
+                          <select
+                            value=""
+                            onChange={(e) => updateStatus(c.id, e.target.value)}
+                            disabled={updating === c.id}
+                            className="px-2 py-1 rounded-lg font-label-sm text-label-sm border border-outline-variant/20 bg-surface-container-low outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
+                          >
+                            <option value="" disabled>{"Actions"}</option>
+                            {statusFlow[c.status].map((s) => (
+                              <option key={s} value={s}>{statusLabels[s] || s}</option>
+                            ))}
+                          </select>
+                        ) : (
+                          <span className="text-label-sm text-outline">{"—"}</span>
+                        )}
+                        {updating === c.id && (
+                          <span className="material-symbols-outlined text-[14px] animate-spin ml-1 align-middle">hourglass_top</span>
+                        )}
                       </td>
                     </tr>
                   ))}
