@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState, useCallback } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { useUIStore } from "@/stores/ui-store"
+import jsPDF from "jspdf"
 
 interface ClaimItem {
   id: string
@@ -110,6 +111,96 @@ export default function ExpensesPage() {
     { description: "", amount: "", categoryId: "" },
   ])
   const [updating, setUpdating] = useState<string | null>(null)
+  const [downloading, setDownloading] = useState(false)
+  const reportRef = useRef<HTMLDivElement>(null)
+
+  const downloadPDF = useCallback(() => {
+    setDownloading(true)
+    try {
+      const pdf = new jsPDF("p", "mm", "a4")
+      const pageW = pdf.internal.pageSize.getWidth()
+      const margin = 20
+      let y = 30
+      const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+
+      pdf.setFillColor(59, 130, 246)
+      pdf.rect(0, 0, pageW, 20, "F")
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(14)
+      pdf.setTextColor(255, 255, 255)
+      pdf.text("Expenses", margin, 13)
+      pdf.setFontSize(8)
+      pdf.text(`Generated: ${dateStr}`, pageW - margin, 13, { align: "right" })
+      pdf.setTextColor(0, 0, 0)
+
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(18)
+      pdf.text("Expenses Report", margin, y)
+      y += 10
+      pdf.setFont("helvetica", "normal")
+      pdf.setFontSize(10)
+      pdf.setTextColor(100, 100, 100)
+      pdf.text("Track and manage business expenses", margin, y)
+      y += 10
+      pdf.setTextColor(0, 0, 0)
+
+      if (data) {
+        pdf.setFont("helvetica", "bold")
+        pdf.setFontSize(12)
+        pdf.text("Summary", margin, y)
+        y += 8
+        pdf.setFont("helvetica", "normal")
+        pdf.setFontSize(10)
+        const kpiItems = [
+          ["Total Expenses", fmt(data.kpis.totalExpenses)],
+          ["Pending Claims", fmt(data.kpis.pendingClaimsTotal)],
+          ["Approved", fmt(data.kpis.approvedTotal)],
+          ["Recurring", fmt(data.kpis.recurringTotal)],
+        ]
+        for (const [label, val] of kpiItems) {
+          if (y > 260) { pdf.addPage(); y = 30 }
+          pdf.text(`${label}: ${val}`, margin, y)
+          y += 6
+        }
+        y += 5
+
+        if (data.claims.length > 0) {
+          pdf.setFont("helvetica", "bold")
+          pdf.setFontSize(12)
+          pdf.text("Recent Claims", margin, y)
+          y += 8
+          pdf.setFont("helvetica", "normal")
+          pdf.setFontSize(9)
+          for (const c of data.claims.slice(0, 20)) {
+            if (y > 260) { pdf.addPage(); y = 30 }
+            pdf.text(`${c.claimNumber} | ${c.title} | ${fmt(c.totalAmount)} | ${statusLabels[c.status] || c.status}`, margin, y)
+            y += 5
+          }
+        }
+      }
+
+      y = Math.max(y, 275)
+      pdf.setFont("helvetica", "italic")
+      pdf.setFontSize(8)
+      pdf.setTextColor(150, 150, 150)
+      pdf.text("SmartHub Shop - Expense Report", margin, y + 5)
+      pdf.text(`Page ${pdf.getNumberOfPages()}`, pageW - margin, y + 5, { align: "right" })
+      pdf.save(`Expenses_${dateStr.replace(/\s+/g, "_")}.pdf`)
+    } catch { window.print() } finally { setDownloading(false) }
+  }, [data])
+
+  const printReport = useCallback(() => { window.print() }, [])
+
+  const emailReport = useCallback(() => {
+    const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    let content = `Expenses Report\nGenerated: ${dateStr}\n\n`
+    if (data) {
+      content += `Total Expenses: ${fmt(data.kpis.totalExpenses)}\nPending Claims: ${fmt(data.kpis.pendingClaimsTotal)}\nApproved: ${fmt(data.kpis.approvedTotal)}\nRecurring: ${fmt(data.kpis.recurringTotal)}\n\n`
+      content += "Recent Claims:\n"
+      for (const c of data.claims.slice(0, 20)) content += `${c.claimNumber} | ${c.title} | ${fmt(c.totalAmount)} | ${statusLabels[c.status] || c.status}\n`
+    }
+    window.open(`mailto:?subject=${encodeURIComponent("Expenses Report - SmartHub Shop")}&body=${encodeURIComponent(content)}`, "_blank")
+  }, [data])
 
   const fetchData = useCallback(async () => {
     setLoading(true)
@@ -212,7 +303,19 @@ export default function ExpensesPage() {
           <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Expenses"}</h2>
           <p className="font-body-md text-body-md text-outline mt-1">Track and manage business expenses</p>
         </div>
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2">
+          <button onClick={downloadPDF} disabled={downloading} className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">{downloading ? "hourglass_top" : "download"}</span>
+            <span className="hidden sm:inline">{"PDF"}</span>
+          </button>
+          <button onClick={printReport} className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">print</span>
+            <span className="hidden sm:inline">{"Print"}</span>
+          </button>
+          <button onClick={emailReport} className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">email</span>
+            <span className="hidden sm:inline">{"Email"}</span>
+          </button>
           <button
             onClick={() => setModalOpen(true)}
             className="h-10 px-4 bg-primary text-white rounded-lg font-label-md hover:bg-primary/90 transition-colors flex items-center gap-2"

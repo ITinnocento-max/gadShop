@@ -1,7 +1,8 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useRef } from "react";
 import { useUIStore } from "@/stores/ui-store";
+import jsPDF from "jspdf";
 
 interface PaymentUser { id: string; name: string; email: string; }
 interface PaymentOrder { id: string; total: number; status: string; }
@@ -76,6 +77,105 @@ export default function PaymentsPage() {
   const [methodFilter, setMethodFilter] = useState("all");
   const [page, setPage] = useState(1);
   const [updating, setUpdating] = useState<string | null>(null);
+  const [downloading, setDownloading] = useState(false);
+  const reportRef = useRef<HTMLDivElement>(null);
+
+  const downloadPDF = useCallback(() => {
+    setDownloading(true);
+    try {
+      const pdf = new jsPDF("p", "mm", "a4");
+      const pageW = pdf.internal.pageSize.getWidth();
+      const margin = 20;
+      let y = 30;
+
+      pdf.setFillColor(59, 130, 246);
+      pdf.rect(0, 0, pageW, 20, "F");
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(14);
+      pdf.setTextColor(255, 255, 255);
+      pdf.text("Payment Monitoring", margin, 13);
+      const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+      pdf.setFontSize(8);
+      pdf.text(`Generated: ${dateStr}`, pageW - margin, 13, { align: "right" });
+
+      pdf.setTextColor(0, 0, 0);
+      pdf.setFont("helvetica", "bold");
+      pdf.setFontSize(18);
+      pdf.text("Payment Monitoring", margin, y);
+      y += 10;
+      pdf.setFont("helvetica", "normal");
+      pdf.setFontSize(10);
+      pdf.setTextColor(100, 100, 100);
+      pdf.text("Manage and reconcile payment transactions across all gateways", margin, y);
+      y += 10;
+      pdf.setTextColor(0, 0, 0);
+
+      if (data) {
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(12);
+        pdf.text("Method Summary", margin, y);
+        y += 8;
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(10);
+        for (const m of data.methodSummary) {
+          if (y > 260) { pdf.addPage(); y = 30; }
+          pdf.text(`${m.method}: ${fmt(m.total)} (${m.count} payments)`, margin, y);
+          y += 6;
+        }
+        y += 5;
+
+        pdf.setFont("helvetica", "bold");
+        pdf.setFontSize(12);
+        pdf.text("Status Summary", margin, y);
+        y += 8;
+        pdf.setFont("helvetica", "normal");
+        pdf.setFontSize(10);
+        for (const s of data.statusSummary) {
+          if (y > 260) { pdf.addPage(); y = 30; }
+          pdf.text(`${statusLabels[s.status] || s.status}: ${fmt(s.total)} (${s.count} payments)`, margin, y);
+          y += 6;
+        }
+        y += 5;
+
+        if (data.payments.length > 0) {
+          pdf.setFont("helvetica", "bold");
+          pdf.setFontSize(12);
+          pdf.text("Recent Transactions", margin, y);
+          y += 8;
+          pdf.setFont("helvetica", "normal");
+          pdf.setFontSize(9);
+          for (const tx of data.payments.slice(0, 20)) {
+            if (y > 260) { pdf.addPage(); y = 30; }
+            pdf.text(`#${tx.id.slice(-8).toUpperCase()} | ${tx.user.name} | ${fmt(tx.amount)} | ${statusLabels[tx.status] || tx.status}`, margin, y);
+            y += 5;
+          }
+        }
+      }
+
+      y = Math.max(y, 275);
+      pdf.setFont("helvetica", "italic");
+      pdf.setFontSize(8);
+      pdf.setTextColor(150, 150, 150);
+      pdf.text("SmartHub Shop - Payment Report", margin, y + 5);
+      pdf.text(`Page ${pdf.getNumberOfPages()}`, pageW - margin, y + 5, { align: "right" });
+
+      pdf.save(`Payment_Monitoring_${dateStr.replace(/\s+/g, "_")}.pdf`);
+    } catch { window.print(); } finally { setDownloading(false); }
+  }, [data]);
+
+  const printReport = useCallback(() => { window.print(); }, []);
+
+  const emailReport = useCallback(() => {
+    const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" });
+    let content = `Payment Monitoring\nGenerated: ${dateStr}\n\n`;
+    if (data) {
+      content += "Method Summary:\n";
+      for (const m of data.methodSummary) content += `${m.method}: ${fmt(m.total)} (${m.count} payments)\n`;
+      content += "\nStatus Summary:\n";
+      for (const s of data.statusSummary) content += `${statusLabels[s.status] || s.status}: ${fmt(s.total)} (${s.count} payments)\n`;
+    }
+    window.open(`mailto:?subject=${encodeURIComponent("Payment Monitoring - SmartHub Shop")}&body=${encodeURIComponent(content)}`, "_blank");
+  }, [data]);
 
   const fetchPayments = useCallback(async () => {
     setLoading(true);
@@ -133,9 +233,23 @@ export default function PaymentsPage() {
           <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Payment Monitoring"}</h2>
           <p className="font-body-md text-body-md text-outline mt-1">Manage and reconcile payment transactions across all gateways</p>
         </div>
-        <button className="md:hidden p-2 text-on-surface-variant" onClick={() => setMobileMenuOpen(true)}>
-          <span className="material-symbols-outlined">menu</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={downloadPDF} disabled={downloading} className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">{downloading ? "hourglass_top" : "download"}</span>
+            <span className="hidden sm:inline">{"PDF"}</span>
+          </button>
+          <button onClick={printReport} className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">print</span>
+            <span className="hidden sm:inline">{"Print"}</span>
+          </button>
+          <button onClick={emailReport} className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">email</span>
+            <span className="hidden sm:inline">{"Email"}</span>
+          </button>
+          <button className="md:hidden p-2 text-on-surface-variant" onClick={() => setMobileMenuOpen(true)}>
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+        </div>
       </div>
 
       {data && (

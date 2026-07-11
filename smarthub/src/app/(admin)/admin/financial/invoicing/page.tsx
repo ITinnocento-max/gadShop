@@ -1,7 +1,8 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useCallback, useRef } from "react"
 import { useUIStore } from "@/stores/ui-store"
+import jsPDF from "jspdf"
 
 interface Invoice {
   id: string
@@ -58,6 +59,8 @@ export default function InvoicingPage() {
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen)
   const [data, setData] = useState<InvoicingResponse | null>(null)
   const [loading, setLoading] = useState(true)
+  const [downloading, setDownloading] = useState(false)
+  const reportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const fetchData = async () => {
@@ -73,6 +76,94 @@ export default function InvoicingPage() {
     }
     fetchData()
   }, [])
+
+  const downloadPDF = useCallback(() => {
+    setDownloading(true)
+    try {
+      const pdf = new jsPDF("p", "mm", "a4")
+      const pageW = pdf.internal.pageSize.getWidth()
+      const margin = 20
+      let y = 30
+      const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+
+      pdf.setFillColor(59, 130, 246)
+      pdf.rect(0, 0, pageW, 20, "F")
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(14)
+      pdf.setTextColor(255, 255, 255)
+      pdf.text("Invoicing", margin, 13)
+      pdf.setFontSize(8)
+      pdf.text(`Generated: ${dateStr}`, pageW - margin, 13, { align: "right" })
+      pdf.setTextColor(0, 0, 0)
+
+      pdf.setFont("helvetica", "bold")
+      pdf.setFontSize(18)
+      pdf.text("Invoicing", margin, y)
+      y += 10
+      pdf.setFont("helvetica", "normal")
+      pdf.setFontSize(10)
+      pdf.setTextColor(100, 100, 100)
+      pdf.text("Create and manage invoices", margin, y)
+      y += 10
+      pdf.setTextColor(0, 0, 0)
+
+      if (data) {
+        pdf.setFont("helvetica", "bold")
+        pdf.setFontSize(12)
+        pdf.text("Summary", margin, y)
+        y += 8
+        pdf.setFont("helvetica", "normal")
+        pdf.setFontSize(10)
+        const summaryItems = [
+          ["Total Invoiced", fmt(data.kpis.totalInvoiced)],
+          ["Paid", fmt(data.kpis.paid)],
+          ["Outstanding", fmt(data.kpis.outstanding)],
+          ["Overdue", fmt(data.kpis.overdue)],
+        ]
+        for (const [label, val] of summaryItems) {
+          if (y > 260) { pdf.addPage(); y = 30 }
+          pdf.text(`${label}: ${val}`, margin, y)
+          y += 6
+        }
+        y += 5
+
+        if (data.invoices.length > 0) {
+          pdf.setFont("helvetica", "bold")
+          pdf.setFontSize(12)
+          pdf.text("Recent Invoices", margin, y)
+          y += 8
+          pdf.setFont("helvetica", "normal")
+          pdf.setFontSize(9)
+          for (const inv of data.invoices.slice(0, 30)) {
+            if (y > 260) { pdf.addPage(); y = 30 }
+            pdf.text(`#${inv.id} | ${inv.customer} | ${fmt(inv.amount)} | ${inv.status}`, margin, y)
+            y += 5
+          }
+        }
+      }
+
+      y = Math.max(y, 275)
+      pdf.setFont("helvetica", "italic")
+      pdf.setFontSize(8)
+      pdf.setTextColor(150, 150, 150)
+      pdf.text("SmartHub Shop - Invoice Report", margin, y + 5)
+      pdf.text(`Page ${pdf.getNumberOfPages()}`, pageW - margin, y + 5, { align: "right" })
+      pdf.save(`Invoicing_${dateStr.replace(/\s+/g, "_")}.pdf`)
+    } catch { window.print() } finally { setDownloading(false) }
+  }, [data])
+
+  const printReport = useCallback(() => { window.print() }, [])
+
+  const emailReport = useCallback(() => {
+    const dateStr = new Date().toLocaleDateString("en-US", { year: "numeric", month: "long", day: "numeric" })
+    let content = `Invoicing Report\nGenerated: ${dateStr}\n\n`
+    if (data) {
+      content += `Total Invoiced: ${fmt(data.kpis.totalInvoiced)}\nPaid: ${fmt(data.kpis.paid)}\nOutstanding: ${fmt(data.kpis.outstanding)}\nOverdue: ${fmt(data.kpis.overdue)}\n\n`
+      content += "Recent Invoices:\n"
+      for (const inv of data.invoices.slice(0, 20)) content += `#${inv.id} | ${inv.customer} | ${fmt(inv.amount)} | ${inv.status}\n`
+    }
+    window.open(`mailto:?subject=${encodeURIComponent("Invoicing Report - SmartHub Shop")}&body=${encodeURIComponent(content)}`, "_blank")
+  }, [data])
 
   const kpiEntries = data
     ? [
@@ -90,9 +181,23 @@ export default function InvoicingPage() {
           <h2 className="font-headline-lg text-headline-lg text-on-surface">{"Invoicing"}</h2>
           <p className="font-body-md text-body-md text-outline mt-1">Create and manage invoices</p>
         </div>
-        <button className="md:hidden p-2 text-on-surface-variant" onClick={() => setMobileMenuOpen(true)}>
-          <span className="material-symbols-outlined">menu</span>
-        </button>
+        <div className="flex items-center gap-2">
+          <button onClick={downloadPDF} disabled={downloading} className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">{downloading ? "hourglass_top" : "download"}</span>
+            <span className="hidden sm:inline">{"PDF"}</span>
+          </button>
+          <button onClick={printReport} className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">print</span>
+            <span className="hidden sm:inline">{"Print"}</span>
+          </button>
+          <button onClick={emailReport} className="h-9 px-3 bg-surface text-on-surface-variant border border-outline-variant/20 rounded-lg font-label-sm text-label-sm hover:bg-surface-variant/50 transition-colors flex items-center gap-1.5">
+            <span className="material-symbols-outlined text-[16px]">email</span>
+            <span className="hidden sm:inline">{"Email"}</span>
+          </button>
+          <button className="md:hidden p-2 text-on-surface-variant" onClick={() => setMobileMenuOpen(true)}>
+            <span className="material-symbols-outlined">menu</span>
+          </button>
+        </div>
       </div>
 
       {loading ? (
