@@ -920,3 +920,19 @@ model SystemSetting {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
+
+model NewRelease {
+  id           String  @id @default(cuid())
+  label        String  @default("New Release")
+  title        String
+  subtitle     String?
+  description  String?
+  buttonText   String  @default("Shop Now")
+  buttonLink   String  @default("/products")
+  imageUrl     String?
+  isActive     Boolean @default(true)
+  sortOrder    Int     @default(0)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}

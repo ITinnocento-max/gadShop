@@ -8,6 +8,7 @@ const navItems = [
   { icon: "dashboard", key: "dashboard", href: "/admin/dashboard" },
   { icon: "group", key: "users", href: "/admin/users" },
   { icon: "inventory_2", key: "products", href: "/admin/products" },
+  { icon: "new_releases", key: "new_releases", href: "/admin/new-releases" },
   { icon: "finance", key: "financial_overview", href: "/admin/financial" },
   { icon: "description", key: "reports", href: "/admin/financial/reports" },
   { icon: "account_balance", key: "banking", href: "/admin/financial/banking" },

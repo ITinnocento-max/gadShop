@@ -17,7 +17,7 @@ export function BottomNav() {
   ];
 
   return (
-    <nav className="fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-2 h-16 md:hidden bg-surface shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border-t border-outline-variant/10">
+    <nav className="fixed bottom-0 left-0 w-full z-40 flex justify-around items-center px-2 pb-2 h-16 md:hidden bg-surface shadow-[0_-4px_20px_rgba(0,0,0,0.05)] border-t border-outline-variant/10">
       {items.map((item) => (
         <Link
           key={item.href}
