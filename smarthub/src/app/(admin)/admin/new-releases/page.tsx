@@ -296,7 +296,7 @@ export default function AdminNewReleasesPage() {
       {showForm && (
         <>
           <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setShowForm(false)} />
-          <div className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-50 bg-surface-container-lowest rounded-t-2xl md:rounded-2xl shadow-overlay max-h-[90vh] overflow-y-auto w-full md:max-w-lg">
+          <div className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-50 bg-surface-container-lowest rounded-t-2xl md:rounded-2xl shadow-overlay max-h-[90vh] overflow-y-auto w-full md:max-w-xl lg:max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
             <div className="sticky top-0 bg-surface-container-lowest flex items-center justify-between p-lg border-b border-outline-variant/20">
               <h2 className="font-headline-md text-headline-md">{editingId ? "Edit Slide" : "New Slide"}</h2>
               <button onClick={() => setShowForm(false)} className="text-on-surface-variant active:scale-90 transition-transform">
