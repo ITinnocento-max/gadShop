@@ -929,7 +929,7 @@ model NewRelease {
   description  String?
   buttonText   String  @default("Shop Now")
   buttonLink   String  @default("/products")
-  imageUrl     String?
+  imageUrl     String? @db.Text
   isActive     Boolean @default(true)
   sortOrder    Int     @default(0)
 
