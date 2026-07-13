@@ -188,9 +188,9 @@ export default function AdminNewReleasesPage() {
           </p>
           <button
             onClick={openCreate}
-            className="flex items-center gap-2 px-4 h-10 bg-primary text-on-primary rounded-lg font-label-md hover:bg-primary/90 transition-colors"
+            className="flex items-center gap-2 px-4 h-10 lg:px-6 lg:h-12 lg:text-lg bg-primary text-on-primary rounded-lg font-label-md lg:font-headline-md hover:bg-primary/90 transition-colors"
           >
-            <span className="material-symbols-outlined text-[18px]">add</span>
+            <span className="material-symbols-outlined text-[18px] lg:text-[24px]">add</span>
             Add Slide
           </button>
         </div>
@@ -302,14 +302,14 @@ export default function AdminNewReleasesPage() {
       {showForm && (
         <>
           <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setShowForm(false)} />
-          <div className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-50 bg-surface-container-lowest rounded-t-2xl md:rounded-2xl shadow-overlay max-h-[90vh] overflow-y-auto w-full md:max-w-2xl lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl">
-            <div className="sticky top-0 bg-surface-container-lowest flex items-center justify-between p-lg border-b border-outline-variant/20">
-              <h2 className="font-headline-md text-headline-md">{editingId ? "Edit Slide" : "New Slide"}</h2>
+          <div className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-50 bg-surface-container-lowest rounded-t-2xl md:rounded-2xl shadow-overlay max-h-[90vh] overflow-y-auto w-full md:max-w-2xl lg:max-w-4xl xl:max-w-6xl 2xl:w-[90vw]">
+            <div className="sticky top-0 bg-surface-container-lowest flex items-center justify-between p-lg lg:p-xl border-b border-outline-variant/20">
+              <h2 className="font-headline-md lg:text-2xl">{editingId ? "Edit Slide" : "New Slide"}</h2>
               <button onClick={() => setShowForm(false)} className="text-on-surface-variant active:scale-90 transition-transform">
                 <span className="material-symbols-outlined">close</span>
               </button>
             </div>
-            <div className="p-lg space-y-5">
+            <div className="p-lg lg:p-xl space-y-5 lg:space-y-6">
               <div>
                 <label className="block font-label-md text-on-surface mb-1">Label</label>
                 <input
