@@ -11,6 +11,7 @@ export async function POST(request: Request) {
   try {
     const formData = await request.formData();
     const file = formData.get("file") as File | null;
+    const folder = (formData.get("folder") as string) || "smarthub/products";
 
     if (!file) {
       return NextResponse.json({ error: "No file provided" }, { status: 400 });
@@ -21,7 +22,12 @@ export async function POST(request: Request) {
 
     const result = await new Promise<{ secure_url: string; public_id: string }>((resolve, reject) => {
       const uploadStream = cloudinary.uploader.upload_stream(
-        { folder: "smarthub/products", resource_type: "auto" },
+        {
+          folder,
+          resource_type: "auto",
+          timeout: 120000,
+          transformation: [{ quality: "auto", fetch_format: "auto" }],
+        },
         (error, result) => {
           if (error) reject(error);
           else resolve(result as { secure_url: string; public_id: string });
