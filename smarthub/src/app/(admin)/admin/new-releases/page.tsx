@@ -311,45 +311,45 @@ export default function AdminNewReleasesPage() {
             </div>
             <div className="p-lg lg:p-xl space-y-5 lg:space-y-6">
               <div>
-                <label className="block font-label-md text-on-surface mb-1">Label</label>
+                <label className="block font-label-md lg:font-label-lg text-on-surface mb-1 lg:mb-2">Label</label>
                 <input
                   value={form.label}
                   onChange={(e) => setForm((f) => ({ ...f, label: e.target.value }))}
-                  className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md focus:ring-2 focus:ring-primary/20 outline-none"
+                  className="w-full h-10 lg:h-12 px-3 lg:px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md lg:text-base focus:ring-2 focus:ring-primary/20 outline-none"
                   placeholder="e.g. New Release"
                 />
               </div>
               <div>
-                <label className="block font-label-md text-on-surface mb-1">Title *</label>
+                <label className="block font-label-md lg:font-label-lg text-on-surface mb-1 lg:mb-2">Title *</label>
                 <input
                   value={form.title}
                   onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
-                  className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md focus:ring-2 focus:ring-primary/20 outline-none"
+                  className="w-full h-10 lg:h-12 px-3 lg:px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md lg:text-base focus:ring-2 focus:ring-primary/20 outline-none"
                   placeholder="e.g. Galaxy S24 Ultra Elite"
                 />
               </div>
               <div>
-                <label className="block font-label-md text-on-surface mb-1">Subtitle</label>
+                <label className="block font-label-md lg:font-label-lg text-on-surface mb-1 lg:mb-2">Subtitle</label>
                 <input
                   value={form.subtitle}
                   onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))}
-                  className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md focus:ring-2 focus:ring-primary/20 outline-none"
+                  className="w-full h-10 lg:h-12 px-3 lg:px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md lg:text-base focus:ring-2 focus:ring-primary/20 outline-none"
                   placeholder="Optional subtitle text"
                 />
               </div>
               <div>
-                <label className="block font-label-md text-on-surface mb-1">Description</label>
+                <label className="block font-label-md lg:font-label-lg text-on-surface mb-1 lg:mb-2">Description</label>
                 <textarea
                   value={form.description}
                   onChange={(e) => setForm((f) => ({ ...f, description: e.target.value }))}
-                  className="w-full h-20 px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md focus:ring-2 focus:ring-primary/20 outline-none resize-none"
+                  className="w-full h-20 lg:h-28 px-3 py-2 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md lg:text-base focus:ring-2 focus:ring-primary/20 outline-none resize-none"
                   placeholder="Optional description"
                 />
               </div>
               <div>
-                <label className="block font-label-md text-on-surface mb-1">Background Image</label>
+                <label className="block font-label-md lg:font-label-lg text-on-surface mb-1 lg:mb-2">Background Image</label>
                 <div className="flex items-center gap-3">
-                  <label className="flex-1 flex items-center justify-center h-10 px-3 bg-surface-container-low border border-dashed border-outline-variant/40 rounded-lg font-body-md cursor-pointer hover:bg-surface-variant/30 transition-colors">
+                  <label className="flex-1 flex items-center justify-center h-10 lg:h-12 px-3 bg-surface-container-low border border-dashed border-outline-variant/40 rounded-lg font-body-md lg:text-base cursor-pointer hover:bg-surface-variant/30 transition-colors">
                     <span className="material-symbols-outlined text-[18px] mr-2 text-outline">upload</span>
                     {uploading ? "Uploading..." : form.imageUrl ? "Change Image" : "Upload Image"}
                     <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
@@ -362,7 +362,7 @@ export default function AdminNewReleasesPage() {
                   </p>
                 )}
                 {form.imageUrl && (
-                  <div className="mt-2 relative w-full h-32 rounded-lg overflow-hidden border border-outline-variant/20">
+                  <div className="mt-2 relative w-full h-32 lg:h-48 rounded-lg overflow-hidden border border-outline-variant/20">
                     <img className="w-full h-full object-cover" src={form.imageUrl} alt="Preview" />
                     <button
                       onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
@@ -373,34 +373,34 @@ export default function AdminNewReleasesPage() {
                   </div>
                 )}
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 lg:gap-6">
                 <div>
-                  <label className="block font-label-md text-on-surface mb-1">Button Text</label>
+                  <label className="block font-label-md lg:font-label-lg text-on-surface mb-1 lg:mb-2">Button Text</label>
                   <input
                     value={form.buttonText}
                     onChange={(e) => setForm((f) => ({ ...f, buttonText: e.target.value }))}
-                    className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md focus:ring-2 focus:ring-primary/20 outline-none"
+                    className="w-full h-10 lg:h-12 px-3 lg:px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md lg:text-base focus:ring-2 focus:ring-primary/20 outline-none"
                     placeholder="Shop Now"
                   />
                 </div>
                 <div>
-                  <label className="block font-label-md text-on-surface mb-1">Button Link</label>
+                  <label className="block font-label-md lg:font-label-lg text-on-surface mb-1 lg:mb-2">Button Link</label>
                   <input
                     value={form.buttonLink}
                     onChange={(e) => setForm((f) => ({ ...f, buttonLink: e.target.value }))}
-                    className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md focus:ring-2 focus:ring-primary/20 outline-none"
+                    className="w-full h-10 lg:h-12 px-3 lg:px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md lg:text-base focus:ring-2 focus:ring-primary/20 outline-none"
                     placeholder="/products"
                   />
                 </div>
               </div>
-              <div className="grid grid-cols-2 gap-4">
+              <div className="grid grid-cols-2 gap-4 lg:gap-6">
                 <div>
-                  <label className="block font-label-md text-on-surface mb-1">Sort Order</label>
+                  <label className="block font-label-md lg:font-label-lg text-on-surface mb-1 lg:mb-2">Sort Order</label>
                   <input
                     type="number"
                     value={form.sortOrder}
                     onChange={(e) => setForm((f) => ({ ...f, sortOrder: parseInt(e.target.value) || 0 }))}
-                    className="w-full h-10 px-3 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md focus:ring-2 focus:ring-primary/20 outline-none"
+                    className="w-full h-10 lg:h-12 px-3 lg:px-4 bg-surface-container-low border border-outline-variant/20 rounded-lg font-body-md lg:text-base focus:ring-2 focus:ring-primary/20 outline-none"
                   />
                 </div>
                 <div className="flex items-end">
@@ -416,17 +416,17 @@ export default function AdminNewReleasesPage() {
                 </div>
               </div>
             </div>
-            <div className="sticky bottom-0 bg-surface-container-lowest flex items-center justify-end gap-3 p-lg border-t border-outline-variant/20">
+            <div className="sticky bottom-0 bg-surface-container-lowest flex items-center justify-end gap-3 p-lg lg:p-xl border-t border-outline-variant/20">
               <button
                 onClick={() => setShowForm(false)}
-                className="px-4 h-10 border border-outline-variant/30 text-on-surface-variant rounded-lg font-label-md hover:bg-surface-variant/30 transition-colors"
+                className="px-4 lg:px-6 h-10 lg:h-12 border border-outline-variant/30 text-on-surface-variant rounded-lg font-label-md lg:text-lg hover:bg-surface-variant/30 transition-colors"
               >
                 Cancel
               </button>
               <button
                 onClick={handleSave}
                 disabled={saving || !form.title.trim()}
-                className="px-4 h-10 bg-primary text-on-primary rounded-lg font-label-md hover:bg-primary/90 transition-colors disabled:opacity-50"
+                className="px-4 lg:px-6 h-10 lg:h-12 bg-primary text-on-primary rounded-lg font-label-md lg:text-lg hover:bg-primary/90 transition-colors disabled:opacity-50"
               >
                 {saving ? "Saving..." : editingId ? "Update" : "Create"}
               </button>
