@@ -40,6 +40,7 @@ export default function AdminNewReleasesPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [uploadError, setUploadError] = useState<string | null>(null);
 
   const fetchReleases = useCallback(async () => {
     setLoading(true);
@@ -61,6 +62,7 @@ export default function AdminNewReleasesPage() {
     const file = e.target.files?.[0];
     if (!file) return;
     setUploading(true);
+    setUploadError(null);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -69,9 +71,11 @@ export default function AdminNewReleasesPage() {
       const data = await res.json();
       if (data.url) {
         setForm((f) => ({ ...f, imageUrl: data.url }));
+      } else {
+        setUploadError(data.error || "Upload failed");
       }
-    } catch {
-      // ignore
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "Upload failed");
     }
     setUploading(false);
   };
@@ -79,6 +83,7 @@ export default function AdminNewReleasesPage() {
   const openCreate = () => {
     setEditingId(null);
     setForm(emptyForm);
+    setUploadError(null);
     setShowForm(true);
   };
 
@@ -297,7 +302,7 @@ export default function AdminNewReleasesPage() {
       {showForm && (
         <>
           <div className="fixed inset-0 bg-black/40 z-40" onClick={() => setShowForm(false)} />
-          <div className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-50 bg-surface-container-lowest rounded-t-2xl md:rounded-2xl shadow-overlay max-h-[90vh] overflow-y-auto w-full md:max-w-xl lg:max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
+          <div className="fixed inset-x-0 bottom-0 md:inset-auto md:top-1/2 md:left-1/2 md:-translate-x-1/2 md:-translate-y-1/2 z-50 bg-surface-container-lowest rounded-t-2xl md:rounded-2xl shadow-overlay max-h-[90vh] overflow-y-auto w-full md:max-w-2xl lg:max-w-3xl xl:max-w-4xl 2xl:max-w-5xl">
             <div className="sticky top-0 bg-surface-container-lowest flex items-center justify-between p-lg border-b border-outline-variant/20">
               <h2 className="font-headline-md text-headline-md">{editingId ? "Edit Slide" : "New Slide"}</h2>
               <button onClick={() => setShowForm(false)} className="text-on-surface-variant active:scale-90 transition-transform">
@@ -350,6 +355,12 @@ export default function AdminNewReleasesPage() {
                     <input type="file" accept="image/*" className="hidden" onChange={handleImageUpload} disabled={uploading} />
                   </label>
                 </div>
+                {uploadError && (
+                  <p className="mt-2 text-sm text-error flex items-center gap-1">
+                    <span className="material-symbols-outlined text-[16px]">error</span>
+                    {uploadError}
+                  </p>
+                )}
                 {form.imageUrl && (
                   <div className="mt-2 relative w-full h-32 rounded-lg overflow-hidden border border-outline-variant/20">
                     <img className="w-full h-full object-cover" src={form.imageUrl} alt="Preview" />
