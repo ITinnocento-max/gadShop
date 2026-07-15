@@ -9,17 +9,20 @@ export function CustomerGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  const hydrated = useAuthStore((s) => s.hydrated);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    if (!hydrated) return;
+
     if (!isAuthenticated || !user) {
       router.replace(`/login?from=${encodeURIComponent(pathname)}`);
       return;
     }
     setReady(true);
-  }, [isAuthenticated, user, router, pathname]);
+  }, [hydrated, isAuthenticated, user, router, pathname]);
 
-  if (!ready) {
+  if (!hydrated || !ready) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-4">
