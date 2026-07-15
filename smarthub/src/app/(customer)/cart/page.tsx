@@ -2,6 +2,7 @@
 
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { CustomerGuard } from "@/components/customer/customer-guard";
 import { useCartStore } from "@/stores/cart-store";
 import Link from "next/link";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -11,7 +12,7 @@ export default function CartPage() {
   const { items, removeItem, updateQuantity, subtotal } = useCartStore();
 
   return (
-    <>
+    <CustomerGuard>
       <Header showBack title={t("cart.title")} />
       <main className="flex-grow w-full max-w-7xl mx-auto px-margin-mobile py-lg grid grid-cols-1 lg:grid-cols-12 gap-gutter pb-28">
         <section className="lg:col-span-8 space-y-md">
@@ -114,6 +115,6 @@ export default function CartPage() {
         )}
       </main>
       <BottomNav />
-    </>
+    </CustomerGuard>
   );
 }

@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { CustomerGuard } from "@/components/customer/customer-guard";
 import { CheckoutStepper } from "@/components/ui/checkout-stepper";
 import { useCartStore } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
@@ -51,7 +52,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <>
+    <CustomerGuard>
       <Header showBack title="SmartHub" />
       <main className="max-w-7xl mx-auto px-margin-mobile py-lg pb-28">
         <div className="mb-xl">
@@ -233,6 +234,6 @@ export default function PaymentPage() {
         </div>
       </main>
       <BottomNav />
-    </>
+    </CustomerGuard>
   );
 }

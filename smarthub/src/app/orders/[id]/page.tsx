@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { CustomerGuard } from "@/components/customer/customer-guard";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface OrderItem {
@@ -66,26 +67,26 @@ export default function OrderDetailPage() {
 
   if (loading) {
     return (
-      <>
+      <CustomerGuard>
         <Header showBack title={t("orders.order_details")} />
         <main className="flex-grow pt-4 pb-28 px-margin-mobile max-w-5xl mx-auto w-full flex items-center justify-center min-h-[60vh]">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary" />
         </main>
         <BottomNav />
-      </>
+      </CustomerGuard>
     );
   }
 
   if (!order) {
     return (
-      <>
+      <CustomerGuard>
         <Header showBack title={t("orders.order_details")} />
         <main className="flex-grow pt-4 pb-28 px-margin-mobile max-w-5xl mx-auto w-full flex flex-col items-center justify-center min-h-[60vh]">
           <span className="material-symbols-outlined text-5xl text-outline-variant mb-3">block</span>
           <h3 className="font-headline-md">Order not found</h3>
         </main>
         <BottomNav />
-      </>
+      </CustomerGuard>
     );
   }
 
@@ -97,7 +98,7 @@ export default function OrderDetailPage() {
   const tax = order.total - subtotal;
 
   return (
-    <>
+    <CustomerGuard>
       <Header showBack title={t("orders.order_details")} />
       <main className="flex-grow pt-4 pb-28 px-margin-mobile max-w-5xl mx-auto w-full">
         <section className="bg-surface-container-lowest dark:bg-inverse-surface rounded-xl p-lg shadow-soft dark:shadow-none dark:border dark:border-outline-variant/10 border border-outline-variant/10 mb-lg">
@@ -219,6 +220,6 @@ export default function OrderDetailPage() {
         </div>
       </main>
       <BottomNav />
-    </>
+    </CustomerGuard>
   );
 }

@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { CustomerGuard } from "@/components/customer/customer-guard";
 import { useCartStore } from "@/stores/cart-store";
 import { useWishlistStore } from "@/stores/wishlist-store";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -14,7 +15,7 @@ export default function WishlistPage() {
   const { items, removeItem, clearAll } = useWishlistStore();
 
   return (
-    <>
+    <CustomerGuard>
       <Header showBack title={t("wishlist.title")} />
       <main className="flex-grow pt-4 pb-28 px-margin-mobile max-w-7xl mx-auto w-full">
         <section className="flex items-center justify-between mb-lg">
@@ -92,6 +93,6 @@ export default function WishlistPage() {
         )}
       </main>
       <BottomNav />
-    </>
+    </CustomerGuard>
   );
 }

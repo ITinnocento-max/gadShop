@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUIStore } from "@/stores/ui-store";
 import { useAuthStore } from "@/stores/auth-store";
+import { CustomerGuard } from "@/components/customer/customer-guard";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const languages = ["en", "fr", "sw", "rw"] as const;
@@ -70,7 +71,7 @@ export default function AccountPage() {
   };
 
   return (
-    <>
+    <CustomerGuard>
       <header className="fixed top-0 w-full z-30 bg-surface/80 dark:bg-inverse-surface/80 backdrop-blur-md shadow-soft dark:shadow-none dark:border dark:border-outline-variant/10 h-16 flex items-center justify-between px-margin-mobile">
         <div className="flex items-center gap-4">
           <button onClick={() => setMobileMenuOpen(true)} className="active:scale-95 transition-transform text-primary">
@@ -228,6 +229,6 @@ export default function AccountPage() {
           <span className="font-label-sm text-label-sm">{t("nav.profile")}</span>
         </a>
       </nav>
-    </>
+    </CustomerGuard>
   );
 }

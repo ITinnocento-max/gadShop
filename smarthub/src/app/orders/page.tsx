@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { CustomerGuard } from "@/components/customer/customer-guard";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface OrderItem {
@@ -78,7 +79,7 @@ export default function OrdersPage() {
     : orders.filter((o) => o.status === statusFilter);
 
   return (
-    <>
+    <CustomerGuard>
       <Header showBack title="SmartHub Store" />
       <main className="flex-grow pt-24 pb-28 px-margin-mobile max-w-7xl mx-auto w-full">
         <section className="mb-lg space-y-md">
@@ -163,6 +164,6 @@ export default function OrdersPage() {
         )}
       </main>
       <BottomNav />
-    </>
+    </CustomerGuard>
   );
 }

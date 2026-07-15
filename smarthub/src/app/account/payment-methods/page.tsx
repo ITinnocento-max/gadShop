@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { CustomerGuard } from "@/components/customer/customer-guard";
 import { useTranslation } from "@/hooks/useTranslation";
 
 interface PaymentMethod {
@@ -36,7 +37,7 @@ export default function PaymentMethodsPage() {
   };
 
   return (
-    <>
+    <CustomerGuard>
       <Header showBack title={t("account.payment_methods")} />
       <main className="flex-grow pt-4 pb-28 px-margin-mobile max-w-4xl mx-auto w-full">
         <section className="space-y-md">
@@ -110,6 +111,6 @@ export default function PaymentMethodsPage() {
         </section>
       </main>
       <BottomNav />
-    </>
+    </CustomerGuard>
   );
 }

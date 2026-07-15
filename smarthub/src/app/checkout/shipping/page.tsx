@@ -4,6 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { CustomerGuard } from "@/components/customer/customer-guard";
 import { CheckoutStepper } from "@/components/ui/checkout-stepper";
 import { useCartStore } from "@/stores/cart-store";
 import { useCheckoutStore } from "@/stores/checkout-store";
@@ -39,7 +40,7 @@ export default function ShippingPage() {
   const tax = subtotal * 0.085;
   const total = subtotal + shipping.cost + tax;
   return (
-    <>
+    <CustomerGuard>
       <Header showBack title="SmartHub" />
       <main className="pt-24 pb-2xl px-margin-mobile max-w-7xl mx-auto">
         <div className="mb-xl">
@@ -169,6 +170,6 @@ export default function ShippingPage() {
         </div>
       </main>
       <BottomNav />
-    </>
+    </CustomerGuard>
   );
 }

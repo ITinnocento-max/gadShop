@@ -1,13 +1,15 @@
 "use client";
 
-import { useState, FormEvent } from "react";
-import { useRouter } from "next/navigation";
+import { Suspense, useState, FormEvent } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/hooks/useTranslation";
 
-export default function LoginPage() {
+function LoginForm() {
   const { t } = useTranslation();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const from = searchParams.get("from");
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -35,9 +37,9 @@ export default function LoginPage() {
       }
       useAuthStore.getState().login(data.user);
       if (data.user.dbRole === "ADMIN") {
-        router.push("/admin/dashboard");
+        router.push(from && from.startsWith("/admin") ? from : "/admin/dashboard");
       } else {
-        router.push("/");
+        router.push(from || "/");
       }
     } catch {
       setError("Network error. Please try again.");
@@ -146,5 +148,17 @@ export default function LoginPage() {
         </section>
       </main>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    }>
+      <LoginForm />
+    </Suspense>
   );
 }
