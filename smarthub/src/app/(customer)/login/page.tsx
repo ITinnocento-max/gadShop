@@ -10,11 +10,22 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const from = searchParams.get("from");
+  const user = useAuthStore((s) => s.user);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [showPassword, setShowPassword] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+
+  if (isAuthenticated && user) {
+    if (user.dbRole === "ADMIN") {
+      router.replace(from && from.startsWith("/admin") ? from : "/admin/dashboard");
+    } else {
+      router.replace(from || "/");
+    }
+    return null;
+  }
 
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();

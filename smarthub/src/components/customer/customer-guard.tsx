@@ -1,22 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 
 export function CustomerGuard({ children }: { children: React.ReactNode }) {
   const router = useRouter();
+  const pathname = usePathname();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
     if (!isAuthenticated || !user) {
-      router.replace("/login");
+      router.replace(`/login?from=${encodeURIComponent(pathname)}`);
       return;
     }
     setReady(true);
-  }, [isAuthenticated, user, router]);
+  }, [isAuthenticated, user, router, pathname]);
 
   if (!ready) {
     return (
