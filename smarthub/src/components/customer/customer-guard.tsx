@@ -2,26 +2,48 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useAuthStore } from "@/stores/auth-store";
+import { useAuthStore, type User } from "@/stores/auth-store";
+
+function readAuthFromStorage(): { user: User | null; isAuthenticated: boolean } {
+  if (typeof window === "undefined") return { user: null, isAuthenticated: false };
+  try {
+    const raw = localStorage.getItem("auth-storage");
+    if (!raw) return { user: null, isAuthenticated: false };
+    const parsed = JSON.parse(raw);
+    const state = parsed.state ?? parsed;
+    if (state?.user && state?.isAuthenticated) {
+      return { user: state.user, isAuthenticated: true };
+    }
+  } catch {}
+  return { user: null, isAuthenticated: false };
+}
 
 export function CustomerGuard({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
-  const user = useAuthStore((s) => s.user);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const hydrated = useAuthStore((s) => s.hydrated);
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
-    if (!hydrated) return;
+    const storeState = useAuthStore.getState();
+    let user = storeState.user;
+    let isAuthenticated = storeState.isAuthenticated;
+
+    if (!user || !isAuthenticated) {
+      const fromStorage = readAuthFromStorage();
+      user = fromStorage.user;
+      isAuthenticated = fromStorage.isAuthenticated;
+      if (user && isAuthenticated) {
+        useAuthStore.setState({ user, isAuthenticated, hydrated: true });
+      }
+    }
 
     if (!isAuthenticated || !user) {
       window.location.href = `/login?from=${encodeURIComponent(pathname)}`;
       return;
     }
     setReady(true);
-  }, [hydrated, isAuthenticated, user, pathname]);
+  }, [pathname]);
 
-  if (!hydrated || !ready) {
+  if (!ready) {
     return (
       <div className="flex-1 flex items-center justify-center min-h-screen">
         <div className="flex flex-col items-center gap-4">
