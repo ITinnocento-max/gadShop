@@ -1,15 +1,13 @@
 "use client";
 
-import { Suspense, useState, useEffect, FormEvent } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useEffect, FormEvent } from "react";
+import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/hooks/useTranslation";
 
-function LoginForm() {
+export default function LoginPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const from = searchParams.get("from");
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [showPassword, setShowPassword] = useState(false);
@@ -17,6 +15,13 @@ function LoginForm() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [from, setFrom] = useState<string | null>(null);
+
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const f = params.get("from");
+    if (f) setFrom(f);
+  }, []);
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -164,17 +169,5 @@ function LoginForm() {
         </section>
       </main>
     </div>
-  );
-}
-
-export default function LoginPage() {
-  return (
-    <Suspense fallback={
-      <div className="flex items-center justify-center min-h-screen">
-        <div className="w-10 h-10 border-4 border-primary border-t-transparent rounded-full animate-spin" />
-      </div>
-    }>
-      <LoginForm />
-    </Suspense>
   );
 }
