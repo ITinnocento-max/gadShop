@@ -20,10 +20,26 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });
     }
 
-    return NextResponse.json({
-      user: { id: user.id, name: user.name, email: user.email, role: user.role, dbRole: user.role },
+    const userData = { id: user.id, name: user.name, email: user.email, role: user.role, dbRole: user.role };
+
+    const cookiePayload = JSON.stringify({
+      state: { user: userData, isAuthenticated: true },
+      version: 0,
+    });
+
+    const response = NextResponse.json({
+      user: userData,
       message: "Login successful",
     });
+
+    response.cookies.set("auth-storage", encodeURIComponent(cookiePayload), {
+      path: "/",
+      maxAge: 86400,
+      sameSite: "none",
+      secure: true,
+    });
+
+    return response;
   } catch {
     return NextResponse.json({ error: "Something went wrong" }, { status: 500 });
   }

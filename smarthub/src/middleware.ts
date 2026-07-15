@@ -17,6 +17,19 @@ function isStaticAsset(pathname: string): boolean {
   );
 }
 
+function parseAuthCookie(value: string): { isAuthenticated: boolean; isAdmin: boolean } {
+  try {
+    let decoded = value;
+    try { decoded = decodeURIComponent(decoded); } catch {}
+    const parsed = JSON.parse(decoded);
+    const state = parsed.state ?? parsed;
+    if (state?.isAuthenticated && state?.user) {
+      return { isAuthenticated: true, isAdmin: state.user.dbRole === "ADMIN" };
+    }
+  } catch {}
+  return { isAuthenticated: false, isAdmin: false };
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
 
@@ -26,23 +39,9 @@ export function middleware(request: NextRequest) {
 
   if (isAdminRoute(pathname)) {
     const authCookie = request.cookies.get("auth-storage");
-    let isAuthenticated = false;
-    let isAdmin = false;
-
-    if (authCookie?.value) {
-      try {
-        const decoded = decodeURIComponent(authCookie.value);
-        const parsed = JSON.parse(decoded);
-        const state = parsed.state ?? parsed;
-        if (state?.isAuthenticated && state?.user) {
-          isAuthenticated = true;
-          isAdmin = state.user.dbRole === "ADMIN";
-        }
-      } catch {
-        isAuthenticated = false;
-        isAdmin = false;
-      }
-    }
+    const { isAuthenticated, isAdmin } = authCookie?.value
+      ? parseAuthCookie(authCookie.value)
+      : { isAuthenticated: false, isAdmin: false };
 
     if (!isAuthenticated) {
       const url = request.nextUrl.clone();
