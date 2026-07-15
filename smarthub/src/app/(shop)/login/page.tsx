@@ -1,13 +1,11 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/hooks/useTranslation";
 
 export default function LoginPage() {
   const { t } = useTranslation();
-  const router = useRouter();
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const [showPassword, setShowPassword] = useState(false);
@@ -26,12 +24,12 @@ export default function LoginPage() {
   useEffect(() => {
     if (isAuthenticated && user) {
       if (user.dbRole === "ADMIN") {
-        router.replace(from && from.startsWith("/admin") ? from : "/admin/dashboard");
+        window.location.href = from && from.startsWith("/admin") ? from : "/admin/dashboard";
       } else {
-        router.replace(from || "/");
+        window.location.href = from || "/";
       }
     }
-  }, [isAuthenticated, user, from, router]);
+  }, [isAuthenticated, user, from]);
 
   if (isAuthenticated && user) {
     return null;
