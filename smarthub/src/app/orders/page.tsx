@@ -78,6 +78,26 @@ export default function OrdersPage() {
     ? orders
     : orders.filter((o) => o.status === statusFilter);
 
+  if (!userId) {
+    return (
+      <>
+        <Header showBack title="SmartHub Store" />
+        <main className="flex-grow pt-24 pb-28 px-margin-mobile max-w-4xl mx-auto w-full">
+          <div className="flex flex-col items-center justify-center py-16 text-center">
+            <span className="material-symbols-outlined text-6xl text-outline-variant mb-4">receipt_long</span>
+            <h3 className="font-headline-md text-on-surface dark:text-white mb-2">Sign in to view your orders</h3>
+            <p className="font-body-md text-on-surface-variant dark:text-outline mb-6">Or track a guest order using your email.</p>
+            <div className="flex gap-md">
+              <button onClick={() => router.push("/login")} className="bg-primary text-on-primary px-8 py-3 rounded-full font-label-md">{t("auth.sign_in")}</button>
+              <button onClick={() => router.push("/orders/track")} className="bg-surface-container-high dark:bg-surface-variant/20 text-on-surface dark:text-white px-8 py-3 rounded-full font-label-md hover:bg-surface-container-highest transition-colors">Track as Guest</button>
+            </div>
+          </div>
+        </main>
+        <BottomNav />
+      </>
+    );
+  }
+
   return (
     <CustomerGuard>
       <Header showBack title="SmartHub Store" />

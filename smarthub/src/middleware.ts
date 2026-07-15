@@ -1,21 +1,8 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const adminRoutes = ["/admin"];
-const customerOnlyRoutes = ["/cart", "/wishlist", "/account", "/checkout", "/orders"];
-const publicRoutes = ["/", "/login", "/register", "/products"];
-
 function isAdminRoute(pathname: string): boolean {
-  return adminRoutes.some((route) => pathname.startsWith(route));
-}
-
-function isCustomerOnlyRoute(pathname: string): boolean {
-  return customerOnlyRoutes.some((route) => pathname.startsWith(route));
-}
-
-function isPublicRoute(pathname: string): boolean {
-  if (pathname === "/") return true;
-  return publicRoutes.some((route) => pathname.startsWith(route));
+  return pathname.startsWith("/admin");
 }
 
 function isApiRoute(pathname: string): boolean {
@@ -37,26 +24,26 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
-  const authCookie = request.cookies.get("auth-storage");
-  let isAuthenticated = false;
-  let isAdmin = false;
-
-  if (authCookie?.value) {
-    try {
-      const decoded = decodeURIComponent(authCookie.value);
-      const parsed = JSON.parse(decoded);
-      const state = parsed.state ?? parsed;
-      if (state?.isAuthenticated && state?.user) {
-        isAuthenticated = true;
-        isAdmin = state.user.dbRole === "ADMIN";
-      }
-    } catch {
-      isAuthenticated = false;
-      isAdmin = false;
-    }
-  }
-
   if (isAdminRoute(pathname)) {
+    const authCookie = request.cookies.get("auth-storage");
+    let isAuthenticated = false;
+    let isAdmin = false;
+
+    if (authCookie?.value) {
+      try {
+        const decoded = decodeURIComponent(authCookie.value);
+        const parsed = JSON.parse(decoded);
+        const state = parsed.state ?? parsed;
+        if (state?.isAuthenticated && state?.user) {
+          isAuthenticated = true;
+          isAdmin = state.user.dbRole === "ADMIN";
+        }
+      } catch {
+        isAuthenticated = false;
+        isAdmin = false;
+      }
+    }
+
     if (!isAuthenticated) {
       const url = request.nextUrl.clone();
       url.pathname = "/login";
@@ -68,26 +55,6 @@ export function middleware(request: NextRequest) {
       url.pathname = "/";
       return NextResponse.redirect(url);
     }
-    return NextResponse.next();
-  }
-
-  if (isCustomerOnlyRoute(pathname)) {
-    if (!isAuthenticated) {
-      const url = request.nextUrl.clone();
-      url.pathname = "/login";
-      url.searchParams.set("from", pathname);
-      return NextResponse.redirect(url);
-    }
-    return NextResponse.next();
-  }
-
-  if (isPublicRoute(pathname)) {
-    if (isAuthenticated && isAdmin && pathname === "/") {
-      const url = request.nextUrl.clone();
-      url.pathname = "/admin/dashboard";
-      return NextResponse.redirect(url);
-    }
-    return NextResponse.next();
   }
 
   return NextResponse.next();

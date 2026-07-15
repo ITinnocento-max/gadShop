@@ -1,13 +1,36 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeResponse } from "@/lib/serialize";
+import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
-    const { userId, items, paymentMethod, total, shippingAddress } = await request.json();
+    const { userId, items, paymentMethod, total, shippingAddress, guestInfo } = await request.json();
 
-    if (!userId || !items?.length || total == null) {
+    if (!items?.length || total == null) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
+    }
+
+    let effectiveUserId = userId;
+
+    if (!effectiveUserId && guestInfo?.email) {
+      let guestUser = await prisma.user.findUnique({ where: { email: guestInfo.email } });
+      if (!guestUser) {
+        guestUser = await prisma.user.create({
+          data: {
+            name: guestInfo.name || guestInfo.email.split("@")[0],
+            email: guestInfo.email,
+            phone: guestInfo.phone || null,
+            password: await bcrypt.hash(Math.random().toString(36).slice(2) + Date.now().toString(36), 10),
+            role: "CUSTOMER",
+          },
+        });
+      }
+      effectiveUserId = guestUser.id;
+    }
+
+    if (!effectiveUserId) {
+      return NextResponse.json({ error: "User identification required" }, { status: 400 });
     }
 
     const products = await prisma.product.findMany({
@@ -28,12 +51,12 @@ export async function POST(request: Request) {
 
     const address = await prisma.address.create({
       data: {
-        street: shippingAddress?.street || "Default Street",
-        city: shippingAddress?.city || "Default City",
-        state: shippingAddress?.state || "Default State",
+        street: shippingAddress?.street || "N/A",
+        city: shippingAddress?.city || "N/A",
+        state: shippingAddress?.state || "N/A",
         zip: shippingAddress?.zip || "00000",
-        country: shippingAddress?.country || "US",
-        userId,
+        country: shippingAddress?.country || "RW",
+        userId: effectiveUserId,
       },
     });
 
@@ -54,7 +77,7 @@ export async function POST(request: Request) {
 
       return tx.order.create({
         data: {
-          userId,
+          userId: effectiveUserId,
           total,
           paymentMethod,
           shippingAddressId: address.id,
@@ -74,7 +97,7 @@ export async function POST(request: Request) {
               method: paymentMethod || "CARD",
               status: "COMPLETED",
               amount: total,
-              userId,
+              userId: effectiveUserId,
             },
           },
         },
@@ -96,6 +119,25 @@ export async function POST(request: Request) {
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const userId = searchParams.get("userId");
+  const email = searchParams.get("email");
+
+  if (email) {
+    const user = await prisma.user.findUnique({ where: { email } });
+    if (!user) {
+      return NextResponse.json([]);
+    }
+    const orders = await prisma.order.findMany({
+      where: { userId: user.id },
+      include: {
+        items: {
+          include: { product: { select: { images: true } } },
+          orderBy: { createdAt: "asc" },
+        },
+      },
+      orderBy: { createdAt: "desc" },
+    });
+    return NextResponse.json(serializeResponse(orders));
+  }
 
   if (!userId) {
     return NextResponse.json([]);

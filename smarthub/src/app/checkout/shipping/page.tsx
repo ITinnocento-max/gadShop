@@ -4,10 +4,10 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { CustomerGuard } from "@/components/customer/customer-guard";
 import { CheckoutStepper } from "@/components/ui/checkout-stepper";
 import { useCartStore } from "@/stores/cart-store";
 import { useCheckoutStore } from "@/stores/checkout-store";
+import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const shippingMethods = [
@@ -19,8 +19,11 @@ const shippingMethods = [
 export default function ShippingPage() {
   const { t } = useTranslation();
   const router = useRouter();
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
+  const user = useAuthStore((s) => s.user);
+  const [firstName, setFirstName] = useState(user?.name?.split(" ")[0] || "");
+  const [lastName, setLastName] = useState(user?.name?.split(" ").slice(1).join(" ") || "");
+  const [email, setEmail] = useState(user?.email || "");
+  const [phone, setPhone] = useState("");
   const [street, setStreet] = useState("");
   const [city, setCity] = useState("");
   const [state, setState] = useState("CA");
@@ -28,10 +31,14 @@ export default function ShippingPage() {
   const [shippingId, setShippingId] = useState("standard");
   const setShippingAddress = useCheckoutStore((s) => s.setShippingAddress);
   const setShippingMethod = useCheckoutStore((s) => s.setShippingMethod);
+  const setGuestInfo = useCheckoutStore((s) => s.setGuestInfo);
 
   const handleContinue = () => {
     setShippingAddress({ firstName, lastName, street, city, state, zip });
     setShippingMethod(shippingId);
+    if (!user?.id && email) {
+      setGuestInfo({ email, phone });
+    }
     router.push("/checkout/payment");
   };
   const items = useCartStore((s) => s.items);
@@ -40,7 +47,7 @@ export default function ShippingPage() {
   const tax = subtotal * 0.085;
   const total = subtotal + shipping.cost + tax;
   return (
-    <CustomerGuard>
+    <>
       <Header showBack title="SmartHub" />
       <main className="pt-24 pb-2xl px-margin-mobile max-w-7xl mx-auto">
         <div className="mb-xl">
@@ -62,6 +69,18 @@ export default function ShippingPage() {
                   <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.last_name")}</label>
                   <input value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="Doe" type="text" />
                 </div>
+                {!user?.id && (
+                  <>
+                    <div className="md:col-span-1">
+                      <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("auth.email_or_phone")} *</label>
+                      <input value={email} onChange={(e) => setEmail(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="you@example.com" type="email" required />
+                    </div>
+                    <div className="md:col-span-1">
+                      <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.phone_number")}</label>
+                      <input value={phone} onChange={(e) => setPhone(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="+250 7XX XXX XXX" type="tel" />
+                    </div>
+                  </>
+                )}
                 <div className="md:col-span-2">
                   <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.street_address")}</label>
                   <input value={street} onChange={(e) => setStreet(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="123 Tech Lane, Silicon Valley" type="text" />
@@ -158,7 +177,7 @@ export default function ShippingPage() {
                   <span className="text-primary dark:text-inverse-primary">Rwf {total.toFixed(2)}</span>
                 </div>
               </div>
-              <button onClick={handleContinue} className="w-full bg-primary text-on-primary h-14 rounded-full font-headline-md text-[18px] hover:scale-[1.02] active:scale-95 transition-all shadow-md flex items-center justify-center">
+              <button onClick={handleContinue} disabled={!user?.id && !email} className="w-full bg-primary text-on-primary h-14 rounded-full font-headline-md text-[18px] hover:scale-[1.02] active:scale-95 transition-all shadow-md flex items-center justify-center disabled:opacity-50">
                 {t("checkout.continue_to_payment")}
               </button>
               <p className="text-center text-label-sm text-on-surface-variant dark:text-outline mt-md flex items-center justify-center gap-xs">
@@ -170,6 +189,6 @@ export default function ShippingPage() {
         </div>
       </main>
       <BottomNav />
-    </CustomerGuard>
+    </>
   );
 }

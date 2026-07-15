@@ -4,7 +4,6 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
-import { CustomerGuard } from "@/components/customer/customer-guard";
 import { CheckoutStepper } from "@/components/ui/checkout-stepper";
 import { useCartStore } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
@@ -16,7 +15,7 @@ export default function PaymentPage() {
   const router = useRouter();
   const { items, clearCart } = useCartStore();
   const user = useAuthStore((s) => s.user);
-  const { shippingAddress, shippingMethod, clearCheckout } = useCheckoutStore();
+  const { shippingAddress, shippingMethod, guestInfo, clearCheckout } = useCheckoutStore();
   const [submitting, setSubmitting] = useState(false);
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
   const tax = subtotal * 0.085;
@@ -26,14 +25,16 @@ export default function PaymentPage() {
   const methodMap: Record<string, string> = { momo: "MTN_MOMO", airtel: "AIRTEL_MONEY", card: "VISA" };
 
   async function handleCompletePayment() {
-    if (!user?.id || items.length === 0) return;
+    if (items.length === 0) return;
+    if (!user?.id && !guestInfo?.email) return;
     setSubmitting(true);
     try {
       const res = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          userId: user.id,
+          userId: user?.id || undefined,
+          guestInfo: !user?.id && guestInfo?.email ? { email: guestInfo.email, phone: guestInfo.phone, name: shippingAddress ? `${shippingAddress.firstName} ${shippingAddress.lastName}` : undefined } : undefined,
           items: items.map((i) => ({ id: i.id, name: i.name, price: i.price, quantity: i.quantity, image: i.image })),
           paymentMethod: methodMap[paymentMethod],
           total,
@@ -43,7 +44,11 @@ export default function PaymentPage() {
       if (!res.ok) throw new Error("Failed to create order");
       clearCart();
       clearCheckout();
-      router.push("/orders");
+      if (user?.id) {
+        router.push("/orders");
+      } else {
+        router.push("/orders/track?email=" + encodeURIComponent(guestInfo!.email));
+      }
     } catch {
       alert("Payment failed. Please try again.");
     } finally {
@@ -52,7 +57,7 @@ export default function PaymentPage() {
   }
 
   return (
-    <CustomerGuard>
+    <>
       <Header showBack title="SmartHub" />
       <main className="max-w-7xl mx-auto px-margin-mobile py-lg pb-28">
         <div className="mb-xl">
@@ -234,6 +239,6 @@ export default function PaymentPage() {
         </div>
       </main>
       <BottomNav />
-    </CustomerGuard>
+    </>
   );
 }
