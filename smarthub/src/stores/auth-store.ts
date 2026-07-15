@@ -22,20 +22,20 @@ interface AuthState {
   setRole: (role: Role) => void;
 }
 
-function syncAuthCookie(state: { user: User | null; isAuthenticated: boolean } | undefined) {
+function setAuthCookie(user: User | null) {
   if (typeof document === "undefined") return;
-  if (!state?.isAuthenticated || !state?.user) {
+  if (!user) {
     document.cookie = "auth-storage=; path=/; max-age=0";
     return;
   }
   const cookieData = JSON.stringify({
     state: {
-      user: state.user,
+      user,
       isAuthenticated: true,
     },
     version: 0,
   });
-  document.cookie = `auth-storage=${encodeURIComponent(cookieData)}; path=/; max-age=86400; SameSite=Lax`;
+  document.cookie = `auth-storage=${encodeURIComponent(cookieData)}; path=/; max-age=86400; SameSite=None; Secure`;
 }
 
 export const useAuthStore = create<AuthState>()(
@@ -44,12 +44,15 @@ export const useAuthStore = create<AuthState>()(
       user: null,
       isAuthenticated: false,
       hydrated: false,
-      login: (user) => set({ user, isAuthenticated: true }),
+      login: (user) => {
+        set({ user, isAuthenticated: true });
+        setAuthCookie(user);
+      },
       logout: () => {
         set({ user: null, isAuthenticated: false });
+        setAuthCookie(null);
         if (typeof window !== "undefined") {
           localStorage.removeItem("auth-storage");
-          document.cookie = "auth-storage=; path=/; max-age=0";
         }
       },
       setRole: (role) =>
@@ -63,16 +66,10 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         isAuthenticated: state.isAuthenticated,
       }),
-      onRehydrateStorage: () => () => {
+      onRehydrateStorage: () => (state) => {
         useAuthStore.setState({ hydrated: true });
-        syncAuthCookie(useAuthStore.getState());
+        if (state?.user) setAuthCookie(state.user);
       },
     }
   )
 );
-
-if (typeof window !== "undefined") {
-  useAuthStore.subscribe((state) => {
-    syncAuthCookie(state);
-  });
-}

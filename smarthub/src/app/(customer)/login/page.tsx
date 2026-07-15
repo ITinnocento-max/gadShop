@@ -57,11 +57,6 @@ export default function LoginPage() {
         return;
       }
       useAuthStore.getState().login(data.user);
-      if (data.user.dbRole === "ADMIN") {
-        router.push(from && from.startsWith("/admin") ? from : "/admin/dashboard");
-      } else {
-        router.push(from || "/");
-      }
     } catch {
       setError("Network error. Please try again.");
     } finally {
