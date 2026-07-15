@@ -25,7 +25,9 @@ const navItems = [
 export function AdminSidebar() {
   const { t } = useTranslation();
   const pathname = usePathname();
-  const { role } = usePermissions();
+  const { role, canAccess } = usePermissions();
+
+  const visibleItems = navItems.filter((item) => canAccess(item.resource));
 
   return (
     <aside className="hidden md:flex flex-col w-72 bg-surface-container-low border-r border-outline-variant/20 shrink-0">
@@ -39,7 +41,7 @@ export function AdminSidebar() {
         </div>
       </a>
       <nav className="flex-1 px-sm py-md overflow-y-auto">
-        {navItems.map((item) => {
+        {visibleItems.map((item) => {
           const isActive = pathname === item.href;
           return (
             <a

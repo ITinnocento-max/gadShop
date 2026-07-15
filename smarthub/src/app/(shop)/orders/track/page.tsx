@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { formatDateSmart } from "@/lib/utils";
 
 interface OrderItem {
   id: string; name: string; price: number; quantity: number; image: string | null;
@@ -24,16 +25,6 @@ const statusIcons: Record<string, string> = {
   PENDING: "schedule", PROCESSING: "settings_suggest", SHIPPED: "local_shipping",
   DELIVERED: "check_circle", CANCELLED: "cancel",
 };
-
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  const now = new Date();
-  const diff = now.getTime() - d.getTime();
-  if (diff < 86400000) {
-    return `Today, ${d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
-  }
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
 
 function TrackContent() {
   const searchParams = useSearchParams();
@@ -120,7 +111,7 @@ function TrackContent() {
                       </div>
                     </div>
                     <div className="text-right">
-                      <p className="font-label-md text-label-md text-on-surface dark:text-white">{formatDate(order.createdAt)}</p>
+                      <p className="font-label-md text-label-md text-on-surface dark:text-white">{formatDateSmart(order.createdAt)}</p>
                       <p className="font-headline-md text-headline-md text-primary dark:text-inverse-primary">RWF {order.total.toFixed(2)}</p>
                     </div>
                   </div>

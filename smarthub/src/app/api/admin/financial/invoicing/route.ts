@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeResponse } from "@/lib/serialize";
+import { requireAdmin } from "@/lib/api-auth";
 
 function invoiceStatus(order: { status: string; paidAt: Date | null; createdAt: Date }) {
   if (order.status === "CANCELLED") return "Cancelled";
@@ -11,6 +12,8 @@ function invoiceStatus(order: { status: string; paidAt: Date | null; createdAt: 
 }
 
 export async function GET() {
+  const { user, error } = await requireAdmin();
+  if (error) return error;
   try {
     const orders = await prisma.order.findMany({
       orderBy: { createdAt: "desc" },

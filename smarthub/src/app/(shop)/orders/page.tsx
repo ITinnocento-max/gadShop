@@ -7,6 +7,7 @@ import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CustomerGuard } from "@/components/customer/customer-guard";
 import { useTranslation } from "@/hooks/useTranslation";
+import { formatDateSmart, formatPricePlain } from "@/lib/utils";
 
 interface OrderItem {
   id: string; name: string; price: number; quantity: number; image: string | null;
@@ -41,20 +42,6 @@ const statusLabels: Record<string, string> = {
   DELIVERED: "Delivered",
   CANCELLED: "Cancelled",
 };
-
-function formatDate(dateStr: string) {
-  const d = new Date(dateStr);
-  const now = new Date();
-  const diff = now.getTime() - d.getTime();
-  if (diff < 86400000) {
-    return `Today, ${d.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit" })}`;
-  }
-  return d.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
-
-function formatPrice(amount: number) {
-  return `RWF ${amount.toFixed(2)}`;
-}
 
 export default function OrdersPage() {
   const { t } = useTranslation();
@@ -152,8 +139,8 @@ export default function OrdersPage() {
                   </div>
                 </div>
                 <div className="text-right">
-                  <p className="font-label-md text-label-md text-on-surface dark:text-white">{formatDate(order.createdAt)}</p>
-                  <p className="font-headline-md text-headline-md text-primary dark:text-inverse-primary">{formatPrice(order.total)}</p>
+                  <p className="font-label-md text-label-md text-on-surface dark:text-white">{formatDateSmart(order.createdAt)}</p>
+                  <p className="font-headline-md text-headline-md text-primary dark:text-inverse-primary">{formatPricePlain(order.total)}</p>
                 </div>
               </div>
               <div className="flex items-center gap-4 mb-lg">

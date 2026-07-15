@@ -1,11 +1,14 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeResponse } from "@/lib/serialize";
+import { requireAdmin } from "@/lib/api-auth";
 
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { user, error } = await requireAdmin();
+  if (error) return error;
   try {
     const { id } = await params;
     const release = await prisma.newRelease.findUnique({ where: { id } });
@@ -25,6 +28,8 @@ export async function PUT(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { user, error } = await requireAdmin();
+  if (error) return error;
   try {
     const { id } = await params;
     const body = await request.json();
@@ -61,6 +66,8 @@ export async function DELETE(
   _request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { user, error } = await requireAdmin();
+  if (error) return error;
   try {
     const { id } = await params;
     const existing = await prisma.newRelease.findUnique({ where: { id } });

@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeResponse } from "@/lib/serialize";
+import { requireAdmin } from "@/lib/api-auth";
 
 const statusFlow: Record<string, string[]> = {
   DRAFT: ["SUBMITTED"],
@@ -14,6 +15,8 @@ export async function PATCH(
   request: Request,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const { user, error } = await requireAdmin();
+  if (error) return error;
   try {
     const { id } = await params;
     const body = await request.json();

@@ -3,21 +3,22 @@
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUIStore } from "@/stores/ui-store";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const navItems = [
-  { icon: "dashboard", key: "dashboard", href: "/admin/dashboard" },
-  { icon: "group", key: "users", href: "/admin/users" },
-  { icon: "inventory_2", key: "products", href: "/admin/products" },
-  { icon: "new_releases", key: "new_releases", href: "/admin/new-releases" },
-  { icon: "finance", key: "financial_overview", href: "/admin/financial" },
-  { icon: "description", key: "reports", href: "/admin/financial/reports" },
-  { icon: "account_balance", key: "banking", href: "/admin/financial/banking" },
-  { icon: "receipt", key: "expenses", href: "/admin/financial/expenses" },
-  { icon: "request_quote", key: "tax", href: "/admin/financial/tax" },
-  { icon: "receipt_long", key: "invoicing", href: "/admin/financial/invoicing" },
-  { icon: "payments", key: "payments", href: "/admin/financial/payments" },
-  { icon: "insights", key: "analytics", href: "/admin/financial/analytics" },
-  { icon: "analytics", key: "profit_loss", href: "/admin/profit-loss" },
+  { icon: "dashboard", key: "dashboard", href: "/admin/dashboard", resource: "dashboard" as const },
+  { icon: "group", key: "users", href: "/admin/users", resource: "users" as const },
+  { icon: "inventory_2", key: "products", href: "/admin/products", resource: "products" as const },
+  { icon: "new_releases", key: "new_releases", href: "/admin/new-releases", resource: "content" as const },
+  { icon: "finance", key: "financial_overview", href: "/admin/financial", resource: "financial" as const },
+  { icon: "description", key: "reports", href: "/admin/financial/reports", resource: "reports" as const },
+  { icon: "account_balance", key: "banking", href: "/admin/financial/banking", resource: "banking" as const },
+  { icon: "receipt", key: "expenses", href: "/admin/financial/expenses", resource: "expenses" as const },
+  { icon: "request_quote", key: "tax", href: "/admin/financial/tax", resource: "tax" as const },
+  { icon: "receipt_long", key: "invoicing", href: "/admin/financial/invoicing", resource: "invoicing" as const },
+  { icon: "payments", key: "payments", href: "/admin/financial/payments", resource: "payments" as const },
+  { icon: "insights", key: "analytics", href: "/admin/financial/analytics", resource: "analytics" as const },
+  { icon: "analytics", key: "profit_loss", href: "/admin/profit-loss", resource: "profit_loss" as const },
 ];
 
 export function AdminDrawerMenu() {
@@ -25,6 +26,8 @@ export function AdminDrawerMenu() {
   const pathname = usePathname();
   const isOpen = useUIStore((s) => s.isMobileMenuOpen);
   const setOpen = useUIStore((s) => s.setMobileMenuOpen);
+  const { canAccess } = usePermissions();
+  const visibleItems = navItems.filter((item) => canAccess(item.resource));
 
   return (
     <>
@@ -46,7 +49,7 @@ export function AdminDrawerMenu() {
           </button>
         </div>
         <nav className="p-md space-y-1 overflow-y-auto">
-          {navItems.map((item) => {
+          {visibleItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
               <a

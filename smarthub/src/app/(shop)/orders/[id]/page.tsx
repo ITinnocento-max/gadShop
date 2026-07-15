@@ -6,6 +6,7 @@ import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CustomerGuard } from "@/components/customer/customer-guard";
 import { useTranslation } from "@/hooks/useTranslation";
+import { formatDateTime } from "@/lib/utils";
 
 interface OrderItem {
   id: string; name: string; price: number; quantity: number;
@@ -43,12 +44,6 @@ const timelineSteps = [
 const statusToStep: Record<string, number> = {
   PENDING: 1, PROCESSING: 2, SHIPPED: 3, DELIVERED: 5,
 };
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-US", {
-    month: "short", day: "numeric", year: "numeric", hour: "2-digit", minute: "2-digit",
-  });
-}
 
 export default function OrderDetailPage() {
   const { t } = useTranslation();
@@ -91,8 +86,8 @@ export default function OrderDetailPage() {
   }
 
   const status = statusLabels[order.status] || order.status;
-  const paidAt = order.paidAt ? formatDate(order.paidAt) : null;
-  const deliveredAt = order.deliveredAt ? formatDate(order.deliveredAt) : null;
+  const paidAt = order.paidAt ? formatDateTime(order.paidAt) : null;
+  const deliveredAt = order.deliveredAt ? formatDateTime(order.deliveredAt) : null;
   const completedStep = statusToStep[order.status] || 1;
   const subtotal = order.items.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const tax = order.total - subtotal;
@@ -109,7 +104,7 @@ export default function OrderDetailPage() {
             </div>
             <span className="font-headline-md text-headline-md text-primary dark:text-inverse-primary">Rwf {order.total.toFixed(2)}</span>
           </div>
-          <p className="font-label-md text-on-surface-variant dark:text-outline">{t("orders.placed_on")} {formatDate(order.createdAt)}</p>
+          <p className="font-label-md text-on-surface-variant dark:text-outline">{t("orders.placed_on")} {formatDateTime(order.createdAt)}</p>
         </section>
 
         <section className="bg-surface-container-lowest dark:bg-inverse-surface rounded-xl p-lg shadow-soft dark:shadow-none dark:border dark:border-outline-variant/10 border border-outline-variant/10 mb-lg">
@@ -140,7 +135,7 @@ export default function OrderDetailPage() {
                     {step === "delivered" && deliveredAt ? deliveredAt :
                      step === "shipped" && paidAt && completed ? paidAt :
                      step === "payment_confirmed" && paidAt ? paidAt :
-                     step === "order_placed" ? formatDate(order.createdAt) : ""}
+                     step === "order_placed" ? formatDateTime(order.createdAt) : ""}
                   </p>
                 </div>
               </div>

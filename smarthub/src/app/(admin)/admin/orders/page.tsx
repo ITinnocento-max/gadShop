@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useUIStore } from "@/stores/ui-store";
+import { formatDate, formatPricePlain } from "@/lib/utils";
 
 interface OrderItem {
   id: string; name: string; price: number; quantity: number;
@@ -47,14 +48,6 @@ const statusLabels: Record<string, string> = {
   DELIVERED: "Delivered",
   CANCELLED: "Cancelled",
 };
-
-function formatCurrency(v: number) {
-  return "RWF " + v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
-}
-
-function formatDate(dateStr: string) {
-  return new Date(dateStr).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
-}
 
 const statusFlow: Record<string, string[]> = {
   PENDING: ["PROCESSING", "CANCELLED"],
@@ -186,7 +179,7 @@ export default function AdminOrdersPage() {
                       {order.items.length} item{order.items.length !== 1 ? "s" : ""}
                       <div className="text-label-sm text-outline truncate max-w-[160px]">{order.items.map((i) => i.name).join(", ")}</div>
                     </td>
-                    <td className="p-md pr-2 font-label-md text-right text-on-surface">{formatCurrency(order.total)}</td>
+                    <td className="p-md pr-2 font-label-md text-right text-on-surface">{formatPricePlain(order.total)}</td>
                     <td className="p-md pr-2">
                       <div className="font-label-sm text-on-surface">{addr?.street}</div>
                       <div className="text-label-sm text-outline">{addr?.city}, {addr?.state} {addr?.zip}</div>
