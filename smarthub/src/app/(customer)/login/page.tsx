@@ -1,6 +1,6 @@
 "use client";
 
-import { Suspense, useState, FormEvent } from "react";
+import { Suspense, useState, useEffect, FormEvent } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -18,12 +18,17 @@ function LoginForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
 
-  if (isAuthenticated && user) {
-    if (user.dbRole === "ADMIN") {
-      router.replace(from && from.startsWith("/admin") ? from : "/admin/dashboard");
-    } else {
-      router.replace(from || "/");
+  useEffect(() => {
+    if (isAuthenticated && user) {
+      if (user.dbRole === "ADMIN") {
+        router.replace(from && from.startsWith("/admin") ? from : "/admin/dashboard");
+      } else {
+        router.replace(from || "/");
+      }
     }
+  }, [isAuthenticated, user, from, router]);
+
+  if (isAuthenticated && user) {
     return null;
   }
 

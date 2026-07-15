@@ -1,3 +1,5 @@
+"use client";
+
 import { useUIStore } from "@/stores/ui-store";
 import { t } from "@/lib/translations";
 
