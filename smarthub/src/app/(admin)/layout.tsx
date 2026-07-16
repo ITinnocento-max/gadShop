@@ -1,3 +1,5 @@
+"use client";
+
 import { AdminSidebar } from "@/components/admin/sidebar";
 import { AdminDrawerMenu } from "@/components/admin/admin-drawer";
 import { AdminGuard } from "@/components/admin/admin-guard";
