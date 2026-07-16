@@ -60,6 +60,9 @@ export async function POST(request: Request) {
       },
     });
 
+    const paymentStatus = paymentMethod === "COD" ? "COMPLETED" : "PENDING";
+    const paidAt = paymentMethod === "COD" ? new Date() : null;
+
     const order = await prisma.$transaction(async (tx) => {
       for (const item of items) {
         const updated = await tx.product.update({
@@ -82,7 +85,7 @@ export async function POST(request: Request) {
           paymentMethod,
           shippingAddressId: address.id,
           status: "PENDING",
-          paidAt: new Date(),
+          paidAt,
           items: {
             create: items.map((item: { id: string; name: string; price: number; quantity: number; image?: string }) => ({
               name: item.name,
@@ -95,7 +98,7 @@ export async function POST(request: Request) {
           payments: {
             create: {
               method: paymentMethod || "CARD",
-              status: "COMPLETED",
+              status: paymentStatus,
               amount: total,
               userId: effectiveUserId,
             },
