@@ -8,6 +8,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 const navItems = [
   { icon: "dashboard", key: "dashboard", href: "/admin/dashboard", resource: "dashboard" as const },
   { icon: "group", key: "users", href: "/admin/users", resource: "users" as const },
+  { icon: "receipt_long", key: "orders", href: "/admin/orders", resource: "orders" as const },
   { icon: "inventory_2", key: "products", href: "/admin/products", resource: "products" as const },
   { icon: "new_releases", key: "new_releases", href: "/admin/new-releases", resource: "content" as const },
   { icon: "finance", key: "financial_overview", href: "/admin/financial", resource: "financial" as const },
