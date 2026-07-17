@@ -4,6 +4,7 @@ import { Suspense, useEffect, useState, useMemo } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { StarRating } from "@/components/store/star-rating";
 import { useCartStore } from "@/stores/cart-store";
 import { useWishlistStore } from "@/stores/wishlist-store";
 import { useTranslation } from "@/hooks/useTranslation";
@@ -151,10 +152,9 @@ function ProductsContent() {
               <div className="space-y-1 flex-1 flex flex-col">
                 <p className="font-label-sm text-outline dark:text-outline-variant uppercase tracking-wider">{product.brand}</p>
                 <h3 className="font-label-md text-on-surface dark:text-white line-clamp-1">{product.name}</h3>
-                <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-secondary text-[14px]" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                  <span className="font-label-sm text-on-surface dark:text-white">{product.rating}</span>
-                </div>
+                {product.rating > 0 && (
+                  <StarRating rating={product.rating} size="xs" />
+                )}
                 <div className="flex items-end justify-between pt-1 mt-auto">
                   <div>
                     <p className="font-headline-md text-headline-md-mobile text-primary dark:text-inverse-primary">Rwf {product.price.toFixed(2)}</p>

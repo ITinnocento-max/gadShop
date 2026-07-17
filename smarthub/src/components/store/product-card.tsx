@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { StarRating } from "./star-rating";
 
 interface ProductCardProps {
   image: string;
@@ -113,16 +114,8 @@ export function ProductCard({
             </p>
           )}
           <h3 className="font-label-md text-on-surface line-clamp-1">{title}</h3>
-          {rating && (
-            <div className="flex items-center gap-1">
-              <span
-                className="material-symbols-outlined text-secondary text-[14px]"
-                style={{ fontVariationSettings: "'FILL' 1" }}
-              >
-                star
-              </span>
-              <span className="font-label-sm text-on-surface">{rating}</span>
-            </div>
+          {rating != null && rating > 0 && (
+            <StarRating rating={rating} size="xs" />
           )}
           <div className="flex items-end justify-between pt-1 mt-auto">
             <div>

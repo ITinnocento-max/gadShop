@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
+import { StarRating } from "@/components/store/star-rating";
 import { useCartStore } from "@/stores/cart-store";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -138,8 +139,8 @@ export default function ProductDetailsPage() {
               <div className="flex justify-between items-center mb-md">
                 <h3 className="font-headline-md text-headline-md text-on-surface dark:text-white">{t("product.reviews")}</h3>
                 <div className="flex items-center gap-1">
-                  <span className="material-symbols-outlined text-yellow-500" style={{ fontVariationSettings: "'FILL' 1" }}>star</span>
-                  <span className="font-label-md font-bold">{product.rating}</span>
+                  <StarRating rating={product.rating} size="sm" showValue={false} />
+                  <span className="font-label-md font-bold">{product.rating.toFixed(1)}</span>
                   <span className="font-label-sm text-outline dark:text-outline-variant">({product.numReviews})</span>
                 </div>
               </div>
