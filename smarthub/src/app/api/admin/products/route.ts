@@ -2,13 +2,14 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeResponse } from "@/lib/serialize";
 import { requireAdmin } from "@/lib/api-auth";
+import { buildProductSearchWhere } from "@/lib/search";
 
 export async function GET(request: Request) {
   const { user, error } = await requireAdmin();
   if (error) return error;
   try {
     const { searchParams } = new URL(request.url);
-    const search = searchParams.get("search")?.toLowerCase();
+    const search = searchParams.get("search")?.trim() || "";
     const category = searchParams.get("category");
     const page = Math.max(1, parseInt(searchParams.get("page") || "1"));
     const limit = Math.min(100, Math.max(1, parseInt(searchParams.get("limit") || "20")));
@@ -21,11 +22,13 @@ export async function GET(request: Request) {
       where.category = { slug: category };
     }
 
-    if (search) {
-      where.OR = [
-        { name: { contains: search } },
-        { brand: { contains: search } },
-      ];
+    const searchWhere = buildProductSearchWhere(search);
+    if (searchWhere) {
+      if (Object.keys(where).length > 0) {
+        where.AND = [where, searchWhere];
+      } else {
+        Object.assign(where, searchWhere);
+      }
     }
 
     if (stockStatus === "low") {

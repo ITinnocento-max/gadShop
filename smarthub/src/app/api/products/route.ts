@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { serializeResponse } from "@/lib/serialize";
+import { buildProductSearchWhere } from "@/lib/search";
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const search = searchParams.get("search")?.toLowerCase();
+  const search = searchParams.get("search")?.trim() || "";
   const category = searchParams.get("category");
   const sortBy = searchParams.get("sortBy");
 
@@ -14,11 +15,14 @@ export async function GET(request: Request) {
       where.category = { name: { equals: category } };
   }
 
-  if (search) {
-    where.OR = [
-      { name: { contains: search } },
-      { brand: { contains: search } },
-    ];
+  const searchWhere = buildProductSearchWhere(search);
+  if (searchWhere) {
+    if (where.OR) {
+      where.AND = [where, searchWhere];
+      delete where.OR;
+    } else {
+      Object.assign(where, searchWhere);
+    }
   }
 
   let orderBy: Record<string, string> = { createdAt: "desc" };

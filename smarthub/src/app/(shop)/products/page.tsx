@@ -8,6 +8,7 @@ import { StarRating } from "@/components/store/star-rating";
 import { useCartStore } from "@/stores/cart-store";
 import { useWishlistStore } from "@/stores/wishlist-store";
 import { useTranslation } from "@/hooks/useTranslation";
+import { matchesSearch } from "@/lib/search";
 
 interface Product {
   id: string; name: string; slug: string; brand: string;
@@ -34,7 +35,7 @@ function ProductsContent() {
   const { toggleItem, hasItem } = useWishlistStore();
   const [products, setProducts] = useState<Product[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [search, setSearch] = useState("");
+  const [search, setSearch] = useState(searchParams.get("search") || "");
   const [category, setCategory] = useState(searchParams.get("category") || "All");
   const [sortBy, setSortBy] = useState("");
   const [addedId, setAddedId] = useState<string | null>(null);
@@ -61,12 +62,8 @@ function ProductsContent() {
   }, [category, search, sortBy]);
 
   const filtered = useMemo(() => {
-    let result = [...products];
-    if (search) {
-      const q = search.toLowerCase();
-      result = result.filter((p) => p.name.toLowerCase().includes(q) || p.brand.toLowerCase().includes(q));
-    }
-    return result;
+    if (!search) return products;
+    return products.filter((p) => matchesSearch(p, search));
   }, [products, search]);
 
   return (
