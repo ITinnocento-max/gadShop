@@ -31,12 +31,19 @@ export function SearchScanner({ open, onClose, onBarcodeScanned }: SearchScanner
 
     try {
       const { Html5Qrcode } = await import("html5-qrcode");
-      const scanner = new Html5Qrcode("barcode-reader");
+      const container = containerRef.current;
+      container.innerHTML = "";
+
+      const scanner = new Html5Qrcode(container.id);
       scannerRef.current = scanner;
 
       await scanner.start(
         { facingMode: "environment" },
-        { fps: 10, qrbox: { width: 280, height: 120 } },
+        {
+          fps: 10,
+          qrbox: { width: 280, height: 120 },
+          aspectRatio: 1.0,
+        },
         (decodedText) => {
           setScannedCode(decodedText);
           setPhase("found");
@@ -44,7 +51,7 @@ export function SearchScanner({ open, onClose, onBarcodeScanned }: SearchScanner
           setTimeout(() => {
             onBarcodeScanned(decodedText);
             onClose();
-          }, 1200);
+          }, 1500);
         },
         () => {}
       );
@@ -76,7 +83,7 @@ export function SearchScanner({ open, onClose, onBarcodeScanned }: SearchScanner
 
   return (
     <div className="fixed inset-0 z-[100] bg-black flex flex-col">
-      <div className="flex items-center justify-between px-4 py-3 bg-black/80">
+      <div className="flex items-center justify-between px-4 py-3 bg-black/80 z-10 relative">
         <button onClick={() => { void stopScanner(); onClose(); }} className="text-white active:scale-95 transition-transform">
           <span className="material-symbols-outlined">close</span>
         </button>
@@ -89,31 +96,18 @@ export function SearchScanner({ open, onClose, onBarcodeScanned }: SearchScanner
         <div className="w-8" />
       </div>
 
-      <div className="flex-1 relative bg-black overflow-hidden">
-        <div id="barcode-reader" ref={containerRef} className="w-full h-full [&>div]:!rounded-none" />
+      <div className="flex-1 relative bg-black">
+        <div id="barcode-reader" ref={containerRef} className="absolute inset-0" />
 
         {phase === "loading" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-3 bg-black">
             <span className="material-symbols-outlined text-white text-5xl animate-pulse">barcode_scanner</span>
             <p className="font-label-md text-white/70">Initializing camera...</p>
           </div>
         )}
 
-        {phase === "scanning" && (
-          <div className="absolute inset-0 pointer-events-none flex flex-col items-center justify-center">
-            <div className="w-[80%] h-[25%] border-2 border-primary rounded-xl relative">
-              <div className="absolute top-0 left-0 w-6 h-6 border-t-4 border-l-4 border-primary rounded-tl-lg" />
-              <div className="absolute top-0 right-0 w-6 h-6 border-t-4 border-r-4 border-primary rounded-tr-lg" />
-              <div className="absolute bottom-0 left-0 w-6 h-6 border-b-4 border-l-4 border-primary rounded-bl-lg" />
-              <div className="absolute bottom-0 right-0 w-6 h-6 border-b-4 border-r-4 border-primary rounded-br-lg" />
-              <div className="absolute left-0 right-0 top-1/2 h-0.5 bg-primary/60 animate-scan" />
-            </div>
-            <p className="mt-4 font-label-md text-white/80">Align barcode within the frame</p>
-          </div>
-        )}
-
         {phase === "found" && scannedCode && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center bg-black/70 gap-3">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-black/80 gap-3">
             <span className="material-symbols-outlined text-secondary text-5xl">check_circle</span>
             <p className="font-headline-md text-white">{scannedCode}</p>
             <p className="font-label-sm text-white/60">Searching for products...</p>
@@ -121,7 +115,7 @@ export function SearchScanner({ open, onClose, onBarcodeScanned }: SearchScanner
         )}
 
         {phase === "error" && (
-          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-8 bg-black">
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center gap-4 px-8 bg-black">
             <span className="material-symbols-outlined text-white/30 text-6xl">barcode_scanner</span>
             <p className="font-label-md text-white text-center">{error}</p>
             <button onClick={startScanner} className="px-8 py-3 bg-primary text-on-primary rounded-full font-label-md active:scale-95 transition-all">
@@ -131,7 +125,7 @@ export function SearchScanner({ open, onClose, onBarcodeScanned }: SearchScanner
         )}
       </div>
 
-      <div className="flex justify-center py-5 bg-black">
+      <div className="flex justify-center py-5 bg-black z-10 relative">
         {phase === "scanning" && (
           <p className="font-label-sm text-white/50">Hold steady over a barcode</p>
         )}
