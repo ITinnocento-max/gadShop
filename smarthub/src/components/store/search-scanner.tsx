@@ -1,123 +1,103 @@
 "use client";
 
 import { useRef, useState, useCallback, useEffect } from "react";
+import { Html5Qrcode } from "html5-qrcode";
 
 interface SearchScannerProps {
   open: boolean;
   onClose: () => void;
-  onTextExtracted: (text: string) => void;
+  onBarcodeScanned: (code: string) => void;
 }
 
-export function SearchScanner({ open, onClose, onTextExtracted }: SearchScannerProps) {
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const canvasRef = useRef<HTMLCanvasElement>(null);
-  const streamRef = useRef<MediaStream | null>(null);
-  const [scanning, setScanning] = useState(false);
+export function SearchScanner({ open, onClose, onBarcodeScanned }: SearchScannerProps) {
+  const containerRef = useRef<HTMLDivElement>(null);
+  const scannerRef = useRef<Html5Qrcode | null>(null);
   const [error, setError] = useState("");
+  const [scanning, setScanning] = useState(true);
 
-  const startCamera = useCallback(async () => {
-    try {
-      setError("");
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: "environment", width: { ideal: 1280 }, height: { ideal: 720 } },
-      });
-      streamRef.current = stream;
-      if (videoRef.current) {
-        videoRef.current.srcObject = stream;
-      }
-    } catch {
-      setError("Camera access denied. Please allow camera permissions.");
+  const stopScanner = useCallback(async () => {
+    if (scannerRef.current) {
+      try {
+        await scannerRef.current.stop();
+      } catch {}
+      scannerRef.current.clear();
+      scannerRef.current = null;
     }
   }, []);
 
-  const stopCamera = useCallback(() => {
-    streamRef.current?.getTracks().forEach((t) => t.stop());
-    streamRef.current = null;
-  }, []);
-
-  useEffect(() => {
-    if (open) startCamera();
-    else stopCamera();
-    return stopCamera;
-  }, [open, startCamera, stopCamera]);
-
-  const captureAndScan = useCallback(async () => {
-    const video = videoRef.current;
-    const canvas = canvasRef.current;
-    if (!video || !canvas) return;
-
-    setScanning(true);
+  const startScanner = useCallback(async () => {
+    if (!containerRef.current) return;
     setError("");
-
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) { setScanning(false); return; }
-
-    ctx.drawImage(video, 0, 0);
-    const imageData = canvas.toDataURL("image/png");
+    setScanning(true);
 
     try {
-      const Tesseract = await import("tesseract.js");
-      const { data } = await Tesseract.recognize(imageData, "eng", {});
-      const text = data.text.replace(/\n+/g, " ").trim();
-      if (text) {
-        onTextExtracted(text);
-        onClose();
+      const scanner = new Html5Qrcode("barcode-reader");
+      scannerRef.current = scanner;
+
+      await scanner.start(
+        { facingMode: "environment" },
+        {
+          fps: 10,
+          qrbox: { width: 280, height: 160 },
+          aspectRatio: 1.0,
+        },
+        (decodedText) => {
+          onBarcodeScanned(decodedText);
+          stopScanner();
+          onClose();
+        },
+        () => {}
+      );
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err);
+      if (msg.includes("NotAllowedError") || msg.includes("Permission")) {
+        setError("Camera access denied. Please allow camera permissions.");
+      } else if (msg.includes("NotFound")) {
+        setError("No camera found on this device.");
       } else {
-        setError("No text found. Try a clearer image.");
-        setScanning(false);
+        setError("Failed to start camera. Try again.");
       }
-    } catch {
-      setError("Failed to scan. Try again.");
       setScanning(false);
     }
-  }, [onTextExtracted, onClose]);
+  }, [onBarcodeScanned, onClose, stopScanner]);
+
+  useEffect(() => {
+    if (open) startScanner();
+    else stopScanner();
+    return () => { void stopScanner(); };
+  }, [open, startScanner, stopScanner]);
 
   if (!open) return null;
 
   return (
     <div className="fixed inset-0 z-[100] bg-black flex flex-col">
       <div className="flex items-center justify-between px-4 py-3 bg-black/80">
-        <button onClick={onClose} className="text-white active:scale-95 transition-transform">
+        <button onClick={() => { stopScanner(); onClose(); }} className="text-white active:scale-95 transition-transform">
           <span className="material-symbols-outlined">close</span>
         </button>
-        <p className="font-label-md text-white">Point camera at text</p>
+        <p className="font-label-md text-white">Scan a barcode</p>
         <div className="w-8" />
       </div>
       <div className="flex-1 relative bg-black overflow-hidden">
-        <video
-          ref={videoRef}
-          autoPlay
-          playsInline
-          muted
-          className="w-full h-full object-cover"
-        />
-        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-          <div className="w-[80%] h-[40%] border-2 border-white/60 rounded-2xl" />
-        </div>
-        {scanning && (
-          <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center gap-3">
-            <span className="material-symbols-outlined text-white text-4xl animate-spin">progress_activity</span>
-            <p className="font-label-md text-white">Scanning text...</p>
+        <div id="barcode-reader" ref={containerRef} className="w-full h-full" />
+        {scanning && !error && (
+          <div className="absolute inset-0 pointer-events-none flex items-center justify-center">
+            <div className="w-[75%] h-[30%] border-2 border-white/50 rounded-2xl" />
           </div>
         )}
         {error && (
-          <div className="absolute bottom-24 left-4 right-4 bg-error/90 text-white p-3 rounded-xl text-center font-label-md">
-            {error}
+          <div className="absolute inset-0 flex flex-col items-center justify-center gap-4 px-8">
+            <span className="material-symbols-outlined text-white/40 text-5xl">barcode_scanner</span>
+            <p className="font-label-md text-white text-center">{error}</p>
+            <button onClick={startScanner} className="px-6 py-2 bg-primary text-on-primary rounded-full font-label-md active:scale-95 transition-all">
+              Try Again
+            </button>
           </div>
         )}
       </div>
-      <div className="flex justify-center py-8 bg-black">
-        <button
-          onClick={captureAndScan}
-          disabled={scanning}
-          className="w-16 h-16 rounded-full bg-white border-4 border-white/40 active:scale-90 transition-all disabled:opacity-50"
-        >
-          <span className="material-symbols-outlined text-primary text-3xl">photo_camera</span>
-        </button>
+      <div className="flex justify-center py-6 bg-black">
+        <p className="font-label-sm text-white/60">Point your camera at a product barcode</p>
       </div>
-      <canvas ref={canvasRef} className="hidden" />
     </div>
   );
 }

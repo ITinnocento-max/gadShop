@@ -176,7 +176,7 @@ export function Header({
       <SearchScanner
         open={scannerOpen}
         onClose={() => setScannerOpen(false)}
-        onTextExtracted={handleScanText}
+        onBarcodeScanned={handleScanText}
       />
     </header>
   );
