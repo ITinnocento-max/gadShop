@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
+import { SearchScanner } from "@/components/store/search-scanner";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUIStore } from "@/stores/ui-store";
 import { useCartStore } from "@/stores/cart-store";
@@ -31,12 +32,63 @@ export function Header({
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
   const cartCount = useCartStore((s) => s.items.reduce((sum, i) => sum + i.quantity, 0));
   const [searchQuery, setSearchQuery] = useState("");
+  const [isListening, setIsListening] = useState(false);
+  const [scannerOpen, setScannerOpen] = useState(false);
+  const recognitionRef = useRef<SpeechRecognition | null>(null);
 
   const handleSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const q = searchQuery.trim();
     if (q) router.push(`/products?search=${encodeURIComponent(q)}`);
   };
+
+  const handleMic = useCallback(() => {
+    const SpeechRecognitionAPI =
+      typeof window !== "undefined"
+        ? window.SpeechRecognition || window.webkitSpeechRecognition
+        : null;
+
+    if (!SpeechRecognitionAPI) {
+      alert("Speech recognition is not supported in this browser.");
+      return;
+    }
+
+    if (isListening && recognitionRef.current) {
+      recognitionRef.current.stop();
+      setIsListening(false);
+      return;
+    }
+
+    const recognition = new SpeechRecognitionAPI();
+    recognition.lang = "en-US";
+    recognition.interimResults = true;
+    recognition.continuous = false;
+
+    recognition.onresult = (event: SpeechRecognitionEvent) => {
+      const transcript = Array.from(event.results)
+        .map((r) => r[0].transcript)
+        .join("");
+      setSearchQuery(transcript);
+      if (event.results[0].isFinal) {
+        router.push(`/products?search=${encodeURIComponent(transcript.trim())}`);
+      }
+    };
+
+    recognition.onend = () => setIsListening(false);
+    recognition.onerror = () => setIsListening(false);
+
+    recognitionRef.current = recognition;
+    recognition.start();
+    setIsListening(true);
+  }, [isListening, router]);
+
+  const handleScanText = useCallback(
+    (text: string) => {
+      setSearchQuery(text);
+      router.push(`/products?search=${encodeURIComponent(text)}`);
+    },
+    [router]
+  );
 
   return (
     <header
@@ -98,18 +150,34 @@ export function Header({
                 placeholder={t("common.search_placeholder")}
                 type="text"
               />
-              <div className="flex gap-2">
-                <span className="material-symbols-outlined text-outline cursor-pointer hover:text-primary">
-                  mic
-                </span>
-                <span className="material-symbols-outlined text-outline cursor-pointer hover:text-primary">
+              <div className="flex gap-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={handleMic}
+                  className={cn(
+                    "material-symbols-outlined cursor-pointer transition-colors",
+                    isListening ? "text-error animate-pulse" : "text-outline hover:text-primary"
+                  )}
+                >
+                  {isListening ? "stop" : "mic"}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setScannerOpen(true)}
+                  className="material-symbols-outlined text-outline cursor-pointer hover:text-primary"
+                >
                   barcode_scanner
-                </span>
+                </button>
               </div>
             </form>
           </div>
         )}
       </div>
+      <SearchScanner
+        open={scannerOpen}
+        onClose={() => setScannerOpen(false)}
+        onTextExtracted={handleScanText}
+      />
     </header>
   );
 }
