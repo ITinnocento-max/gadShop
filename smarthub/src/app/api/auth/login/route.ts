@@ -32,11 +32,10 @@ export async function POST(request: Request) {
       message: "Login successful",
     });
 
-    response.cookies.set("auth-storage", encodeURIComponent(cookiePayload), {
+    response.cookies.set("auth-storage", cookiePayload, {
       path: "/",
       maxAge: 86400,
-      sameSite: "none",
-      secure: true,
+      sameSite: "lax",
     });
 
     return response;

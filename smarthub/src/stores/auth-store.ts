@@ -35,7 +35,7 @@ function setAuthCookie(user: User | null) {
     },
     version: 0,
   });
-  document.cookie = `auth-storage=${encodeURIComponent(cookieData)}; path=/; max-age=86400; SameSite=None; Secure`;
+  document.cookie = `auth-storage=${encodeURIComponent(cookieData)}; path=/; max-age=86400; SameSite=Lax`;
 }
 
 export const useAuthStore = create<AuthState>()(
