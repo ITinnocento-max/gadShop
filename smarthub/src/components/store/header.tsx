@@ -2,6 +2,7 @@
 
 import { cn } from "@/lib/utils";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUIStore } from "@/stores/ui-store";
@@ -25,6 +26,7 @@ export function Header({
   className,
 }: HeaderProps) {
   const { t } = useTranslation();
+  const router = useRouter();
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
   const cartCount = useCartStore((s) => s.items.reduce((sum, i) => sum + i.quantity, 0));
 
@@ -39,7 +41,7 @@ export function Header({
         <div className="flex justify-between items-center w-full px-margin-mobile h-16">
           <div className="flex items-center gap-2">
             {showBack && (
-              <button className="active:scale-95 transition-transform">
+              <button onClick={() => router.back()} className="active:scale-95 transition-transform">
                 <span className="material-symbols-outlined text-primary">
                   arrow_back
                 </span>
