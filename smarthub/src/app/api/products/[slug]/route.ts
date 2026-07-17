@@ -22,5 +22,15 @@ export async function GET(
     return NextResponse.json({ error: "Product not found" }, { status: 404 });
   }
 
-  return NextResponse.json(serializeResponse(product));
+  const serialized = serializeResponse(product);
+  if (serialized.reviews && serialized.reviews.length > 0) {
+    const total = serialized.reviews.reduce((sum: number, r: { rating: number }) => sum + r.rating, 0);
+    serialized.rating = total / serialized.reviews.length;
+    serialized.numReviews = serialized.reviews.length;
+  } else {
+    serialized.rating = 0;
+    serialized.numReviews = 0;
+  }
+
+  return NextResponse.json(serialized);
 }

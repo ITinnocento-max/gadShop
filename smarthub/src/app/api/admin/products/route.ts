@@ -67,9 +67,24 @@ export async function GET(request: Request) {
 
     const uniqueVendors = vendors.map((v) => v.vendor);
 
+    const productIds = products.map((p) => p.id);
+    const ratings = await prisma.review.groupBy({
+      by: ["productId"],
+      _avg: { rating: true },
+      _count: { rating: true },
+      where: { productId: { in: productIds } },
+    });
+    const ratingMap = new Map(
+      ratings.map((r) => [r.productId, { avg: r._avg.rating ?? 0, count: r._count.rating }])
+    );
+    const productsWithRatings = products.map((p) => {
+      const r = ratingMap.get(p.id);
+      return { ...p, rating: r?.avg ?? 0, numReviews: r?.count ?? 0 };
+    });
+
     return NextResponse.json(
       serializeResponse({
-        products,
+        products: productsWithRatings,
         total,
         page,
         limit,
