@@ -112,10 +112,8 @@ export function Header({
                 menu
               </span>
             )}
-            <Link href="/">
-              <h1 className="text-headline-lg-mobile text-primary tracking-tighter">
-                {title ?? t("common.app_name")}
-              </h1>
+            <Link href="/" className="flex items-center">
+              <img src="/logo.jpeg" alt="Blandon 250" className="h-8 w-auto object-contain" />
             </Link>
           </div>
           <div className="flex items-center gap-4">
