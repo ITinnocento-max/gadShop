@@ -25,7 +25,6 @@ const icons: Record<string, string> = {
   gaming: "sports_esports",
   home: "home",
   fitness: "fitness_center",
-  audio: "headphones",
 };
 
 export function CategoryCard({ icon, label, href = "/products", className }: CategoryCardProps) {
