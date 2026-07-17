@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -34,6 +34,23 @@ export default function Home() {
   const [flashProducts, setFlashProducts] = useState<ProductData[]>([]);
   const [featuredProducts, setFeaturedProducts] = useState<ProductData[]>([]);
   const [newReleases, setNewReleases] = useState<NewRelease[]>([]);
+  const [currentSlide, setCurrentSlide] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const slides = newReleases.length > 0 ? newReleases : [{ id: "fallback", label: t("home.new_release"), title: "Galaxy S24 Ultra Elite", subtitle: null, buttonText: t("common.shop_now"), buttonLink: "/products", imageUrl: null }];
+
+  const goToSlide = useCallback((index: number) => {
+    setCurrentSlide(index);
+  }, []);
+
+  useEffect(() => {
+    if (slides.length <= 1 || isPaused) return;
+    intervalRef.current = setInterval(() => {
+      setCurrentSlide((prev) => (prev + 1) % slides.length);
+    }, 4000);
+    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
+  }, [slides.length, isPaused]);
 
   useEffect(() => {
     Promise.all([
@@ -54,47 +71,36 @@ export default function Home() {
       <Header showSearch />
       <main className="pb-24">
         <section className="relative overflow-hidden w-full h-[320px] mb-lg px-margin-mobile pt-sm">
-          <div className="flex transition-transform duration-500 ease-out h-full gap-4 overflow-x-auto no-scrollbar snap-x snap-mandatory">
-            {newReleases.length > 0 ? (
-              newReleases.map((release) => (
-                <div key={release.id} className="min-w-full h-full relative rounded-2xl overflow-hidden snap-center group">
-                  <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10" />
-                  <div className="absolute inset-0 bg-cover bg-center" style={{
-                    backgroundImage: release.imageUrl ? `url('${release.imageUrl}')` : "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA1YpLMYb4afngQxHQXGqYPl3zyqQU76M6NEJmx_oXx6P8ab4r_4F7o0tTc_j8-YYbT8Lzwn-6kKWR2LNxpC_F2I6oN2QUMnneMwXNxwi300CJAPkwO_-9eHo66YOVr_SWkBFRS3Z7Xjf_mg3pK0xvqCwx811QViMIzJxIRXb9b0Oy7OOhC40uFhnLC9c1RVtu_pbyc3UwMuurezX-Ix-c7RSO_89IgOWehrrK3XR6z3mQjSmkG9VS4gQ')"
-                  }} />
-                  <div className="absolute bottom-10 left-6 z-20 text-white max-w-[200px]">
-                    <p className="font-label-md text-label-md text-primary-fixed uppercase tracking-widest mb-1">{release.label}</p>
-                    <h2 className="font-headline-lg-mobile text-headline-lg-mobile leading-tight mb-4">{release.title}</h2>
-                    <button onClick={() => router.push(release.buttonLink)} className="bg-primary text-white font-label-md px-6 py-2 rounded-full active:scale-95 transition-all">{release.buttonText}</button>
-                  </div>
-                </div>
-              ))
-            ) : (
-              <div className="min-w-full h-full relative rounded-2xl overflow-hidden snap-center group">
+          <div
+            className="flex h-full gap-4 transition-transform duration-700 ease-[cubic-bezier(0.25,0.1,0.25,1)]"
+            style={{ transform: `translateX(-${currentSlide * (100 + 2.5)}%)` }}
+            onMouseEnter={() => setIsPaused(true)}
+            onMouseLeave={() => setIsPaused(false)}
+            onTouchStart={() => setIsPaused(true)}
+            onTouchEnd={() => setTimeout(() => setIsPaused(false), 2000)}
+          >
+            {slides.map((release, i) => (
+              <div key={release.id} className="min-w-[calc(100%-0px)] h-full relative rounded-2xl overflow-hidden shrink-0 group">
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10" />
-                <div className="absolute inset-0 bg-cover bg-center" style={{
-                  backgroundImage: "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA1YpLMYb4afngQxHQXGqYPl3zyqQU76M6NEJmx_oXx6P8ab4r_4F7o0tTc_j8-YYbT8Lzwn-6kKWR2LNxpC_F2I6oN2QUMnneMwXNxwi300CJAPkwO_-9eHo66YOVr_SWkBFRS3Z7Xjf_mg3pK0xvqCwx811QViMIzJxIRXb9b0Oy7OOhC40uFhnLC9c1RVtu_pbyc3UwMuurezX-Ix-c7RSO_89IgOWehrrK3XR6z3mQjSmkG9VS4gQ')"
+                <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{
+                  backgroundImage: release.imageUrl ? `url('${release.imageUrl}')` : "url('https://lh3.googleusercontent.com/aida-public/AB6AXuA1YpLMYb4afngQxHQXGqYPl3zyqQU76M6NEJmx_oXx6P8ab4r_4F7o0tTc_j8-YYbT8Lzwn-6kKWR2LNxpC_F2I6oN2QUMnneMwXNxwi300CJAPkwO_-9eHo66YOVr_SWkBFRS3Z7Xjf_mg3pK0xvqCwx811QViMIzJxIRXb9b0Oy7OOhC40uFhnLC9c1RVtu_pbyc3UwMuurezX-Ix-c7RSO_89IgOWehrrK3XR6z3mQjSmkG9VS4gQ')"
                 }} />
                 <div className="absolute bottom-10 left-6 z-20 text-white max-w-[200px]">
-                  <p className="font-label-md text-label-md text-primary-fixed uppercase tracking-widest mb-1">{t("home.new_release")}</p>
-                  <h2 className="font-headline-lg-mobile text-headline-lg-mobile leading-tight mb-4">Galaxy S24 Ultra Elite</h2>
-                  <button onClick={() => router.push("/products")} className="bg-primary text-white font-label-md px-6 py-2 rounded-full active:scale-95 transition-all">{t("common.shop_now")}</button>
+                  <p className="font-label-md text-label-md text-primary-fixed uppercase tracking-widest mb-1">{release.label}</p>
+                  <h2 className="font-headline-lg-mobile text-headline-lg-mobile leading-tight mb-4">{release.title}</h2>
+                  <button onClick={() => router.push(release.buttonLink)} className="bg-primary text-white font-label-md px-6 py-2 rounded-full active:scale-95 transition-all">{release.buttonText}</button>
                 </div>
               </div>
-            )}
+            ))}
           </div>
           <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2 z-30">
-            {newReleases.length > 0 ? (
-              newReleases.map((_, i) => (
-                <div key={i} className={`h-1.5 rounded-full ${i === 0 ? "w-8 bg-primary" : "w-2 bg-white/40"}`} />
-              ))
-            ) : (
-              <>
-                <div className="w-8 h-1.5 rounded-full bg-primary" />
-                <div className="w-2 h-1.5 rounded-full bg-white/40" />
-                <div className="w-2 h-1.5 rounded-full bg-white/40" />
-              </>
-            )}
+            {slides.map((_, i) => (
+              <button
+                key={i}
+                onClick={() => goToSlide(i)}
+                className={`h-1.5 rounded-full transition-all duration-300 ${i === currentSlide ? "w-8 bg-primary" : "w-2 bg-white/40 hover:bg-white/60"}`}
+              />
+            ))}
           </div>
         </section>
 
