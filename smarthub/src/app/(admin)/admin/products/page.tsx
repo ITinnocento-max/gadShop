@@ -10,7 +10,7 @@ interface Category {
 
 interface Product {
   id: string; name: string; slug: string; brand: string;
-  price: number; originalPrice: number | null; stock: number;
+  price: number; originalPrice: number | null; costPrice: number | null; stock: number;
   images: string[]; featured: boolean; inStock: boolean;
   createdAt: string;
   category: Category;
@@ -188,7 +188,8 @@ export default function AdminProductsPage() {
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{"Product"}</th>
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{"Category"}</th>
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider">{"Vendor"}</th>
-                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Price"}</th>
+                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Cost Price"}</th>
+                    <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Selling Price"}</th>
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Stock"}</th>
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-center">{"Status"}</th>
                     <th className="px-lg py-4 font-label-sm text-outline uppercase tracking-wider text-right">{"Actions"}</th>
@@ -197,11 +198,11 @@ export default function AdminProductsPage() {
                 <tbody className="divide-y divide-outline-variant/10">
                   {loading ? (
                     <tr>
-                      <td colSpan={7} className="px-lg py-12 text-center text-outline">{"Loading..."}</td>
+                      <td colSpan={8} className="px-lg py-12 text-center text-outline">{"Loading..."}</td>
                     </tr>
                   ) : data?.products.length === 0 ? (
                     <tr>
-                      <td colSpan={7} className="px-lg py-12 text-center text-outline">{"No products found"}</td>
+                      <td colSpan={8} className="px-lg py-12 text-center text-outline">{"No products found"}</td>
                     </tr>
                   ) : (
                     data?.products.map((product) => (
@@ -223,6 +224,13 @@ export default function AdminProductsPage() {
                         </td>
                         <td className="px-lg py-4 font-body-md text-on-surface-variant">{product.category.name}</td>
                         <td className="px-lg py-4 font-body-md text-on-surface-variant">{product.vendor.name}</td>
+                        <td className="px-lg py-4 text-right font-label-md">
+                          {product.costPrice != null ? (
+                            <span className="text-on-surface">{fmt(product.costPrice)}</span>
+                          ) : (
+                            <span className="text-outline">{"-"}</span>
+                          )}
+                        </td>
                         <td className="px-lg py-4 text-right font-label-md">
                           <span className="text-on-surface">{fmt(product.price)}</span>
                           {product.originalPrice && (

@@ -63,6 +63,7 @@ CREATE TABLE `Product` (
     `brand` VARCHAR(191) NOT NULL,
     `price` DECIMAL(10, 2) NOT NULL,
     `originalPrice` DECIMAL(10, 2) NULL,
+    `costPrice` DECIMAL(10, 2) NULL,
     `images` JSON NOT NULL,
     `stock` INTEGER NOT NULL DEFAULT 0,
     `featured` BOOLEAN NOT NULL DEFAULT false,

@@ -43,7 +43,7 @@ export async function PUT(
   try {
     const { id } = await params;
     const body = await request.json();
-    const { name, slug, description, brand, price, originalPrice, stock, images, categoryId, vendorId, specs, featured } = body;
+    const { name, slug, description, brand, price, originalPrice, costPrice, stock, images, categoryId, vendorId, specs, featured } = body;
 
     const existing = await prisma.product.findUnique({ where: { id } });
     if (!existing) {
@@ -66,6 +66,7 @@ export async function PUT(
         ...(brand !== undefined && { brand }),
         ...(price !== undefined && { price: parseFloat(price) }),
         ...(originalPrice !== undefined && { originalPrice: originalPrice ? parseFloat(originalPrice) : null }),
+        ...(costPrice !== undefined && { costPrice: costPrice ? parseFloat(costPrice) : null }),
         ...(stock !== undefined && { stock: parseInt(stock), inStock: parseInt(stock) > 0 }),
         ...(images !== undefined && { images }),
         ...(categoryId !== undefined && { categoryId }),

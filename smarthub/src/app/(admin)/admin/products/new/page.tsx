@@ -23,7 +23,7 @@ export default function NewProductPage() {
 
   const [form, setForm] = useState({
     name: "", slug: "", description: "", brand: "",
-    price: "", originalPrice: "", stock: "0",
+    price: "", originalPrice: "", costPrice: "", stock: "0",
     categoryId: "", vendorId: "", featured: false,
     images: "", specs: "",
   });
@@ -118,6 +118,7 @@ export default function NewProductPage() {
           brand: form.brand,
           price: parseFloat(form.price),
           originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : null,
+          costPrice: form.costPrice ? parseFloat(form.costPrice) : null,
           stock: parseInt(form.stock) || 0,
           categoryId: form.categoryId,
           vendorId: form.vendorId,
@@ -208,6 +209,10 @@ export default function NewProductPage() {
                 <div>
                   <label className={labelCls}>{"Original Price"}</label>
                   <input value={form.originalPrice} onChange={(e) => update("originalPrice", e.target.value)} type="number" step="0.01" min="0" className={inputCls} placeholder="0.00" />
+                </div>
+                <div>
+                  <label className={labelCls}>{"Cost Price"}</label>
+                  <input value={form.costPrice} onChange={(e) => update("costPrice", e.target.value)} type="number" step="0.01" min="0" className={inputCls} placeholder="0.00" />
                 </div>
                 <div>
                   <label className={labelCls}>{"Stock"}</label>

@@ -10,7 +10,7 @@ interface Vendor { id: string; name: string; }
 
 interface ProductData {
   id: string; name: string; slug: string; description: string; brand: string;
-  price: number; originalPrice: number | null; stock: number; featured: boolean;
+  price: number; originalPrice: number | null; costPrice: number | null; stock: number; featured: boolean;
   images: string[]; specs: Record<string, unknown> | null;
   category: Category; vendor: Vendor;
 }
@@ -31,7 +31,7 @@ export default function EditProductPage() {
 
   const [form, setForm] = useState({
     name: "", slug: "", description: "", brand: "",
-    price: "", originalPrice: "", stock: "0",
+    price: "", originalPrice: "", costPrice: "", stock: "0",
     categoryId: "", vendorId: "", featured: false,
     images: "", specs: "",
   });
@@ -57,6 +57,7 @@ export default function EditProductPage() {
         brand: p.brand || "",
         price: String(p.price || ""),
         originalPrice: p.originalPrice ? String(p.originalPrice) : "",
+        costPrice: p.costPrice ? String(p.costPrice) : "",
         stock: String(p.stock ?? "0"),
         categoryId: p.category?.id || "",
         vendorId: p.vendor?.id || "",
@@ -90,6 +91,7 @@ export default function EditProductPage() {
           brand: form.brand,
           price: parseFloat(form.price),
           originalPrice: form.originalPrice ? parseFloat(form.originalPrice) : null,
+          costPrice: form.costPrice ? parseFloat(form.costPrice) : null,
           stock: parseInt(form.stock) || 0,
           categoryId: form.categoryId,
           vendorId: form.vendorId,
@@ -188,6 +190,10 @@ export default function EditProductPage() {
                 <div>
                   <label className={labelCls}>{"Original Price"}</label>
                   <input value={form.originalPrice} onChange={(e) => update("originalPrice", e.target.value)} type="number" step="0.01" min="0" className={inputCls} />
+                </div>
+                <div>
+                  <label className={labelCls}>{"Cost Price"}</label>
+                  <input value={form.costPrice} onChange={(e) => update("costPrice", e.target.value)} type="number" step="0.01" min="0" className={inputCls} />
                 </div>
                 <div>
                   <label className={labelCls}>{"Stock"}</label>

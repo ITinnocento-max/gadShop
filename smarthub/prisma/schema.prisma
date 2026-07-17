@@ -213,6 +213,7 @@ model Product {
   brand         String
   price         Decimal  @db.Decimal(10, 2)
   originalPrice Decimal? @db.Decimal(10, 2)
+  costPrice     Decimal? @db.Decimal(10, 2)
   images        Json
   stock         Int      @default(0)
   featured      Boolean  @default(false)

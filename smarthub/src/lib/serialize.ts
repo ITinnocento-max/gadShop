@@ -1,5 +1,5 @@
 const DECIMAL_FIELDS = new Set([
-  "price", "originalPrice", "total", "amount",
+  "price", "originalPrice", "costPrice", "total", "amount",
   "openingBalance", "currentBalance", "rate",
 ]);
 
