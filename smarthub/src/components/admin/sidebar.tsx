@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -31,7 +32,7 @@ export function AdminSidebar() {
 
   return (
     <aside className="hidden md:flex flex-col w-72 bg-surface-container-low border-r border-outline-variant/20 shrink-0">
-      <a href="/admin/dashboard" className="p-lg flex items-center gap-3 border-b border-outline-variant/10 hover:bg-surface-variant/30 transition-colors">
+      <Link href="/admin/dashboard" className="p-lg flex items-center gap-3 border-b border-outline-variant/10 hover:bg-surface-variant/30 transition-colors">
         <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center text-on-primary">
           <span className="material-symbols-outlined">account_balance</span>
         </div>
@@ -39,12 +40,12 @@ export function AdminSidebar() {
           <span className="font-headline-md text-headline-md text-primary">{t("common.app_name")}</span>
           <span className="font-label-sm text-label-sm text-outline">{t("admin.enterprise_management")}</span>
         </div>
-      </a>
+      </Link>
       <nav className="flex-1 px-sm py-md overflow-y-auto">
         {visibleItems.map((item) => {
           const isActive = pathname === item.href;
           return (
-            <a
+            <Link
               key={item.key}
               href={item.href}
               className={`flex items-center gap-3 mx-2 px-4 py-3 rounded-lg transition-colors ${
@@ -55,7 +56,7 @@ export function AdminSidebar() {
             >
               <span className="material-symbols-outlined" style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}>{item.icon}</span>
               <span className="font-body-md text-body-md">{t(`admin.${item.key}`)}</span>
-            </a>
+            </Link>
           );
         })}
       </nav>

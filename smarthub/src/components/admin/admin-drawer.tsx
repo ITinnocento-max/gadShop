@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
 import { useUIStore } from "@/stores/ui-store";
@@ -53,7 +54,7 @@ export function AdminDrawerMenu() {
           {visibleItems.map((item) => {
             const isActive = pathname === item.href || pathname.startsWith(item.href + "/");
             return (
-              <a
+              <Link
                 key={item.key}
                 href={item.href}
                 onClick={() => setOpen(false)}
@@ -65,7 +66,7 @@ export function AdminDrawerMenu() {
               >
                 <span className="material-symbols-outlined text-[20px]" style={isActive ? { fontVariationSettings: "'FILL' 1" } : undefined}>{item.icon}</span>
                 <span className="font-label-md text-label-md">{t(`admin.${item.key}`)}</span>
-              </a>
+              </Link>
             );
           })}
         </nav>

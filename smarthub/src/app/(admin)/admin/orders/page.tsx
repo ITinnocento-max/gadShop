@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useUIStore } from "@/stores/ui-store";
+import Link from "next/link";
 import { formatDate, formatPricePlain } from "@/lib/utils";
 
 interface OrderItem {
@@ -241,10 +242,10 @@ export default function AdminOrdersPage() {
         )}
       </div>
       <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-2 h-16 bg-surface border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-        <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard"><span className="material-symbols-outlined">dashboard</span><span className="font-label-sm text-label-sm">{"Dashboard"}</span></a>
-        <a className="flex flex-col items-center justify-center text-primary bg-primary-container/30 rounded-full px-4 py-1" href="/admin/orders"><span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>receipt_long</span><span className="font-label-sm text-label-sm">{"Orders"}</span></a>
-        <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/products"><span className="material-symbols-outlined">inventory_2</span><span className="font-label-sm text-label-sm">{"Products"}</span></a>
-        <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/financial"><span className="material-symbols-outlined">account_balance</span><span className="font-label-sm text-label-sm">{"Financial"}</span></a>
+        <Link className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard"><span className="material-symbols-outlined">dashboard</span><span className="font-label-sm text-label-sm">{"Dashboard"}</span></Link>
+        <Link className="flex flex-col items-center justify-center text-primary bg-primary-container/30 rounded-full px-4 py-1" href="/admin/orders"><span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>receipt_long</span><span className="font-label-sm text-label-sm">{"Orders"}</span></Link>
+        <Link className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/products"><span className="material-symbols-outlined">inventory_2</span><span className="font-label-sm text-label-sm">{"Products"}</span></Link>
+        <Link className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/financial"><span className="material-symbols-outlined">account_balance</span><span className="font-label-sm text-label-sm">{"Financial"}</span></Link>
       </nav>
     </main>
   );

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Link from "next/link";
 import { useUIStore } from "@/stores/ui-store";
 
 interface MonthlyRow {
@@ -286,26 +287,22 @@ export default function AdminProfitLossPage() {
           </section>
         </div>
         <nav className="md:hidden fixed bottom-0 left-0 w-full z-50 flex justify-around items-center px-2 pb-2 h-16 bg-surface border-t border-outline-variant/30 shadow-[0_-4px_20px_rgba(0,0,0,0.05)]">
-          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard">
+          <Link className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard">
             <span className="material-symbols-outlined">dashboard</span>
             <span className="font-label-sm text-label-sm">{"Dashboard"}</span>
-          </a>
-          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/products">
+          </Link>
+          <Link className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/products">
             <span className="material-symbols-outlined">inventory_2</span>
             <span className="font-label-sm text-label-sm">{"Products"}</span>
-          </a>
-          <a className="flex flex-col items-center justify-center text-primary bg-primary-container/30 rounded-full px-4 py-1" href="/admin/profit-loss">
+          </Link>
+          <Link className="flex flex-col items-center justify-center text-primary bg-primary-container/30 rounded-full px-4 py-1" href="/admin/profit-loss">
             <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>analytics</span>
             <span className="font-label-sm text-label-sm">{"Profit & Loss"}</span>
-          </a>
-          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/financial">
+          </Link>
+          <Link className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/financial">
             <span className="material-symbols-outlined">account_balance_wallet</span>
             <span className="font-label-sm text-label-sm">{"Financial Reports"}</span>
-          </a>
-          <a className="flex flex-col items-center justify-center text-on-surface-variant hover:text-primary" href="/admin/dashboard">
-            <span className="material-symbols-outlined">dashboard</span>
-            <span className="font-label-sm text-label-sm">{"Dashboard"}</span>
-          </a>
+          </Link>
         </nav>
       </main>
   );
