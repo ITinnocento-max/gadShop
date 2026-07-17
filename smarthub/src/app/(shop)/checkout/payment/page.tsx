@@ -127,7 +127,7 @@ export default function PaymentPage() {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            phone: "+256" + phone.replace(/\s/g, ""),
+            phone: "+250" + phone.replace(/\s/g, ""),
             amount: total,
             orderId: order.id,
             paymentId: payment.id,
@@ -296,12 +296,12 @@ export default function PaymentPage() {
                       <div>
                         <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.phone_number")}</label>
                         <div className="relative">
-                          <span className="absolute left-md top-1/2 -translate-y-1/2 font-body-md text-on-surface-variant dark:text-outline">+256</span>
+                          <span className="absolute left-md top-1/2 -translate-y-1/2 font-body-md text-on-surface-variant dark:text-outline">+250</span>
                           <input
                             value={phone}
                             onChange={(e) => setPhone(e.target.value)}
                             className="w-full pl-16 pr-md py-3 bg-surface-container-low dark:bg-surface-variant/10 border-outline-variant dark:border-outline-variant/30 rounded-lg focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary focus:border-primary transition-all"
-                            placeholder="770 000 000"
+                            placeholder="7XX XXX XXX"
                             type="tel"
                           />
                         </div>
@@ -312,7 +312,7 @@ export default function PaymentPage() {
                     <div className="space-y-md">
                       <div>
                         <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.cardholder_name")}</label>
-                        <input className="w-full px-md py-3 bg-surface-container-low dark:bg-surface-variant/10 border-outline-variant dark:border-outline-variant/30 rounded-lg focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary focus:border-primary" placeholder="John Doe" type="text" />
+                        <input className="w-full px-md py-3 bg-surface-container-low dark:bg-surface-variant/10 border-outline-variant dark:border-outline-variant/30 rounded-lg focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary focus:border-primary" placeholder="Jean Mugabo" type="text" />
                       </div>
                       <div>
                         <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.card_number")}</label>

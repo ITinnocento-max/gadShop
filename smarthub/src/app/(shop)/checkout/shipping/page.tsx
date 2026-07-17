@@ -63,11 +63,11 @@ export default function ShippingPage() {
               <form className="grid grid-cols-1 md:grid-cols-2 gap-md">
                 <div className="md:col-span-1">
                   <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.first_name")}</label>
-                  <input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="John" type="text" />
+                  <input value={firstName} onChange={(e) => setFirstName(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="Jean" type="text" />
                 </div>
                 <div className="md:col-span-1">
                   <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.last_name")}</label>
-                  <input value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="Doe" type="text" />
+                  <input value={lastName} onChange={(e) => setLastName(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="Mugabo" type="text" />
                 </div>
                 {!user?.id && (
                   <>
@@ -83,24 +83,26 @@ export default function ShippingPage() {
                 )}
                 <div className="md:col-span-2">
                   <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.street_address")}</label>
-                  <input value={street} onChange={(e) => setStreet(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="123 Tech Lane, Silicon Valley" type="text" />
+                  <input value={street} onChange={(e) => setStreet(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="KN 5 Rd, Kicukiro" type="text" />
                 </div>
                 <div className="md:col-span-1">
                   <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.city")}</label>
-                  <input value={city} onChange={(e) => setCity(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="Mountain View" type="text" />
+                  <input value={city} onChange={(e) => setCity(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="Kigali" type="text" />
                 </div>
                 <div className="md:col-span-1 grid grid-cols-2 gap-sm">
                   <div>
                     <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.state")}</label>
                     <select value={state} onChange={(e) => setState(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all">
-                      <option>CA</option>
-                      <option>NY</option>
-                      <option>TX</option>
+                      <option>Kigali</option>
+                      <option>Eastern</option>
+                      <option>Northern</option>
+                      <option>Southern</option>
+                      <option>Western</option>
                     </select>
                   </div>
                   <div>
                     <label className="block font-label-md text-label-md text-on-surface-variant dark:text-outline mb-xs">{t("checkout.zip")}</label>
-                    <input value={zip} onChange={(e) => setZip(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="94043" type="text" />
+                    <input value={zip} onChange={(e) => setZip(e.target.value)} className="w-full h-12 bg-surface-container-low dark:bg-surface-variant/10 border-none rounded-lg px-md focus:ring-2 focus:ring-primary dark:focus:ring-inverse-primary transition-all" placeholder="00000" type="text" />
                   </div>
                 </div>
                 <div className="md:col-span-2">

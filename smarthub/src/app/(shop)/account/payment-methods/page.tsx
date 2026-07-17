@@ -18,9 +18,9 @@ interface PaymentMethod {
 }
 
 const initialMethods: PaymentMethod[] = [
-  { id: "pm1", type: "momo", label: "MTN MoMo", details: "+256 770 123 456", isDefault: true, icon: "smartphone", iconBg: "bg-[#FFCC00]/20" },
+  { id: "pm1", type: "momo", label: "MTN MoMo", details: "+250 788 123 456", isDefault: true, icon: "smartphone", iconBg: "bg-[#FFCC00]/20" },
   { id: "pm2", type: "visa", label: "Visa Card", details: "•••• 4821", isDefault: false, icon: "credit_card", iconBg: "bg-primary/10" },
-  { id: "pm3", type: "airtel", label: "Airtel Money", details: "+256 750 987 654", isDefault: false, icon: "smartphone", iconBg: "bg-[#E11900]/10" },
+  { id: "pm3", type: "airtel", label: "Airtel Money", details: "+250 732 987 654", isDefault: false, icon: "smartphone", iconBg: "bg-[#E11900]/10" },
 ];
 
 export default function PaymentMethodsPage() {
