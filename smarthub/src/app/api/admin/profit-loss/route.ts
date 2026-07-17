@@ -9,24 +9,39 @@ export async function GET() {
   try {
     const orders = await prisma.order.findMany({
       where: { status: { in: ["DELIVERED", "SHIPPED"] } },
-      select: { total: true, createdAt: true },
+      select: {
+        total: true,
+        createdAt: true,
+        items: {
+          select: {
+            quantity: true,
+            product: {
+              select: { costPrice: true },
+            },
+          },
+        },
+      },
       orderBy: { createdAt: "asc" },
     });
 
-    const monthlyMap: Record<string, { revenue: number; count: number }> = {};
+    const monthlyMap: Record<string, { revenue: number; cogs: number; count: number }> = {};
     for (const order of orders) {
       const d = new Date(order.createdAt);
       const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}`;
-      if (!monthlyMap[key]) monthlyMap[key] = { revenue: 0, count: 0 };
+      if (!monthlyMap[key]) monthlyMap[key] = { revenue: 0, cogs: 0, count: 0 };
       monthlyMap[key].revenue += Number(order.total);
       monthlyMap[key].count += 1;
+
+      for (const item of order.items) {
+        const cost = item.product.costPrice ? Number(item.product.costPrice) : 0;
+        monthlyMap[key].cogs += cost * item.quantity;
+      }
     }
 
     const months = Object.entries(monthlyMap).sort(([a], [b]) => a.localeCompare(b));
     const totalRevenue = months.reduce((s, [, v]) => s + v.revenue, 0);
     const totalOrders = months.reduce((s, [, v]) => s + v.count, 0);
 
-    const placeholderCOGSRate = 0.42;
     const placeholderExpenseCategories = [
       { name: "Marketing (Social Ads)", rate: 0.09 },
       { name: "Cloud Infrastructure", rate: 0.04 },
@@ -35,7 +50,7 @@ export async function GET() {
 
     const monthlyRows = months.map(([month, data]) => {
       const revenue = data.revenue;
-      const cogs = revenue * placeholderCOGSRate;
+      const cogs = data.cogs;
       const grossProfit = revenue - cogs;
       const expenses = placeholderExpenseCategories.reduce((s, c) => s + revenue * c.rate, 0);
       const netProfit = grossProfit - expenses;
