@@ -1,5 +1,6 @@
 "use client";
 
+import { useState } from "react";
 import { cn } from "@/lib/utils";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -29,6 +30,13 @@ export function Header({
   const router = useRouter();
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
   const cartCount = useCartStore((s) => s.items.reduce((sum, i) => sum + i.quantity, 0));
+  const [searchQuery, setSearchQuery] = useState("");
+
+  const handleSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const q = searchQuery.trim();
+    if (q) router.push(`/products?search=${encodeURIComponent(q)}`);
+  };
 
   return (
     <header
@@ -81,9 +89,11 @@ export function Header({
         </div>
         {showSearch && (
           <div className="px-margin-mobile pb-3">
-            <div className="flex items-center bg-surface-container-low rounded-full px-4 py-2 gap-3 group focus-within:ring-2 focus-within:ring-primary/20 transition-all">
+            <form onSubmit={handleSearch} className="flex items-center bg-surface-container-low rounded-full px-4 py-2 gap-3 group focus-within:ring-2 focus-within:ring-primary/20 transition-all">
               <span className="material-symbols-outlined text-outline">search</span>
               <input
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
                 className="bg-transparent border-none focus:ring-0 w-full font-body-md text-on-surface placeholder-outline/60 p-0"
                 placeholder={t("common.search_placeholder")}
                 type="text"
@@ -96,7 +106,7 @@ export function Header({
                   barcode_scanner
                 </span>
               </div>
-            </div>
+            </form>
           </div>
         )}
       </div>
