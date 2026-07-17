@@ -28,7 +28,8 @@
     "items_saved": "ibintu byabitswe",
     "browse_products": "Reba ibicuruzwa",
     "order_number": "Itegeko #",
-    "back": "Inyuma"
+    "back": "Inyuma",
+    "search": "Rondera..."
   },
   "nav": {
     "home": "Ahabanza",
@@ -165,7 +166,10 @@
     "subtotal": "Igiteranyo gito",
     "shipping": "Gutwara",
     "tax": "Imisoro",
-    "total": "Igiteranyo"
+    "total": "Igiteranyo",
+    "enter_promo_code": "Injiza kode y'ikizamini",
+    "apply": "Shira",
+    "promo_discount": "Kugabanya icyiciro"
   },
   "auth": {
     "welcome_back": "Murakaza neza",
@@ -385,7 +389,33 @@
     "expense_analytics": "Amafaranga",
     "comparisons": "Ugereranyo",
     "daily": "Buri Munsi",
-    "weekly": "Buri Cyumweru"
+    "weekly": "Buri Cyumweru",
+    "promo_codes": "Amakode y'Ikizamini",
+    "create_promo_code": "Kurema kode y'ikizamini",
+    "edit_promo_code": "Guhindura kode y'ikizamini",
+    "delete_promo_code": "Gusiba kode y'ikizamini",
+    "promo_code": "Kode y'Ikizamini",
+    "discount_type": "Ubwoko bwo Guhindura Igiciro",
+    "percentage": "Igisangizo",
+    "fixed_amount": "Igiciro Gihambaye",
+    "discount_value": "Igiciro cyo Guhindura",
+    "target_product": "Igiciro Gitegetswe (Birabaye)",
+    "target_user": "Ukoresha Gitegetswe (Birabaye)",
+    "max_uses": "Kubikoresha Bikenera",
+    "active": "Birakora",
+    "inactive": "Ntibikora",
+    "current_uses": "Kubikoresha Bibanziriza",
+    "created_at": "Yaremewe",
+    "apply_promo": "Shira kode y'ikizamini",
+    "promo_applied": "Kode y'ikizamini yashyizwe!",
+    "promo_removed": "Kode y'ikizamini yasibwe",
+    "savings": "Kugabanya",
+    "all_products": "Ibiciro Vyose",
+    "all_users": "Abakoresha Bose",
+    "description_optional": "Ibisobanuro (Birabaye)",
+    "code_optional_hint": "Siba kugenera",
+    "no_promo_codes": "Nta makode y'ikizamini ariho",
+    "confirm_delete_promo": "Uzi neza ko ushaka gusiba kode y'ikizamini?"
   },
   "stepper": {
     "cart": "igitebo",

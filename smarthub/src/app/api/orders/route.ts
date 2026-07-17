@@ -5,7 +5,7 @@ import bcrypt from "bcryptjs";
 
 export async function POST(request: Request) {
   try {
-    const { userId, items, paymentMethod, total, shippingAddress, guestInfo } = await request.json();
+    const { userId, items, paymentMethod, total, shippingAddress, guestInfo, promoCodeId, promoDiscount } = await request.json();
 
     if (!items?.length || total == null) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -63,7 +63,26 @@ export async function POST(request: Request) {
     const paymentStatus = paymentMethod === "COD" ? "COMPLETED" : "PENDING";
     const paidAt = paymentMethod === "COD" ? new Date() : null;
 
+    let validPromoId: string | null = null;
+    if (promoCodeId) {
+      const promo = await prisma.promoCode.findUnique({ where: { id: promoCodeId } });
+      if (promo && promo.isActive) {
+        const usageCount = await prisma.promoCodeUsage.count({ where: { promoCodeId } });
+        if (usageCount < promo.maxUses) {
+          validPromoId = promo.id;
+        }
+      }
+    }
+
     const order = await prisma.$transaction(async (tx) => {
+      if (validPromoId) {
+        const usageCount = await tx.promoCodeUsage.count({ where: { promoCodeId: validPromoId } });
+        const promo = await tx.promoCode.findUnique({ where: { id: validPromoId } });
+        if (!promo || usageCount >= promo.maxUses) {
+          throw new Error("Promo code is no longer valid");
+        }
+      }
+
       for (const item of items) {
         const updated = await tx.product.update({
           where: { id: item.id },
@@ -78,10 +97,12 @@ export async function POST(request: Request) {
         }
       }
 
-      return tx.order.create({
+      const finalTotal = promoDiscount ? total - promoDiscount : total;
+
+      const createdOrder = await tx.order.create({
         data: {
           userId: effectiveUserId,
-          total,
+          total: finalTotal,
           paymentMethod,
           shippingAddressId: address.id,
           status: "PENDING",
@@ -99,7 +120,7 @@ export async function POST(request: Request) {
             create: {
               method: paymentMethod || "CARD",
               status: paymentStatus,
-              amount: total,
+              amount: finalTotal,
               userId: effectiveUserId,
             },
           },
@@ -110,12 +131,24 @@ export async function POST(request: Request) {
           shippingAddress: true,
         },
       });
+
+      if (validPromoId) {
+        await tx.promoCodeUsage.create({
+          data: {
+            promoCodeId: validPromoId,
+            userId: effectiveUserId,
+            orderId: createdOrder.id,
+          },
+        });
+      }
+
+      return createdOrder;
     });
 
     return NextResponse.json(serializeResponse(order), { status: 201 });
   } catch (error) {
     console.error("Order creation failed:", error);
-    return NextResponse.json({ error: "Failed to create order" }, { status: 500 });
+    return NextResponse.json({ error: error instanceof Error ? error.message : "Failed to create order" }, { status: 500 });
   }
 }
 

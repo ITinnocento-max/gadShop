@@ -1,6 +1,6 @@
 const DECIMAL_FIELDS = new Set([
   "price", "originalPrice", "costPrice", "total", "amount",
-  "openingBalance", "currentBalance", "rate",
+  "openingBalance", "currentBalance", "rate", "discountValue",
 ]);
 
 function isDecimal(value: unknown): value is { toNumber(): number } {

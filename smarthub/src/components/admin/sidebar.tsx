@@ -21,6 +21,7 @@ const navItems = [
   { icon: "payments", key: "payments", href: "/admin/financial/payments", resource: "payments" as const },
   { icon: "insights", key: "analytics", href: "/admin/financial/analytics", resource: "analytics" as const },
   { icon: "analytics", key: "profit_loss", href: "/admin/profit-loss", resource: "profit_loss" as const },
+  { icon: "local_offer", key: "promo_codes", href: "/admin/promo-codes", resource: "marketing" as const },
 ];
 
 export function AdminSidebar() {

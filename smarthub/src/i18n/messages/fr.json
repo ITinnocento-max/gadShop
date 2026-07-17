@@ -28,7 +28,8 @@
     "items_saved": "articles sauvegardés",
     "browse_products": "Parcourir les produits",
     "order_number": "Commande #",
-    "back": "Retour"
+    "back": "Retour",
+    "search": "Rechercher..."
   },
   "nav": {
     "home": "Accueil",
@@ -165,7 +166,10 @@
     "subtotal": "Sous-total",
     "shipping": "Livraison",
     "tax": "Taxe",
-    "total": "Total"
+    "total": "Total",
+    "enter_promo_code": "Entrez le code promo",
+    "apply": "Appliquer",
+    "promo_discount": "Réduction promo"
   },
   "auth": {
     "welcome_back": "Bon retour",
@@ -385,7 +389,33 @@
     "expense_analytics": "Dépenses",
     "comparisons": "Comparaisons",
     "daily": "Quotidien",
-    "weekly": "Hebdomadaire"
+    "weekly": "Hebdomadaire",
+    "promo_codes": "Codes Promo",
+    "create_promo_code": "Créer un Code Promo",
+    "edit_promo_code": "Modifier le Code Promo",
+    "delete_promo_code": "Supprimer le Code Promo",
+    "promo_code": "Code Promo",
+    "discount_type": "Type de Réduction",
+    "percentage": "Pourcentage",
+    "fixed_amount": "Montant Fixe",
+    "discount_value": "Valeur de la Réduction",
+    "target_product": "Produit Cible (Optionnel)",
+    "target_user": "Utilisateur Cible (Optionnel)",
+    "max_uses": "Utilisations Maximales",
+    "active": "Actif",
+    "inactive": "Inactif",
+    "current_uses": "Utilisations Actuelles",
+    "created_at": "Créé le",
+    "apply_promo": "Appliquer le Code Promo",
+    "promo_applied": "Code promo appliqué !",
+    "promo_removed": "Code promo retiré",
+    "savings": "Économies",
+    "all_products": "Tous les Produits",
+    "all_users": "Tous les Utilisateurs",
+    "description_optional": "Description (Optionnel)",
+    "code_optional_hint": "Laisser vide pour auto-générer",
+    "no_promo_codes": "Aucun code promo pour le moment",
+    "confirm_delete_promo": "Êtes-vous sûr de vouloir supprimer ce code promo ?"
   },
   "stepper": {
     "cart": "Panier",

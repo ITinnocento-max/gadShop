@@ -17,11 +17,16 @@ export default function PaymentPage() {
   const router = useRouter();
   const { items, clearCart } = useCartStore();
   const user = useAuthStore((s) => s.user);
-  const { shippingAddress, shippingMethod, guestInfo, clearCheckout } = useCheckoutStore();
+  const { shippingAddress, shippingMethod, guestInfo, appliedPromo, setAppliedPromo, clearCheckout } = useCheckoutStore();
   const [submitting, setSubmitting] = useState(false);
+  const [promoInput, setPromoInput] = useState("");
+  const [promoLoading, setPromoLoading] = useState(false);
+  const [promoError, setPromoError] = useState("");
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0);
-  const tax = subtotal * 0.085;
-  const total = subtotal + tax;
+  const promoDiscount = appliedPromo?.discountAmount || 0;
+  const taxableSubtotal = subtotal - promoDiscount;
+  const tax = taxableSubtotal * 0.085;
+  const total = Math.max(0, taxableSubtotal + tax);
   const [paymentMethod, setPaymentMethod] = useState<"momo" | "airtel" | "card">("momo");
   const [phone, setPhone] = useState("");
   const [payStep, setPayStep] = useState<PayStep>("form");
@@ -36,6 +41,41 @@ export default function PaymentPage() {
       pollRef.current = null;
     }
   }, []);
+
+  async function handleApplyPromo() {
+    if (!promoInput.trim()) return;
+    setPromoLoading(true);
+    setPromoError("");
+    try {
+      const firstItem = items[0];
+      const res = await fetch("/api/checkout/apply-promo", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: promoInput.trim(), productId: firstItem?.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        setPromoError(data.error || "Invalid promo code");
+        return;
+      }
+      setAppliedPromo({
+        promoCodeId: data.id,
+        code: data.code,
+        discountType: data.discountType,
+        discountValue: data.discountValue,
+        discountAmount: data.discountAmount,
+      });
+      setPromoInput("");
+    } catch {
+      setPromoError("Failed to apply promo code");
+    }
+    setPromoLoading(false);
+  }
+
+  function handleRemovePromo() {
+    setAppliedPromo(null);
+    setPromoError("");
+  }
 
   const pollStatus = useCallback(
     (gateway: "mtn-momo" | "airtel-money", refKey: string, orderId: string) => {
@@ -110,8 +150,10 @@ export default function PaymentPage() {
             image: i.image,
           })),
           paymentMethod: methodMap[paymentMethod],
-          total,
+          total: subtotal,
           shippingAddress: shippingAddress || undefined,
+          promoCodeId: appliedPromo?.promoCodeId || undefined,
+          promoDiscount: appliedPromo?.discountAmount || undefined,
         }),
       });
 
@@ -370,6 +412,41 @@ export default function PaymentPage() {
                       <span>{t("checkout.subtotal")}</span>
                       <span>Rwf {subtotal.toFixed(2)}</span>
                     </div>
+                    {appliedPromo && (
+                      <div className="flex justify-between text-secondary font-label-md">
+                        <span className="flex items-center gap-1">
+                          <span className="material-symbols-outlined text-[16px]">local_offer</span>
+                          {appliedPromo.code}
+                          <button onClick={handleRemovePromo} className="text-outline hover:text-error ml-1">
+                            <span className="material-symbols-outlined text-[14px]">close</span>
+                          </button>
+                        </span>
+                        <span>-Rwf {appliedPromo.discountAmount.toFixed(2)}</span>
+                      </div>
+                    )}
+                    {!appliedPromo && (
+                      <div className="pt-2">
+                        <div className="flex gap-xs">
+                          <input
+                            value={promoInput}
+                            onChange={(e) => { setPromoInput(e.target.value); setPromoError(""); }}
+                            onKeyDown={(e) => e.key === "Enter" && handleApplyPromo()}
+                            className="flex-1 h-9 px-3 text-[13px] bg-surface-container-low dark:bg-surface-variant/10 border border-outline-variant dark:border-outline-variant/30 rounded-lg focus:ring-2 focus:ring-primary"
+                            placeholder={t("checkout.enter_promo_code")}
+                          />
+                          <button
+                            onClick={handleApplyPromo}
+                            disabled={promoLoading || !promoInput.trim()}
+                            className="h-9 px-3 bg-primary-container/20 text-primary dark:text-inverse-primary rounded-lg font-label-sm hover:bg-primary-container/30 disabled:opacity-50 transition-colors"
+                          >
+                            {promoLoading ? "..." : t("checkout.apply")}
+                          </button>
+                        </div>
+                        {promoError && (
+                          <p className="text-[12px] text-error mt-1">{promoError}</p>
+                        )}
+                      </div>
+                    )}
                     <div className="flex justify-between text-on-surface-variant dark:text-outline font-label-md">
                       <span>{t("checkout.shipping")}</span>
                       <span className="text-secondary">{t("checkout.free")}</span>
