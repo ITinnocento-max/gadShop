@@ -26,8 +26,6 @@ interface PLData {
   expenseBreakdown: ExpenseItem[];
 }
 
-const expenseColors = ["bg-primary", "bg-secondary", "bg-tertiary-container", "bg-outline"];
-
 export default function AdminProfitLossPage() {
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen);
   const [data, setData] = useState<PLData | null>(null);
@@ -53,10 +51,8 @@ export default function AdminProfitLossPage() {
   const trendMonths = months.map((r) => {
     const [, m] = r.month.split("-");
     const names = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-    return { label: names[parseInt(m) - 1] || r.month, revenue: r.revenue, netProfit: r.netProfit };
+    return { label: names[parseInt(m) - 1] || r.month, revenue: r.revenue, netProfit: r.netProfit, cogs: r.cogs };
   });
-
-  const maxTrend = Math.max(...trendMonths.map((r) => r.revenue), 1);
 
   return (
     <main className="flex-1 flex flex-col min-h-screen overflow-hidden">
@@ -240,49 +236,190 @@ export default function AdminProfitLossPage() {
                 </div>
               </div>
               {loading ? (
-                <div className="h-64 flex items-center justify-center text-outline">{"Loading..."}</div>
-              ) : (
-                <div className="h-64 w-full flex items-end gap-2 md:gap-4 px-4 border-b border-outline-variant/20">
+                <div className="h-72 flex items-center justify-center text-outline">{"Loading..."}</div>
+              ) : trendMonths.length === 0 ? (
+                <div className="h-72 flex items-center justify-center text-outline">{"No data available"}</div>
+              ) : (() => {
+                const chartW = 700;
+                const chartH = 260;
+                const padL = 60;
+                const padR = 16;
+                const padT = 16;
+                const padB = 36;
+                const innerW = chartW - padL - padR;
+                const innerH = chartH - padT - padB;
+                const barCount = trendMonths.length;
+                const groupW = innerW / barCount;
+                const barW = Math.min(groupW * 0.55, 48);
+                const maxVal = Math.max(...trendMonths.map((r) => Math.max(r.revenue, 0)), 1);
+                const niceMax = Math.ceil(maxVal / (maxVal > 100000 ? 100000 : maxVal > 10000 ? 10000 : maxVal > 1000 ? 1000 : 100)) * (maxVal > 100000 ? 100000 : maxVal > 10000 ? 10000 : maxVal > 1000 ? 1000 : 100);
+                const gridLines = 5;
+
+                const x = (i: number) => padL + groupW * i + groupW / 2;
+                const barY = (val: number) => padT + innerH - (val / niceMax) * innerH;
+                const lineY = (val: number) => padT + innerH - (Math.max(val, 0) / niceMax) * innerH;
+
+                const profitPts = trendMonths.map((r, i) => `${x(i)},${lineY(r.netProfit)}`).join(" ");
+
+                return (
+                  <div className="w-full overflow-x-auto">
+                    <svg viewBox={`0 0 ${chartW} ${chartH}`} className="w-full h-auto" style={{ minWidth: 400 }}>
+                      {Array.from({ length: gridLines + 1 }, (_, i) => {
+                        const val = (niceMax / gridLines) * i;
+                        const y = padT + innerH - (val / niceMax) * innerH;
+                        return (
+                          <g key={i}>
+                            <line x1={padL} y1={y} x2={chartW - padR} y2={y} stroke="currentColor" className="text-outline-variant/30" strokeWidth="1" />
+                            <text x={padL - 8} y={y + 4} textAnchor="end" className="fill-current text-outline" fontSize="10" fontFamily="sans-serif">
+                              {niceMax >= 1000000 ? `${(val / 1000000).toFixed(1)}M` : niceMax >= 1000 ? `${(val / 1000).toFixed(0)}K` : val.toFixed(0)}
+                            </text>
+                          </g>
+                        );
+                      })}
+                      <line x1={padL} y1={padT + innerH} x2={chartW - padR} y2={padT + innerH} stroke="currentColor" className="text-outline-variant/30" strokeWidth="1" />
+
+                      {trendMonths.map((r, i) => {
+                        const cx = x(i);
+                        const bh = Math.max(((r.revenue - r.cogs) / niceMax) * innerH, 0);
+                        const rh = Math.max((r.revenue / niceMax) * innerH, 0);
+                        return (
+                          <g key={i}>
+                            <rect
+                              x={cx - barW / 2}
+                              y={padT + innerH - rh}
+                              width={barW}
+                              height={rh}
+                              rx={3}
+                              fill="currentColor"
+                              className="text-primary/25"
+                            />
+                            {r.cogs > 0 && (
+                              <rect
+                                x={cx - barW / 2}
+                                y={padT + innerH - rh}
+                                width={barW}
+                                height={Math.max(bh, 0)}
+                                rx={3}
+                                fill="currentColor"
+                                className="text-primary/70"
+                              />
+                            )}
+                            <title>{`Revenue: ${fmt(r.revenue)}`}</title>
+                          </g>
+                        );
+                      })}
+
+                      <polyline
+                        points={profitPts}
+                        fill="none"
+                        stroke="currentColor"
+                        className="text-secondary"
+                        strokeWidth="2.5"
+                        strokeLinejoin="round"
+                        strokeLinecap="round"
+                      />
+                      {trendMonths.map((r, i) => (
+                        <g key={`dot-${i}`}>
+                          <circle cx={x(i)} cy={lineY(r.netProfit)} r="4.5" fill="currentColor" className="text-secondary" stroke="white" strokeWidth="2" />
+                          <title>{`Net Profit: ${fmt(r.netProfit)}`}</title>
+                        </g>
+                      ))}
+
+                      {trendMonths.map((r, i) => (
+                        <text key={`lbl-${i}`} x={x(i)} y={chartH - 6} textAnchor="middle" className="fill-current text-outline" fontSize="11" fontFamily="sans-serif">
+                          {r.label}
+                        </text>
+                      ))}
+                    </svg>
+                  </div>
+                );
+              })()}
+              {trendMonths.length > 0 && (
+                <div className="flex justify-between mt-3 px-4 text-label-sm text-outline uppercase">
                   {trendMonths.map((r, i) => (
-                    <div key={i} className="flex-1 flex flex-col justify-end gap-0.5">
-                      <div
-                        className="w-full bg-secondary/60 rounded-t-sm transition-all"
-                        style={{ height: `${Math.max((r.netProfit / maxTrend) * 100, 2)}%` }}
-                      />
-                      <div
-                        className="w-full bg-primary rounded-t-sm transition-all"
-                        style={{ height: `${Math.max((r.revenue / maxTrend) * 100, 4)}%` }}
-                      />
+                    <div key={i} className="flex flex-col items-center gap-0.5">
+                      <span className="text-on-surface font-label-sm">{fmtShort(r.revenue)}</span>
+                      <span className={r.netProfit >= 0 ? "text-secondary" : "text-error"}>{fmtShort(r.netProfit)}</span>
                     </div>
                   ))}
                 </div>
               )}
-              <div className="flex justify-between mt-4 px-4 text-label-sm text-outline uppercase">
-                {trendMonths.map((r, i) => (
-                  <span key={i}>{r.label}</span>
-                ))}
-              </div>
             </div>
             <div className="bg-surface-container-lowest p-lg rounded-2xl border border-outline-variant/10 shadow-sm flex flex-col">
               <h3 className="font-headline-md text-on-surface mb-lg">{"Expense Breakdown"}</h3>
-              <div className="space-y-6 flex-1">
+              <div className="flex-1 flex flex-col items-center">
                 {loading ? (
                   <div className="text-center py-8 text-outline">{"Loading..."}</div>
-                ) : (
-                  data?.expenseBreakdown.map((e, i) => (
-                    <div key={e.name}>
-                      <div className="flex justify-between mb-2">
-                        <span className="font-body-md text-on-surface">{e.name}</span>
-                        <span className="font-label-md font-bold">{e.pct}%</span>
-                      </div>
-                      <div className="w-full h-2 bg-surface-container rounded-full overflow-hidden">
-                        <div className={`h-full ${expenseColors[i % expenseColors.length]} rounded-full`} style={{ width: `${e.pct}%` }} />
-                      </div>
+                ) : data?.expenseBreakdown && data.expenseBreakdown.length > 0 ? (
+                  <>
+                    <svg viewBox="0 0 200 200" className="w-44 h-44 mb-lg">
+                      {(() => {
+                        const cx = 100, cy = 100, r = 80, strokeW = 24;
+                        const totalPct = data.expenseBreakdown.reduce((s, e) => s + e.pct, 0);
+                        const donutColors = ["#6750A4", "#625B71", "#7D5260", "#938F99"];
+                        let offset = 0;
+                        const circumference = 2 * Math.PI * r;
+                        return data.expenseBreakdown.map((e, i) => {
+                          const pct = totalPct > 0 ? e.pct / totalPct : 0;
+                          const dash = pct * circumference;
+                          const gap = circumference - dash;
+                          const rotation = (offset / totalPct) * 360 - 90;
+                          offset += e.pct;
+                          return (
+                            <circle
+                              key={i}
+                              cx={cx}
+                              cy={cy}
+                              r={r}
+                              fill="none"
+                              stroke={donutColors[i % donutColors.length]}
+                              strokeWidth={strokeW}
+                              strokeDasharray={`${dash} ${gap}`}
+                              strokeLinecap="butt"
+                              transform={`rotate(${rotation} ${cx} ${cy})`}
+                              className="transition-all duration-700"
+                            />
+                          );
+                        });
+                      })()}
+                      <circle cx={100} cy={100} r={56} fill="currentColor" className="text-surface-container-lowest" />
+                      <text x={100} y={94} textAnchor="middle" className="fill-current text-on-surface" fontSize="14" fontWeight="bold" fontFamily="sans-serif">
+                        {data!.expenseBreakdown.reduce((s, e) => s + e.pct, 0)}%
+                      </text>
+                      <text x={100} y={112} textAnchor="middle" className="fill-current text-outline" fontSize="10" fontFamily="sans-serif">
+                        Total
+                      </text>
+                    </svg>
+                    <div className="space-y-3 w-full">
+                      {data?.expenseBreakdown.map((e, i) => {
+                        const donutColors = ["bg-primary", "bg-secondary", "bg-tertiary-container", "bg-outline"];
+                        return (
+                          <div key={e.name}>
+                            <div className="flex justify-between mb-1.5">
+                              <div className="flex items-center gap-2">
+                                <span className={`w-2.5 h-2.5 rounded-full ${donutColors[i % donutColors.length]}`} />
+                                <span className="font-body-sm text-on-surface">{e.name}</span>
+                              </div>
+                              <span className="font-label-sm font-bold text-on-surface">{fmtShort(e.amount)} ({e.pct}%)</span>
+                            </div>
+                            <div className="w-full h-1.5 bg-surface-container rounded-full overflow-hidden">
+                              <div className={`h-full ${donutColors[i % donutColors.length]} rounded-full transition-all duration-700`} style={{ width: `${e.pct}%` }} />
+                            </div>
+                          </div>
+                        );
+                      })}
                     </div>
-                  ))
+                  </>
+                ) : (
+                  <div className="text-center py-8 text-outline">{"No expenses recorded"}</div>
                 )}
               </div>
-              <button className="mt-lg w-full py-3 rounded-xl border border-primary text-primary font-bold hover:bg-primary/5 transition-all active:scale-95">{"View Detailed Audit"}</button>
+              <Link
+                href="/admin/financial"
+                className="mt-lg w-full py-3 rounded-xl border border-primary text-primary font-bold hover:bg-primary/5 transition-all active:scale-95 text-center block"
+              >
+                {"View Detailed Audit"}
+              </Link>
             </div>
           </section>
         </div>
