@@ -82,7 +82,8 @@ export default function LoginPage() {
               <img className="w-[80%] h-auto max-w-[50vw] object-contain relative z-10 drop-shadow-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU4l3j3LE0Wlm57XANPIiG4rQG_JT2pxC37O_tX4jxyMZ0qfEKPm4aavTLJmgKJT0fO656DVeaXmLRrr93-OjPT2dzxOp9D6Mb1QHUgdatrGCXxmvqiVIq2fE_tke2g3u_5gcxQ9NIMomeB5KMRRMddy9oZcSdbDAdZt7X9ofROr9Qtd5E3JpMJ62gVB-0kk91d5_n86SChbkO6wa73hhGNkXOOuHIDODDS6N1LRPOz_U5SbYKRYWvJw" alt="SmartHub products" />
             </div>
           </div>
-          <div className="relative z-10 font-label-md text-label-md lg:text-[1.2vw] xl:text-[1vw] text-on-primary/60">&copy; 2024 {t("common.app_name")}. {t("admin.all_rights")}</div>
+          <div className="relative z-10 font-label-md text-label-md lg:text-[1.2vw] xl:text-[1vw] text-on-primary/60">&copy; 2026 {t("common.app_name")}. {t("admin.all_rights")}</div>
+          <div className="relative z-10 font-label-sm text-label-sm text-on-primary/40 mt-1">Developer: Innocent &amp; Google Profile: InonoTech rw</div>
         </section>
         <section className="flex flex-col justify-center px-[6vw] lg:px-[5vw] xl:px-[4vw] py-[4vw] bg-surface-container-lowest dark:bg-inverse-surface">
           <div className="w-full mx-auto">

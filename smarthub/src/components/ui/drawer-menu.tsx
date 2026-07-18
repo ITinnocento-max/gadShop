@@ -68,7 +68,8 @@ export function DrawerMenu() {
           )}
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-md border-t border-outline-variant/20 dark:border-outline-variant/30">
-          <p className="font-label-sm text-label-sm text-outline dark:text-outline-variant text-center">&copy; 2024 {t("common.app_name")}</p>
+          <p className="font-label-sm text-label-sm text-outline dark:text-outline-variant text-center">&copy; 2026 {t("common.app_name")}</p>
+          <p className="font-label-sm text-label-sm text-outline/60 dark:text-outline-variant/60 text-center mt-1">Developer: Innocent &amp; Google Profile: InonoTech rw</p>
         </div>
       </aside>
     </>
