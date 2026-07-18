@@ -112,8 +112,9 @@ export function Header({
                 menu
               </span>
             )}
-            <Link href="/" className="flex items-center">
+            <Link href="/" className="flex items-center gap-1.5">
               <img src="/logo.jpeg" alt="Blandon 250" className="h-8 w-auto object-contain" />
+              <span className="text-headline-sm text-primary font-bold tracking-tight">Blandon 250</span>
             </Link>
           </div>
           <div className="flex items-center gap-4">
