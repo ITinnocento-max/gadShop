@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter } from "next/navigation";
+
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CustomerGuard } from "@/components/customer/customer-guard";
@@ -25,7 +25,6 @@ const initialMethods: PaymentMethod[] = [
 
 export default function PaymentMethodsPage() {
   const { t } = useTranslation();
-  const router = useRouter();
   const [methods, setMethods] = useState<PaymentMethod[]>(initialMethods);
 
   const setDefault = (id: string) => {

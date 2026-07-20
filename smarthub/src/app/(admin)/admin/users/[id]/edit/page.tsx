@@ -26,7 +26,6 @@ export default function EditUserPage() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const rolesRes = await fetch("/api/admin/users?limit=1").catch(() => null);
         const adminRolesRes = await fetch("/api/admin/roles").then((r) => r.json()).catch(() => []);
         setAdminRoles(adminRolesRes);
 

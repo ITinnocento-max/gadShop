@@ -2,8 +2,9 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { Header } from "@/components/store/header";
-import { BottomNav } from "@/components/ui/bottom-nav";
+import {BottomNav } from "@/components/ui/bottom-nav";
 import { StarRating } from "@/components/store/star-rating";
 import { StarRatingInput } from "@/components/store/star-rating-input";
 import { useCartStore } from "@/stores/cart-store";
@@ -46,7 +47,7 @@ export default function ProductDetailsPage() {
       .then((r) => r.json())
       .then((data) => { setProduct(data); setLoading(false); })
       .catch(() => { setLoading(false); });
-  }, [params?.slug]);
+  }, [params]);
 
   useEffect(() => { fetchProduct(); }, [fetchProduct]);
 
@@ -121,8 +122,8 @@ export default function ProductDetailsPage() {
         <section className="relative bg-surface-container-lowest dark:bg-inverse-surface overflow-hidden">
           <div className="flex overflow-x-auto snap-x snap-mandatory no-scrollbar">
             {(product.images.length > 0 ? product.images : [""]).map((img, i) => (
-              <div key={i} className="flex-shrink-0 w-full snap-center h-[420px] flex items-center justify-center p-xl">
-                <img className="h-full object-contain" src={img} alt={product.name} />
+              <div key={i} className="relative flex-shrink-0 w-full snap-center h-[420px] flex items-center justify-center p-xl">
+                <Image className="object-contain" src={img} alt={product.name} fill />
               </div>
             ))}
           </div>
@@ -205,7 +206,7 @@ export default function ProductDetailsPage() {
                       </div>
                     </div>
                     {review.title && <p className="font-label-md font-semibold text-on-surface dark:text-white">{review.title}</p>}
-                    {review.comment && <p className="font-body-md text-on-surface-variant dark:text-outline italic">"{review.comment}"</p>}
+                    {review.comment && <p className="font-body-md text-on-surface-variant dark:text-outline italic">{'\u201c'}{review.comment}{'\u201d'}</p>}
                   </div>
                 );
               })}

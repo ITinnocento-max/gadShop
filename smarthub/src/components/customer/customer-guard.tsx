@@ -40,6 +40,7 @@ export function CustomerGuard({ children }: { children: React.ReactNode }) {
       window.location.href = `/login?from=${encodeURIComponent(pathname)}`;
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setReady(true);
   }, [pathname]);
 

@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import Link from "next/link";
 import { StarRating } from "./star-rating";
 
@@ -32,7 +33,6 @@ export function ProductCard({
   rating,
   className,
   href = "/products/sample",
-  inStock = true,
   stockLeft,
   showAddButton = true,
   variant = "grid",
@@ -41,7 +41,7 @@ export function ProductCard({
     return (
       <div className={cn("min-w-[160px] bg-surface rounded-xl overflow-hidden shadow-soft hover:shadow-raised transition-shadow", className)}>
         <div className="relative h-40 w-full overflow-hidden">
-          <img className="w-full h-full object-cover" src={image} alt={title} />
+          <Image className="w-full h-full object-cover" src={image} alt={title} width={300} height={300} unoptimized />
           {discount && (
             <div className="absolute top-2 left-2 bg-error text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
               {discount}
@@ -101,10 +101,13 @@ export function ProductCard({
           <span className="material-symbols-outlined">favorite</span>
         </button>
         <div className="aspect-square rounded-lg overflow-hidden bg-surface-container-low mb-3">
-          <img
+          <Image
             className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
             src={image}
             alt={title}
+            width={300}
+            height={300}
+            unoptimized
           />
         </div>
         <div className="space-y-1 flex-1 flex flex-col">

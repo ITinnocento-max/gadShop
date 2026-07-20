@@ -76,6 +76,7 @@ export function SearchScanner({ open, onClose, onBarcodeScanned }: SearchScanner
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       startScanner();
     } else {
       void stopScanner();

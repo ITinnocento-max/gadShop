@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useUIStore } from "@/stores/ui-store"
 import jsPDF from "jspdf"
 import {
@@ -85,17 +85,12 @@ function fmt(v: number) {
   return "RWF " + v.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })
 }
 
-function fmtRaw(v: number) {
-  return v.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })
-}
-
 export default function AnalyticsPage() {
   const setMobileMenuOpen = useUIStore((s) => s.setMobileMenuOpen)
   const [data, setData] = useState<AnalyticsResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [period, setPeriod] = useState("monthly")
   const [downloading, setDownloading] = useState(false)
-  const reportRef = useRef<HTMLDivElement>(null)
 
   const downloadPDF = useCallback(() => {
     setDownloading(true)
@@ -192,21 +187,17 @@ export default function AnalyticsPage() {
     window.open(`mailto:?subject=${encodeURIComponent(`Analytics Report - ${period} - SmartHub Shop`)}&body=${encodeURIComponent(content)}`, "_blank")
   }, [data, period])
 
-  const fetchData = useCallback(async (p: string) => {
-    setLoading(true)
-    try {
-      const res = await fetch(`/api/admin/financial/analytics?period=${p}`).then((r) => r.json())
-      setData(res)
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false)
-    }
-  }, [])
-
   useEffect(() => {
-    fetchData(period)
-  }, [period, fetchData])
+    let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true)
+    fetch(`/api/admin/financial/analytics?period=${period}`)
+      .then((r) => r.json())
+      .then((res) => { if (!cancelled) setData(res) })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [period])
 
   const lineData = data ? {
     labels: data.trendData.map((d) => d.label),

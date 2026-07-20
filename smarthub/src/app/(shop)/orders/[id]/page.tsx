@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CustomerGuard } from "@/components/customer/customer-guard";
@@ -150,7 +151,7 @@ export default function OrderDetailPage() {
             {order.items.map((item) => (
               <div key={item.id} className="flex gap-md">
                 <div className="w-16 h-16 rounded-lg overflow-hidden bg-surface-container dark:bg-surface-variant/10 shrink-0">
-                  <img className="w-full h-full object-cover" src={item.product.images[0] || item.image || ""} alt={item.name} />
+                  <Image className="w-full h-full object-cover" src={item.product.images[0] || item.image || ""} alt={item.name} width={64} height={64} />
                 </div>
                 <div className="flex-1 min-w-0">
                   <p className="font-label-md text-on-surface dark:text-white truncate">{item.name}</p>

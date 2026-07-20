@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useUIStore } from "@/stores/ui-store";
 
 interface DashboardData {
@@ -51,10 +52,12 @@ export default function AdminDashboardPage() {
               <span className="absolute top-0 right-0 block h-2 w-2 rounded-full bg-error ring-2 ring-surface dark:ring-inverse-surface" />
             </button>
             <div className="h-9 w-9 rounded-full overflow-hidden border border-outline-variant/30">
-              <img
+              <Image
                 className="w-full h-full object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtCW-FBTsBEr84QsObtVXSMlblJ03MU02wyJKZJ40gfXpqi6YbQlKqUahpD1y0xyjMO4R00MdPloZ7moihgaIpjucPKV3WXsVsUGUQA8YEZqgsQ_fYFo5P6BqZbO3-una2V7w_6pcAyV8LqpJvY18JbVk_K-eitrHDuNI_15FEyp-8ZQJ7XtP4q9L0f4e4hY5oi9bjx6uRa0g4Bo7GxdQczEp16GBF1ZWKi8dOzad1HfEniGp754GuLA"
                 alt="Admin avatar"
+                width={36}
+                height={36}
               />
             </div>
           </div>
@@ -185,10 +188,11 @@ export default function AdminDashboardPage() {
               ) : data?.lowStockProducts.map((p) => (
                 <div key={p.id} className="min-w-[200px] bg-surface/70 dark:bg-inverse-surface/70 backdrop-blur-md border border-outline-variant/20 rounded-xl overflow-hidden shadow-soft">
                   <div className="h-32 w-full relative">
-                    <img
-                      className="w-full h-full object-cover"
+                    <Image
+                      className="object-cover"
                       src={p.image || "https://placehold.co/200x150?text=No+Image"}
                       alt={p.name}
+                      fill
                     />
                     <div className="absolute top-2 right-2 bg-error text-white text-[10px] font-bold px-2 py-0.5 rounded-full">
                       ONLY {p.stock} LEFT

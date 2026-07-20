@@ -54,11 +54,11 @@ function TrackContent() {
   };
 
   useEffect(() => {
-    const paramEmail = searchParams.get("email");
-    if (paramEmail) {
-      setEmail(paramEmail);
-      fetchOrders(paramEmail);
+    if (email) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      fetchOrders(email);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

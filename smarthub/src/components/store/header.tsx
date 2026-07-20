@@ -2,6 +2,7 @@
 
 import { useState, useRef, useCallback } from "react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { LanguageSwitcher } from "@/components/ui/language-switcher";
@@ -20,7 +21,6 @@ interface HeaderProps {
 }
 
 export function Header({
-  title,
   showBack = false,
   showSearch = false,
   showCart = false,
@@ -113,7 +113,7 @@ export function Header({
               </span>
             )}
             <Link href="/" className="flex items-center gap-1.5">
-              <img src="/logo.jpeg" alt="Blandon 250" className="h-8 w-auto object-contain" />
+              <Image src="/logo.jpeg" alt="Blandon 250" width={32} height={32} unoptimized className="h-8 w-auto object-contain" />
               <span className="text-headline-sm text-primary font-bold tracking-tight">Blandon 250</span>
             </Link>
           </div>

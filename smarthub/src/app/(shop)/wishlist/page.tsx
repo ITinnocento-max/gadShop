@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CustomerGuard } from "@/components/customer/customer-guard";
@@ -46,7 +47,7 @@ export default function WishlistPage() {
                 )}
                 <div onClick={() => router.push(`/products/${item.slug}`)} className="cursor-pointer">
                   <div className="aspect-square rounded-lg overflow-hidden bg-surface-container-low dark:bg-surface-variant/10 mb-3">
-                    <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={item.image} alt={item.title} />
+                    <Image className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={item.image} alt={item.title} width={300} height={300} unoptimized />
                   </div>
                 </div>
                 <div className="space-y-1 flex-1 flex flex-col">

@@ -53,12 +53,15 @@ export default function OrdersPage() {
   const userId = useAuthStore((s) => s.user?.id);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!userId) { setLoading(false); return; }
+    let cancelled = false;
     setLoading(true);
     fetch(`/api/orders?userId=${userId}`)
       .then((r) => r.json())
-      .then(setOrders)
-      .finally(() => setLoading(false));
+      .then((data) => { if (!cancelled) setOrders(data); })
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [userId]);
 
   const filtered = statusFilter === "All"

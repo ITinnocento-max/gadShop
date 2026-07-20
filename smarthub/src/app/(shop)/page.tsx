@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useRef, useCallback } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CountdownTimer } from "@/components/ui/countdown-timer";
@@ -79,7 +80,7 @@ export default function Home() {
             onTouchStart={() => setIsPaused(true)}
             onTouchEnd={() => setTimeout(() => setIsPaused(false), 2000)}
           >
-            {slides.map((release, i) => (
+            {slides.map((release) => (
               <div key={release.id} className="min-w-[calc(100%-0px)] h-full relative rounded-2xl overflow-hidden shrink-0 group">
                 <div className="absolute inset-0 bg-gradient-to-r from-black/60 to-transparent z-10" />
                 <div className="absolute inset-0 bg-cover bg-center transition-transform duration-700 group-hover:scale-105" style={{
@@ -151,8 +152,8 @@ export default function Home() {
                 <button onClick={(e) => { e.stopPropagation(); }} className="absolute top-3 right-3 z-10 text-on-surface-variant/40 hover:text-error transition-colors">
                   <span className="material-symbols-outlined">favorite</span>
                 </button>
-                <div className="h-40 mb-3 flex items-center justify-center overflow-hidden rounded-xl">
-                  <img className="w-full h-full object-cover" src={product.images[0] || ""} alt={product.name} />
+                <div className="relative h-40 mb-3 flex items-center justify-center overflow-hidden rounded-xl">
+                  <Image className="object-cover" src={product.images[0] || ""} alt={product.name} fill />
                 </div>
                 <p className="font-label-md text-on-surface-variant">{product.brand}</p>
                 <p className="font-headline-md text-[16px] text-on-surface truncate">{product.name}</p>

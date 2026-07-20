@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import { useUIStore } from "@/stores/ui-store";
 
 interface NewRelease {
@@ -43,21 +44,20 @@ export default function AdminNewReleasesPage() {
   const [uploading, setUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
 
-  const fetchReleases = useCallback(async () => {
-    setLoading(true);
-    try {
-      const res = await fetch("/api/admin/new-releases");
-      const data = await res.json();
-      setReleases(data);
-    } catch {
-      // ignore
-    }
-    setLoading(false);
-  }, []);
+  const [refetchKey, setRefetchKey] = useState(0);
+  const refetch = useCallback(() => setRefetchKey((k) => k + 1), []);
 
   useEffect(() => {
-    fetchReleases();
-  }, [fetchReleases]);
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true);
+    fetch("/api/admin/new-releases")
+      .then((r) => r.json())
+      .then((data) => { if (!cancelled) setReleases(data); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [refetchKey]);
 
   const handleImageUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -129,7 +129,7 @@ export default function AdminNewReleasesPage() {
         });
       }
       setShowForm(false);
-      fetchReleases();
+      refetch();
     } catch {
       // ignore
     }
@@ -142,7 +142,7 @@ export default function AdminNewReleasesPage() {
       const res = await fetch(`/api/admin/new-releases/${id}`, { method: "DELETE" });
       if (res.ok) {
         setDeleteId(null);
-        fetchReleases();
+        refetch();
       }
     } catch {
       // ignore
@@ -157,7 +157,7 @@ export default function AdminNewReleasesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !release.isActive }),
       });
-      fetchReleases();
+      refetch();
     } catch {
       // ignore
     }
@@ -177,7 +177,7 @@ export default function AdminNewReleasesPage() {
             <span className="material-symbols-outlined">notifications</span>
           </button>
           <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
-            <img className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6jAEv7x888X42BimUArGeWLtS9MnDaHwOqSgTX0c13jeuDFDOGhAMbJwltx7r19TZDkvBAPK8kC_t1LocXTZchBB2ntQe2r16jny3aiQ8pzLUYhEV4mzaxTbMqM0khIbcIdHn4LQUuSo1dfmVr6kRSvYi7HcxcQuRzco7rCMccO_heVE48x3jOW4gGtkgBDmG7yRoL1CLMoByp2g1AcpmouNjLxmSZFNuwWzYlIkowOuD5ljUz-l87A" alt="Admin" />
+            <Image className="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6jAEv7x888X42BimUArGeWLtS9MnDaHwOqSgTX0c13jeuDFDOGhAMbJwltx7r19TZDkvBAPK8kC_t1LocXTZchBB2ntQe2r16jny3aiQ8pzLUYhEV4mzaxTbMqM0khIbcIdHn4LQUuSo1dfmVr6kRSvYi7HcxcQuRzco7rCMccO_heVE48x3jOW4gGtkgBDmG7yRoL1CLMoByp2g1AcpmouNjLxmSZFNuwWzYlIkowOuD5ljUz-l87A" alt="Admin" width={32} height={32} />
           </div>
         </div>
       </header>
@@ -223,9 +223,9 @@ export default function AdminNewReleasesPage() {
                   releases.map((release) => (
                     <tr key={release.id} className="hover:bg-surface-container-low/50 transition-colors">
                       <td className="px-lg py-4">
-                        <div className="w-24 h-14 rounded-lg bg-surface-variant overflow-hidden shrink-0">
+                        <div className="relative w-24 h-14 rounded-lg bg-surface-variant overflow-hidden shrink-0">
                           {release.imageUrl ? (
-                            <img className="w-full h-full object-cover" src={release.imageUrl} alt={release.title} />
+                            <Image className="object-cover" src={release.imageUrl} alt={release.title} fill />
                           ) : (
                             <div className="w-full h-full flex items-center justify-center text-outline">
                               <span className="material-symbols-outlined">image</span>
@@ -364,7 +364,7 @@ export default function AdminNewReleasesPage() {
                 )}
                 {form.imageUrl && (
                   <div className="mt-2 relative w-full h-32 lg:h-48 rounded-lg overflow-hidden border border-outline-variant/20">
-                    <img className="w-full h-full object-cover" src={form.imageUrl} alt="Preview" />
+                    <Image className="object-cover" src={form.imageUrl} alt="Preview" fill />
                     <button
                       onClick={() => setForm((f) => ({ ...f, imageUrl: "" }))}
                       className="absolute top-1 right-1 p-1 bg-black/50 rounded-full text-white hover:bg-black/70 transition-colors"

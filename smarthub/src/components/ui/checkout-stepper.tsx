@@ -10,12 +10,6 @@ interface CheckoutStepperProps {
 }
 
 const stepKeys = ["cart", "shipping", "payment", "review"];
-const stepIcons: Record<string, string> = {
-  cart: "shopping_cart",
-  shipping: "local_shipping",
-  payment: "payments",
-  review: "rate_review",
-};
 
 export function CheckoutStepper({ currentStep, className }: CheckoutStepperProps) {
   const { t } = useTranslation();

@@ -2,24 +2,24 @@ import { t } from "@/lib/translations";
 
 describe("t()", () => {
   it("returns translated string for a valid key in English", () => {
-    expect(t("en", "common.app_name")).toBe("SmartHub");
+    expect(t("en", "common.app_name")).toBe("Blandon 250");
     expect(t("en", "nav.home")).toBe("Home");
     expect(t("en", "common.search_placeholder")).toBe("Search smartphones, accessories...");
   });
 
   it("returns translated string for a valid key in French", () => {
-    expect(t("fr", "common.app_name")).toBe("SmartHub");
+    expect(t("fr", "common.app_name")).toBe("Blandon 250");
     expect(t("fr", "nav.home")).toBe("Accueil");
     expect(t("fr", "common.search_placeholder")).toBe("Rechercher smartphones, accessoires...");
   });
 
   it("returns translated string for Swahili", () => {
-    expect(t("sw", "common.app_name")).toBe("SmartHub");
+    expect(t("sw", "common.app_name")).toBe("Blandon 250");
     expect(t("sw", "nav.cart")).toBe("Kart");
   });
 
   it("returns translated string for Kinyarwanda", () => {
-    expect(t("rw", "common.app_name")).toBe("SmartHub");
+    expect(t("rw", "common.app_name")).toBe("Blandon 250");
     expect(t("rw", "nav.home")).toBe("Ahabanza");
   });
 

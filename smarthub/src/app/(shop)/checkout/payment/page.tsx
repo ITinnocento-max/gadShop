@@ -8,6 +8,7 @@ import { CheckoutStepper } from "@/components/ui/checkout-stepper";
 import { useCartStore } from "@/stores/cart-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { useCheckoutStore } from "@/stores/checkout-store";
+import Image from "next/image";
 import { useTranslation } from "@/hooks/useTranslation";
 
 type PayStep = "form" | "waiting" | "success" | "failed";
@@ -17,7 +18,7 @@ export default function PaymentPage() {
   const router = useRouter();
   const { items, clearCart } = useCartStore();
   const user = useAuthStore((s) => s.user);
-  const { shippingAddress, shippingMethod, guestInfo, appliedPromo, setAppliedPromo, clearCheckout } = useCheckoutStore();
+  const { shippingAddress, guestInfo, appliedPromo, setAppliedPromo, clearCheckout } = useCheckoutStore();
   const [submitting, setSubmitting] = useState(false);
   const [promoInput, setPromoInput] = useState("");
   const [promoLoading, setPromoLoading] = useState(false);
@@ -78,7 +79,7 @@ export default function PaymentPage() {
   }
 
   const pollStatus = useCallback(
-    (gateway: "mtn-momo" | "airtel-money", refKey: string, orderId: string) => {
+    (gateway: "mtn-momo" | "airtel-money", refKey: string) => {
       const param = gateway === "mtn-momo" ? "referenceId" : "transactionId";
       let attempts = 0;
       const maxAttempts = 60;
@@ -185,7 +186,7 @@ export default function PaymentPage() {
         setPayStep("waiting");
         setStatusMsg("A payment prompt has been sent to your phone. Please approve it.");
         const refKey = gwData.referenceId || gwData.transactionId;
-        pollStatus(gateway, refKey, order.id);
+        pollStatus(gateway, refKey);
       } else {
         clearCart();
         clearCheckout();
@@ -276,7 +277,7 @@ export default function PaymentPage() {
                         <input checked={paymentMethod === "momo"} onChange={() => setPaymentMethod("momo")} className="hidden peer" name="payment" type="radio" />
                         <div className="flex items-center gap-md w-full">
                           <div className="w-12 h-12 rounded-lg bg-[#FFCC00] flex items-center justify-center p-xs">
-                            <img className="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtmXpjh8k-2xAsJ2ey89HMRXVzG2M9B_p5RK_AHInFGn8qQdY6mamlPChX-dVbyHSNzdidJ8AwnPUFd_CY0cNvQxJ9zWhTA6boM4PVHc3sYbrVeh5BEkb4ktZTwBEXH5JAb3uSEVfX7RLRWHDb31tTI8HmRGGpTkHfFyafPz789p5ONSS-mqhVdNnSJndeai_Gm7-EDfsortBfN6wn8YKjOqONiSpvSVQDg1HnDm463_J7QJntMxDhKg" alt="MTN MoMo" />
+                            <Image className="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCtmXpjh8k-2xAsJ2ey89HMRXVzG2M9B_p5RK_AHInFGn8qQdY6mamlPChX-dVbyHSNzdidJ8AwnPUFd_CY0cNvQxJ9zWhTA6boM4PVHc3sYbrVeh5BEkb4ktZTwBEXH5JAb3uSEVfX7RLRWHDb31tTI8HmRGGpTkHfFyafPz789p5ONSS-mqhVdNnSJndeai_Gm7-EDfsortBfN6wn8YKjOqONiSpvSVQDg1HnDm463_J7QJntMxDhKg" alt="MTN MoMo" width={48} height={48} />
                           </div>
                           <div className="flex-1">
                             <p className="font-label-md text-label-md text-on-surface dark:text-white">MTN MoMo</p>
@@ -289,7 +290,7 @@ export default function PaymentPage() {
                         <input checked={paymentMethod === "airtel"} onChange={() => setPaymentMethod("airtel")} className="hidden peer" name="payment" type="radio" />
                         <div className="flex items-center gap-md w-full">
                           <div className="w-12 h-12 rounded-lg bg-[#E11900] flex items-center justify-center p-xs">
-                            <img className="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaCJjiZTVPagKiDTBObQuLpx5ILWP_x7OIpVRLr1P8Ifh3QzNxrXytzOMUZ2IEh83pstF4eJ6DIk37CyQdb25DltdIh3V5S_2UrIWRoeo8UPxUSZdZULbGVdtymMXHfgO_6EyikyPqVzRZIwEGmt_NJGjJeY1FVqrz9x-c-jinSom2zyeZtJUJhEsuB4-GsvdNY0hoyJvoFWFV6PgTjrTDRzCOWJ3202DaAzw4YrRtIMTyOOxmIjinAQ" alt="Airtel Money" />
+                            <Image className="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCaCJjiZTVPagKiDTBObQuLpx5ILWP_x7OIpVRLr1P8Ifh3QzNxrXytzOMUZ2IEh83pstF4eJ6DIk37CyQdb25DltdIh3V5S_2UrIWRoeo8UPxUSZdZULbGVdtymMXHfgO_6EyikyPqVzRZIwEGmt_NJGjJeY1FVqrz9x-c-jinSom2zyeZtJUJhEsuB4-GsvdNY0hoyJvoFWFV6PgTjrTDRzCOWJ3202DaAzw4YrRtIMTyOOxmIjinAQ" alt="Airtel Money" width={48} height={48} />
                           </div>
                           <div className="flex-1">
                             <p className="font-label-md text-label-md text-on-surface dark:text-white">Airtel Money</p>
@@ -307,7 +308,7 @@ export default function PaymentPage() {
                         <input checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} className="hidden peer" name="payment" type="radio" />
                         <div className="flex items-center gap-md w-full">
                           <div className="w-12 h-8 rounded bg-[#1434CB] flex items-center justify-center p-xs">
-                            <img className="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCilSR6IVihns1lkvbY4CMBnKL2qES3zLfMEBiRAWGUC0rQM9Xt4MFh9uWkEYvvcm9rTPOqcZ177OcQSS8xex1QPj4CoIN7tjDVjLNTFva4InY6il7y1RRm_P50OnA6az_t9734Z-0B8W1b1T0e7JCiRiEpOi_A7kAPqK5E1pv7Has7CdStsYylGHxZcDMWYbZaWH3IK4ucpL1Cxcua0KhkgoFjnfz1514NZ0zRqC5Z46c8B0VSYI7UQQ" alt="Visa" />
+                            <Image className="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCilSR6IVihns1lkvbY4CMBnKL2qES3zLfMEBiRAWGUC0rQM9Xt4MFh9uWkEYvvcm9rTPOqcZ177OcQSS8xex1QPj4CoIN7tjDVjLNTFva4InY6il7y1RRm_P50OnA6az_t9734Z-0B8W1b1T0e7JCiRiEpOi_A7kAPqK5E1pv7Has7CdStsYylGHxZcDMWYbZaWH3IK4ucpL1Cxcua0KhkgoFjnfz1514NZ0zRqC5Z46c8B0VSYI7UQQ" alt="Visa" width={48} height={32} />
                           </div>
                           <div className="flex-1">
                             <p className="font-label-md text-label-md text-on-surface dark:text-white">Visa</p>
@@ -320,7 +321,7 @@ export default function PaymentPage() {
                         <input checked={paymentMethod === "card"} onChange={() => setPaymentMethod("card")} className="hidden peer" name="payment" type="radio" />
                         <div className="flex items-center gap-md w-full">
                           <div className="w-12 h-8 rounded bg-[#222222] flex items-center justify-center p-xs">
-                            <img className="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9dRL_kVShweuASvMRdjRTXIyyqd9ckdFx_O7Oru72Brtqfr5G5L8wudziM6mjIThM_dj27imXTTTuxdIfP4RhBfGdnllGpD-EYYHDUmV8jO-ysXsWBM75YmjLIFfQOHCojtC_dVhcq69gbz1-X1E9qau6IU7fUFgAItlN2Mb1CVnWBxD1OlkOz1Dn3USoD-SSpaVIHppq0y-0ksYJ-SbhVxhBah_PsEyfXh5qruY2WdAqpxOkEz6rzg" alt="Mastercard" />
+                            <Image className="w-full h-full object-contain" src="https://lh3.googleusercontent.com/aida-public/AB6AXuC9dRL_kVShweuASvMRdjRTXIyyqd9ckdFx_O7Oru72Brtqfr5G5L8wudziM6mjIThM_dj27imXTTTuxdIfP4RhBfGdnllGpD-EYYHDUmV8jO-ysXsWBM75YmjLIFfQOHCojtC_dVhcq69gbz1-X1E9qau6IU7fUFgAItlN2Mb1CVnWBxD1OlkOz1Dn3USoD-SSpaVIHppq0y-0ksYJ-SbhVxhBah_PsEyfXh5qruY2WdAqpxOkEz6rzg" alt="Mastercard" width={48} height={32} />
                           </div>
                           <div className="flex-1">
                             <p className="font-label-md text-label-md text-on-surface dark:text-white">Mastercard</p>
@@ -396,7 +397,7 @@ export default function PaymentPage() {
                     {items.map((item) => (
                       <div key={item.id} className="flex items-center gap-md">
                         <div className="w-16 h-16 rounded-lg bg-surface-container-highest dark:bg-surface-variant/20 overflow-hidden flex-shrink-0">
-                          <img className="w-full h-full object-cover" src={item.image} alt={item.name} />
+                          <Image className="w-full h-full object-cover" src={item.image} alt={item.name} width={64} height={64} />
                         </div>
                         <div className="flex-1 min-w-0">
                           <p className="font-label-md text-label-md text-on-surface dark:text-white truncate">{item.name}</p>
@@ -469,9 +470,9 @@ export default function PaymentPage() {
                   </p>
                 </section>
                 <div className="flex justify-center gap-lg items-center opacity-60 grayscale hover:grayscale-0 transition-all">
-                  <img className="h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAToez5SNHEByt4ovh7H7o00f3JrbECZfMy3pFbXOyix8rb2xkYtKmasgX31MRbL4IXA0qSLG_zOnM0B8vApwJbK2YK5k3_genFdqHu_1vnVEikXzXIqh5IVwoWLzgAAIP_ibuOS2seOYW9QprBYXiKL_MTKacyX0oxnj5h1nG7QeQi_ISiEgJVtdOPVSPSnFEZzhgECqCJGvGaeOC1PQEo_RCQAvMiKZTur2Pi2y1g0BNP-2ho2I1_dA" alt="Mastercard SecureCode" />
-                  <img className="h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD42VG_DFDC-hLfEBsk4yte0DJxo1tZOmLvBu0vWWajgqhIyhfTqnGrgA4SbzX8BJSvnXa3lQSxl97KORkniCidX4O0Ev17jJpQjTMgF41folkUMx0iyibhLrfxKHE4ToHH9mMCu9dYyyK0EF4Gzgc7Qjt1o3Siu8ospRmF_bm4Y2QGGG6SGgeOhRRvZ9US11FHgaBpL-dioFRQALggQMekOLzj8ukA_aCjDGmR2bZqmpu5X9Q_1N3MqQ" alt="Verified by Visa" />
-                  <img className="h-6" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtjDIF9BKbMAx3JJqCZ4H-9Haib1lXnXESIL-JE4IWc-OesNxGzC7kwh-5mo5wwFid37GBDFu5GjsGWKGDPXttROAPkG5dO5idqwQfZggaWmSOD0MjYtuzOlOI-Yn7829tydhg5LlKe5fN6UfosnUKAode60Kk8fLvGiXcczsJLTfheGqmQFEwKVCy4IIgRQmRr6_1ppimcxjNEa8BGuD0uU1RiI8Bga49szIRtnKxKxfamwaprpMO1g" alt="Norton Secured" />
+                  <Image className="h-6 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAToez5SNHEByt4ovh7H7o00f3JrbECZfMy3pFbXOyix8rb2xkYtKmasgX31MRbL4IXA0qSLG_zOnM0B8vApwJbK2YK5k3_genFdqHu_1vnVEikXzXIqh5IVwoWLzgAAIP_ibuOS2seOYW9QprBYXiKL_MTKacyX0oxnj5h1nG7QeQi_ISiEgJVtdOPVSPSnFEZzhgECqCJGvGaeOC1PQEo_RCQAvMiKZTur2Pi2y1g0BNP-2ho2I1_dA" alt="Mastercard SecureCode" width={24} height={24} />
+                  <Image className="h-6 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuD42VG_DFDC-hLfEBsk4yte0DJxo1tZOmLvBu0vWWajgqhIyhfTqnGrgA4SbzX8BJSvnXa3lQSxl97KORkniCidX4O0Ev17jJpQjTMgF41folkUMx0iyibhLrfxKHE4ToHH9mMCu9dYyyK0EF4Gzgc7Qjt1o3Siu8ospRmF_bm4Y2QGGG6SGgeOhRRvZ9US11FHgaBpL-dioFRQALggQMekOLzj8ukA_aCjDGmR2bZqmpu5X9Q_1N3MqQ" alt="Verified by Visa" width={24} height={24} />
+                  <Image className="h-6 w-auto" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAtjDIF9BKbMAx3JJqCZ4H-9Haib1lXnXESIL-JE4IWc-OesNxGzC7kwh-5mo5wwFid37GBDFu5GjsGWKGDPXttROAPkG5dO5idqwQfZggaWmSOD0MjYtuzOlOI-Yn7829tydhg5LlKe5fN6UfosnUKAode60Kk8fLvGiXcczsJLTfheGqmQFEwKVCy4IIgRQmRr6_1ppimcxjNEa8BGuD0uU1RiI8Bga49szIRtnKxKxfamwaprpMO1g" alt="Norton Secured" width={24} height={24} />
                 </div>
               </div>
             </div>

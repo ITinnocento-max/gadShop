@@ -4,7 +4,7 @@ import { serializeResponse } from "@/lib/serialize";
 import { requireAdmin } from "@/lib/api-auth";
 
 export async function GET(request: Request) {
-  const { user, error } = await requireAdmin();
+  const { error } = await requireAdmin();
   if (error) return error;
   try {
     const { searchParams } = new URL(request.url);
@@ -47,7 +47,6 @@ export async function GET(request: Request) {
       totalProducts,
       totalPayments,
       totalExpenses,
-      recentOrders,
       paymentMethodData,
       ordersByPeriod,
     ] = await Promise.all([
@@ -57,12 +56,6 @@ export async function GET(request: Request) {
       prisma.product.count(),
       prisma.payment.aggregate({ _sum: { amount: true }, _count: { id: true } }),
       prisma.expenseClaim.aggregate({ _sum: { totalAmount: true } }),
-      prisma.order.findMany({
-        where: { createdAt: { gte: startDate } },
-        orderBy: { createdAt: "desc" },
-        take: 1000,
-        select: { id: true, total: true, status: true, createdAt: true },
-      }),
       prisma.payment.groupBy({
         by: ["method"],
         _count: { id: true },

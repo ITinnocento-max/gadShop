@@ -56,43 +56,45 @@ export default function AdminPromoCodesPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  const fetchPromoCodes = useCallback(async () => {
+  const [refetchKey, setRefetchKey] = useState(0);
+  const refetch = useCallback(() => setRefetchKey((k) => k + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     params.set("page", String(page));
     params.set("limit", "15");
-
-    try {
-      const res = await fetch(`/api/admin/promo-codes?${params}`);
-      const data = await res.json();
-      setPromoCodes(data.promoCodes || []);
-      setTotalPages(data.totalPages || 1);
-    } catch {
-      // ignore
-    }
-    setLoading(false);
-  }, [search, page]);
-
-  useEffect(() => {
-    fetchPromoCodes();
-  }, [fetchPromoCodes]);
-
-  const fetchFormData = async () => {
-    try {
-      const [prodRes, userRes] = await Promise.all([
-        fetch("/api/admin/products?limit=100").then((r) => r.json()),
-        fetch("/api/admin/users?limit=100").then((r) => r.json()),
-      ]);
-      setProducts(prodRes.products || []);
-      setUsers(userRes.users || []);
-    } catch {
-      // ignore
-    }
-  };
+    fetch(`/api/admin/promo-codes?${params}`)
+      .then((r) => r.json())
+      .then((data) => {
+        if (!cancelled) {
+          setPromoCodes(data.promoCodes || []);
+          setTotalPages(data.totalPages || 1);
+        }
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [search, page, refetchKey]);
 
   useEffect(() => {
-    if (showForm) fetchFormData();
+    if (!showForm) return;
+    let cancelled = false;
+    Promise.all([
+      fetch("/api/admin/products?limit=100").then((r) => r.json()),
+      fetch("/api/admin/users?limit=100").then((r) => r.json()),
+    ])
+      .then(([prodRes, userRes]) => {
+        if (!cancelled) {
+          setProducts(prodRes.products || []);
+          setUsers(userRes.users || []);
+        }
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
   }, [showForm]);
 
   const handleCreate = async () => {
@@ -117,7 +119,7 @@ export default function AdminPromoCodesPage() {
       if (res.ok) {
         setShowForm(false);
         setForm(emptyForm);
-        fetchPromoCodes();
+        refetch();
       } else {
         const err = await res.json();
         alert(err.error || "Failed to create promo code");
@@ -134,7 +136,7 @@ export default function AdminPromoCodesPage() {
       const res = await fetch(`/api/admin/promo-codes/${id}`, { method: "DELETE" });
       if (res.ok) {
         setDeleteId(null);
-        fetchPromoCodes();
+        refetch();
       }
     } catch {
       // ignore
@@ -149,7 +151,7 @@ export default function AdminPromoCodesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ isActive: !promo.isActive }),
       });
-      fetchPromoCodes();
+      refetch();
     } catch {
       // ignore
     }

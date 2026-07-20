@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useRef, useCallback } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useParams, useRouter } from "next/navigation"
 import { useUIStore } from "@/stores/ui-store"
 import jsPDF from "jspdf"
@@ -48,20 +48,22 @@ export default function ReportDetailPage() {
   const params = useParams()
   const slug = params.slug as string
   const meta = reportMeta[slug]
-  const reportRef = useRef<HTMLDivElement>(null)
   const [downloading, setDownloading] = useState(false)
 
   const [summaryData, setSummaryData] = useState<Record<string, number> | null>(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!meta) { setLoading(false); return }
+    let cancelled = false
     setLoading(true)
     fetch("/api/admin/financial/reports/summary")
       .then((r) => r.json())
-      .then((d) => setSummaryData(d))
+      .then((d) => { if (!cancelled) setSummaryData(d) })
       .catch(() => {})
-      .finally(() => setLoading(false))
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
   }, [slug, meta])
 
   const buildReportContent = useCallback(() => {
@@ -92,17 +94,6 @@ export default function ReportDetailPage() {
         pdf.setFontSize(size)
         pdf.text(text, margin, y)
         y += size * 0.5
-      }
-
-      const body = (text: string, size = 10) => {
-        pdf.setFont("helvetica", "normal")
-        pdf.setFontSize(size)
-        const lines = pdf.splitTextToSize(text, pageW - margin * 2)
-        for (const line of lines) {
-          if (y > 270) { pdf.addPage(); y = yStart }
-          pdf.text(line as string, margin, y)
-          y += size * 0.45
-        }
       }
 
       const separator = () => {
@@ -186,10 +177,9 @@ export default function ReportDetailPage() {
   }, [])
 
   const emailReport = useCallback(() => {
-    const { reportTitle, dateStr, content } = buildReportContent()
+    const { reportTitle, content } = buildReportContent()
     const subject = encodeURIComponent(`${reportTitle} - SmartHub Shop`)
-    const body = encodeURIComponent(content)
-    window.open(`mailto:?subject=${subject}&body=${body}`, "_blank")
+    window.open(`mailto:?subject=${subject}&body=${encodeURIComponent(content)}`, "_blank")
   }, [buildReportContent])
 
   if (!meta) {
@@ -249,7 +239,7 @@ export default function ReportDetailPage() {
       {loading ? (
         <div className="text-center py-12 text-outline">{"Loading..."}</div>
       ) : (
-        <div ref={reportRef} className="bg-surface p-lg rounded-xl shadow-soft border border-outline-variant/10">
+        <div className="bg-surface p-lg rounded-xl shadow-soft border border-outline-variant/10">
           <div className="flex items-center gap-4 mb-6">
             <div className="w-14 h-14 bg-primary/10 text-primary rounded-2xl flex items-center justify-center">
               <span className="material-symbols-outlined text-[32px]">{meta.icon}</span>

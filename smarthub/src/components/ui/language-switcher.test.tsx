@@ -1,3 +1,4 @@
+/// <reference types="@testing-library/jest-dom" />
 import { render, screen, fireEvent } from "@testing-library/react";
 import { LanguageSwitcher } from "./language-switcher";
 import { useUIStore } from "@/stores/ui-store";

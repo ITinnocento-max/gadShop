@@ -67,25 +67,25 @@ export default function AdminOrdersPage() {
   const [page, setPage] = useState(1);
   const [updating, setUpdating] = useState<string | null>(null);
 
-  const fetchOrders = useCallback(async () => {
+  const [refetchKey, setRefetchKey] = useState(0);
+  const refetch = useCallback(() => setRefetchKey((k) => k + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (statusFilter !== "all") params.set("status", statusFilter);
     params.set("page", String(page));
     params.set("limit", "20");
-
-    try {
-      const res = await fetch(`/api/admin/orders?${params}`).then((r) => r.json());
-      setData(res);
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
-  }, [search, statusFilter, page]);
-
-  useEffect(() => { fetchOrders(); }, [fetchOrders]);
+    fetch(`/api/admin/orders?${params}`)
+      .then((r) => r.json())
+      .then((res) => { if (!cancelled) setData(res); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [search, statusFilter, page, refetchKey]);
 
   const updateStatus = async (orderId: string, newStatus: string) => {
     setUpdating(orderId);
@@ -95,7 +95,7 @@ export default function AdminOrdersPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (res.ok) fetchOrders();
+      if (res.ok) refetch();
     } catch {
       // ignore
     } finally {

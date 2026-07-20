@@ -44,6 +44,7 @@ export function AdminGuard({ children }: { children: React.ReactNode }) {
       window.location.href = "/";
       return;
     }
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setReady(true);
   }, [pathname]);
 

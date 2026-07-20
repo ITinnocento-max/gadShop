@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useUIStore } from "@/stores/ui-store"
 import jsPDF from "jspdf"
 
@@ -60,7 +60,6 @@ export default function InvoicingPage() {
   const [data, setData] = useState<InvoicingResponse | null>(null)
   const [loading, setLoading] = useState(true)
   const [downloading, setDownloading] = useState(false)
-  const reportRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const fetchData = async () => {

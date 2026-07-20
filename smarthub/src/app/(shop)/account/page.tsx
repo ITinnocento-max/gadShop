@@ -2,6 +2,8 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
+import Image from "next/image";
 import { useUIStore } from "@/stores/ui-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { CustomerGuard } from "@/components/customer/customer-guard";
@@ -51,12 +53,15 @@ export default function AccountPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     if (!user?.id) { setLoading(false); return; }
+    let cancelled = false;
     fetch(`/api/orders?userId=${user.id}`)
       .then((r) => r.json())
-      .then((data) => setOrders(data))
+      .then((data) => { if (!cancelled) setOrders(data); })
       .catch(() => {})
-      .finally(() => setLoading(false));
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
   }, [user?.id]);
 
   const lastOrder = orders[0];
@@ -87,7 +92,7 @@ export default function AccountPage() {
         <section className="flex flex-col items-center mt-4 mb-8">
           <div className="relative group">
             <div className="w-24 h-24 rounded-full overflow-hidden border-4 border-white dark:border-inverse-surface shadow-lg">
-              <img className="w-full h-full object-cover" src={user?.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuCTZpYH3lFSG415REHBkLO6WNwRC9-MNrBh5R45MSGwC4U5MBUioLxSkJvrqIPwot_uTyrSrfr6BjHOJCqLdqAsgIhgiEz5dMxI4-15AtQGzrrt-AHPjnUbxw0hSyAjodPcNqSEdj7qvunWfaSCFWVZhromLzMFzx9olvcxyO30etn0kwDWX0zot4c6rPwFvu0DPKQK_3ht9hn75NCNZ-PcM-dwYfz-8YFUueMZ0W-dnePJz-x44IKC1g"} alt="Profile" />
+              <Image className="w-full h-full object-cover" src={user?.avatar || "https://lh3.googleusercontent.com/aida-public/AB6AXuCTZpYH3lFSG415REHBkLO6WNwRC9-MNrBh5R45MSGwC4U5MBUioLxSkJvrqIPwot_uTyrSrfr6BjHOJCqLdqAsgIhgiEz5dMxI4-15AtQGzrrt-AHPjnUbxw0hSyAjodPcNqSEdj7qvunWfaSCFWVZhromLzMFzx9olvcxyO30etn0kwDWX0zot4c6rPwFvu0DPKQK_3ht9hn75NCNZ-PcM-dwYfz-8YFUueMZ0W-dnePJz-x44IKC1g"} alt="Profile" width={96} height={96} />
             </div>
             <button onClick={() => router.push("/account")} className="absolute bottom-0 right-0 bg-primary text-on-primary p-1.5 rounded-full shadow-md active:scale-90 transition-transform">
               <span className="material-symbols-outlined text-[18px]">edit</span>
@@ -109,7 +114,7 @@ export default function AccountPage() {
             ) : lastOrder ? (
               <div className="flex items-center gap-md">
                 <div className="w-16 h-16 bg-surface-container dark:bg-surface-variant/15 rounded-lg overflow-hidden flex-shrink-0">
-                  <img className="w-full h-full object-cover" src={lastOrder.items[0]?.product?.images?.[0] || lastOrder.items[0]?.image || ""} alt={lastOrder.items[0]?.name || "Order"} />
+                  <Image className="w-full h-full object-cover" src={lastOrder.items[0]?.product?.images?.[0] || lastOrder.items[0]?.image || ""} alt={lastOrder.items[0]?.name || "Order"} width={64} height={64} />
                 </div>
                 <div className="flex-grow min-w-0">
                   <div className="flex items-center gap-1.5 mb-1">
@@ -144,7 +149,7 @@ export default function AccountPage() {
         </section>
         <nav className="space-y-2">
           <h4 className="font-label-sm text-outline dark:text-outline-variant px-2 py-1">{t("account.account_preferences")}</h4>
-          <a className="flex items-center justify-between p-md bg-surface-container-lowest dark:bg-inverse-surface rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-none hover:bg-surface-container dark:hover:bg-surface-variant/15 transition-colors active:scale-[0.98]" href="/orders">
+          <Link className="flex items-center justify-between p-md bg-surface-container-lowest dark:bg-inverse-surface rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-none hover:bg-surface-container dark:hover:bg-surface-variant/15 transition-colors active:scale-[0.98]" href="/orders">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-lg bg-primary-container/10 flex items-center justify-center text-primary dark:text-inverse-primary">
                 <span className="material-symbols-outlined">receipt_long</span>
@@ -152,7 +157,7 @@ export default function AccountPage() {
               <span className="font-label-md text-on-surface dark:text-white">{t("account.my_orders")}</span>
             </div>
             <span className="material-symbols-outlined text-outline-variant dark:text-outline-variant/30">chevron_right</span>
-          </a>
+          </Link>
           <button onClick={() => router.push("/wishlist")} className="w-full flex items-center justify-between p-md bg-surface-container-lowest dark:bg-inverse-surface rounded-xl shadow-[0_4px_20px_rgba(0,0,0,0.03)] dark:shadow-none hover:bg-surface-container dark:hover:bg-surface-variant/15 transition-colors active:scale-[0.98]">
             <div className="flex items-center gap-4">
               <div className="w-10 h-10 rounded-lg bg-tertiary-container/10 flex items-center justify-center text-tertiary">
@@ -208,26 +213,26 @@ export default function AccountPage() {
       </main>
       {/* Bottom Navigation — Design Spec */}
       <nav className="fixed bottom-0 left-0 w-full flex justify-around items-center h-20 px-2 pb-safe bg-surface dark:bg-inverse-surface shadow-soft dark:shadow-none dark:border dark:border-outline-variant/10 border-t border-outline-variant/30 dark:border-outline-variant/20 z-50">
-        <a className="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-variant/50 transition-all rounded-full px-4 py-1" href="/">
+        <Link className="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-variant/50 transition-all rounded-full px-4 py-1" href="/">
           <span className="material-symbols-outlined">home</span>
           <span className="font-label-sm text-label-sm">{t("nav.home")}</span>
-        </a>
-        <a className="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-variant/50 transition-all rounded-full px-4 py-1" href="/products">
+        </Link>
+        <Link className="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-variant/50 transition-all rounded-full px-4 py-1" href="/products">
           <span className="material-symbols-outlined">category</span>
           <span className="font-label-sm text-label-sm">{t("nav.categories")}</span>
-        </a>
-        <a className="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-variant/50 transition-all rounded-full px-4 py-1" href="/orders">
+        </Link>
+        <Link className="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-variant/50 transition-all rounded-full px-4 py-1" href="/orders">
           <span className="material-symbols-outlined">receipt_long</span>
           <span className="font-label-sm text-label-sm">{t("nav.orders")}</span>
-        </a>
-        <a className="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-variant/50 transition-all rounded-full px-4 py-1" href="/cart">
+        </Link>
+        <Link className="flex flex-col items-center justify-center text-on-surface-variant dark:text-outline hover:bg-surface-variant/50 transition-all rounded-full px-4 py-1" href="/cart">
           <span className="material-symbols-outlined">shopping_bag</span>
           <span className="font-label-sm text-label-sm">{t("nav.cart")}</span>
-        </a>
-        <a className="flex flex-col items-center justify-center bg-primary-container/10 text-primary dark:text-inverse-primary rounded-full px-4 py-1" href="/account">
+        </Link>
+        <Link className="flex flex-col items-center justify-center bg-primary-container/10 text-primary dark:text-inverse-primary rounded-full px-4 py-1" href="/account">
           <span className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1" }}>person</span>
           <span className="font-label-sm text-label-sm">{t("nav.profile")}</span>
-        </a>
+        </Link>
       </nav>
     </CustomerGuard>
   );

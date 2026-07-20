@@ -1,6 +1,7 @@
 "use client";
 
 import { Suspense, useEffect, useState, useMemo } from "react";
+import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
@@ -134,7 +135,7 @@ function ProductsContent() {
                 <span className="absolute top-2 left-2 z-10 bg-tertiary text-on-tertiary px-2 py-0.5 rounded-lg font-label-sm">{discount}</span>
               )}
               <div className="aspect-square rounded-lg overflow-hidden bg-surface-container-low dark:bg-surface-variant/10 mb-3 relative">
-                <img className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={product.images[0] || ""} alt={product.name} />
+                <Image className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" src={product.images[0] || ""} alt={product.name} width={300} height={300} unoptimized />
                 <button
                   onClick={(e) => { e.stopPropagation(); toggleItem({ id: product.id, slug: product.slug, image: product.images[0] || "", brand: product.brand, title: product.name, price: product.price, originalPrice: product.originalPrice ?? undefined, inStock: product.stock > 0 }); }}
                   className={`absolute top-2 right-2 w-8 h-8 rounded-full flex items-center justify-center transition-all active:scale-90 ${

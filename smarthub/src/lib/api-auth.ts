@@ -15,23 +15,6 @@ interface AuthResult {
   error: NextResponse | null;
 }
 
-function parseAuthCookie(cookieHeader: string | undefined): AuthUser | null {
-  if (!cookieHeader) return null;
-  const match = cookieHeader.split(";").find((c) => c.trim().startsWith("auth-storage="));
-  if (!match) return null;
-  try {
-    const value = decodeURIComponent(match.split("=").slice(1).join("="));
-    const parsed = JSON.parse(value);
-    const state = parsed.state ?? parsed;
-    if (state?.isAuthenticated && state?.user) {
-      return state.user as AuthUser;
-    }
-  } catch {
-    return null;
-  }
-  return null;
-}
-
 export async function getAuthUser(): Promise<AuthUser | null> {
   const cookieStore = await cookies();
   const authCookie = cookieStore.get("auth-storage");

@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { usePathname } from "next/navigation";
 import { useTranslation } from "@/hooks/useTranslation";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -35,7 +36,7 @@ export function AdminSidebar() {
     <aside className="hidden md:flex flex-col w-72 bg-surface-container-low border-r border-outline-variant/20 shrink-0">
       <Link href="/admin/dashboard" className="p-lg flex items-center gap-3 border-b border-outline-variant/10 hover:bg-surface-variant/30 transition-colors">
         <div className="w-10 h-10 rounded-xl overflow-hidden flex items-center justify-center bg-surface-container shrink-0">
-          <img src="/logo.jpeg" alt="SmartHub" className="w-full h-full object-contain" />
+          <Image src="/logo.jpeg" alt="SmartHub" width={40} height={40} unoptimized className="w-full h-full object-contain" />
         </div>
         <div className="flex flex-col">
           <span className="font-headline-md text-headline-md text-primary">{t("common.app_name")}</span>

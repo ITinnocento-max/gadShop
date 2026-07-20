@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { Header } from "@/components/store/header";
 import { BottomNav } from "@/components/ui/bottom-nav";
 import { CheckoutStepper } from "@/components/ui/checkout-stepper";
+import Image from "next/image";
 import { useCartStore } from "@/stores/cart-store";
 import { useCheckoutStore } from "@/stores/checkout-store";
 import { useAuthStore } from "@/stores/auth-store";
@@ -148,7 +149,7 @@ export default function ShippingPage() {
                 {items.map((item) => (
                   <div key={item.id} className="flex gap-md">
                     <div className="w-16 h-16 rounded-lg overflow-hidden flex-shrink-0">
-                      <img className="w-full h-full object-cover" src={item.image} alt={item.name} />
+                      <Image className="w-full h-full object-cover" src={item.image} alt={item.name} width={64} height={64} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <h4 className="font-label-md text-on-surface dark:text-white truncate">{item.name}</h4>

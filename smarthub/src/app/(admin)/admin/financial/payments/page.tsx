@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useRef } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useUIStore } from "@/stores/ui-store";
 import jsPDF from "jspdf";
 
@@ -78,7 +78,6 @@ export default function PaymentsPage() {
   const [page, setPage] = useState(1);
   const [updating, setUpdating] = useState<string | null>(null);
   const [downloading, setDownloading] = useState(false);
-  const reportRef = useRef<HTMLDivElement>(null);
 
   const downloadPDF = useCallback(() => {
     setDownloading(true);
@@ -177,7 +176,12 @@ export default function PaymentsPage() {
     window.open(`mailto:?subject=${encodeURIComponent("Payment Monitoring - SmartHub Shop")}&body=${encodeURIComponent(content)}`, "_blank");
   }, [data]);
 
-  const fetchPayments = useCallback(async () => {
+  const [refetchKey, setRefetchKey] = useState(0);
+  const refetch = useCallback(() => setRefetchKey((k) => k + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
@@ -185,18 +189,13 @@ export default function PaymentsPage() {
     if (methodFilter !== "all") params.set("method", methodFilter);
     params.set("page", String(page));
     params.set("limit", "20");
-
-    try {
-      const res = await fetch(`/api/admin/payments?${params}`).then((r) => r.json());
-      setData(res);
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false);
-    }
-  }, [search, statusFilter, methodFilter, page]);
-
-  useEffect(() => { fetchPayments(); }, [fetchPayments]);
+    fetch(`/api/admin/payments?${params}`)
+      .then((r) => r.json())
+      .then((res) => { if (!cancelled) setData(res); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [search, statusFilter, methodFilter, page, refetchKey]);
 
   const updateStatus = async (paymentId: string, newStatus: string) => {
     setUpdating(paymentId);
@@ -206,7 +205,7 @@ export default function PaymentsPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       });
-      if (res.ok) fetchPayments();
+      if (res.ok) refetch();
     } catch {
       // ignore
     } finally {

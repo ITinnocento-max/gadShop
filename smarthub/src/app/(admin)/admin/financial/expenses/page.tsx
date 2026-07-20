@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState, useCallback, useRef } from "react"
+import { useEffect, useState, useCallback } from "react"
 import { useUIStore } from "@/stores/ui-store"
 import jsPDF from "jspdf"
 
@@ -112,7 +112,6 @@ export default function ExpensesPage() {
   ])
   const [updating, setUpdating] = useState<string | null>(null)
   const [downloading, setDownloading] = useState(false)
-  const reportRef = useRef<HTMLDivElement>(null)
 
   const downloadPDF = useCallback(() => {
     setDownloading(true)
@@ -202,21 +201,20 @@ export default function ExpensesPage() {
     window.open(`mailto:?subject=${encodeURIComponent("Expenses Report - SmartHub Shop")}&body=${encodeURIComponent(content)}`, "_blank")
   }, [data])
 
-  const fetchData = useCallback(async () => {
-    setLoading(true)
-    try {
-      const res = await fetch("/api/admin/financial/expenses").then((r) => r.json())
-      setData(res)
-    } catch {
-      // ignore
-    } finally {
-      setLoading(false)
-    }
-  }, [])
+  const [refetchKey, setRefetchKey] = useState(0)
+  const refetch = useCallback(() => setRefetchKey((k) => k + 1), [])
 
   useEffect(() => {
-    fetchData()
-  }, [fetchData])
+    let cancelled = false
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setLoading(true)
+    fetch("/api/admin/financial/expenses")
+      .then((r) => r.json())
+      .then((res) => { if (!cancelled) setData(res) })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false) })
+    return () => { cancelled = true }
+  }, [refetchKey])
 
   const resetForm = () => {
     setFormTitle("")
@@ -259,7 +257,7 @@ export default function ExpensesPage() {
       if (res.ok) {
         setModalOpen(false)
         resetForm()
-        fetchData()
+        refetch()
       }
     } catch {
       // ignore
@@ -276,7 +274,7 @@ export default function ExpensesPage() {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ status: newStatus }),
       })
-      if (res.ok) fetchData()
+      if (res.ok) refetch()
     } catch {
       // ignore
     } finally {

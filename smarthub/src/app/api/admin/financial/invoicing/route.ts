@@ -12,7 +12,7 @@ function invoiceStatus(order: { status: string; paidAt: Date | null; createdAt: 
 }
 
 export async function GET() {
-  const { user, error } = await requireAdmin();
+  const { error } = await requireAdmin();
   if (error) return error;
   try {
     const orders = await prisma.order.findMany({

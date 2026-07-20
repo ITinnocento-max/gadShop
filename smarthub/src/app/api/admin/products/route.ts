@@ -5,7 +5,7 @@ import { requireAdmin } from "@/lib/api-auth";
 import { buildProductSearchWhere } from "@/lib/search";
 
 export async function GET(request: Request) {
-  const { user, error } = await requireAdmin();
+  const { error } = await requireAdmin();
   if (error) return error;
   try {
     const { searchParams } = new URL(request.url);
@@ -102,7 +102,7 @@ export async function GET(request: Request) {
 }
 
 export async function POST(request: Request) {
-  const { user, error } = await requireAdmin();
+  const { error } = await requireAdmin();
   if (error) return error;
   try {
     const body = await request.json();

@@ -45,8 +45,6 @@ export default function AdminProfitLossPage() {
     (v < 0 ? "-" : "") + "RWF " + Math.abs(v).toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
 
   const months = data?.monthlyRows ?? [];
-  const last3 = months.slice(-3);
-  const quarters = last3.reduce((s, r) => s + r.revenue, 0);
 
   const trendMonths = months.map((r) => {
     const [, m] = r.month.split("-");
@@ -170,7 +168,7 @@ export default function AdminProfitLossPage() {
                 </thead>
                 <tbody className="divide-y divide-outline-variant/10">
                   <tr className="bg-surface-container-low/20">
-                    <td className="px-lg py-3 font-label-md text-primary font-bold" colSpan={months.length + 2}>"TOTAL REVENUE (SALES)"</td>
+                    <td className="px-lg py-3 font-label-md text-primary font-bold" colSpan={months.length + 2}>&quot;TOTAL REVENUE (SALES)&quot;</td>
                   </tr>
                   <tr className="hover:bg-surface-container-low transition-colors">
                     <td className="px-lg py-4 font-body-md">Product Sales</td>
@@ -204,7 +202,7 @@ export default function AdminProfitLossPage() {
                     <td className="px-lg py-4 text-right font-label-md text-secondary">{fmtShort(data?.totals.grossProfit ?? 0)}</td>
                   </tr>
                   <tr className="bg-surface-container-low/20">
-                    <td className="px-lg py-3 font-label-md text-primary font-bold" colSpan={months.length + 2}>"OPERATING EXPENSES"</td>
+                    <td className="px-lg py-3 font-label-md text-primary font-bold" colSpan={months.length + 2}>&quot;OPERATING EXPENSES&quot;</td>
                   </tr>
                   <tr className="hover:bg-surface-container-low transition-colors">
                     <td className="px-lg py-4 font-body-md">Operating Expenses</td>
@@ -256,7 +254,6 @@ export default function AdminProfitLossPage() {
                 const gridLines = 5;
 
                 const x = (i: number) => padL + groupW * i + groupW / 2;
-                const barY = (val: number) => padT + innerH - (val / niceMax) * innerH;
                 const lineY = (val: number) => padT + innerH - (Math.max(val, 0) / niceMax) * innerH;
 
                 const profitPts = trendMonths.map((r, i) => `${x(i)},${lineY(r.netProfit)}`).join(" ");

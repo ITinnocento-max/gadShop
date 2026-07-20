@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, FormEvent } from "react";
+import Image from "next/image";
 import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/hooks/useTranslation";
 
@@ -13,13 +14,10 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [from, setFrom] = useState<string | null>(null);
-
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const f = params.get("from");
-    if (f) setFrom(f);
-  }, []);
+  const [from] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    return new URLSearchParams(window.location.search).get("from");
+  });
 
   useEffect(() => {
     if (isAuthenticated && user) {
@@ -79,7 +77,7 @@ export default function LoginPage() {
           <div className="absolute bottom-0 right-0 w-full h-[65%] flex items-end justify-end translate-x-[10%] translate-y-[10%]">
             <div className="relative group w-full h-full flex items-end justify-end">
               <div className="absolute inset-0 bg-secondary-fixed/30 rounded-full blur-3xl scale-110 animate-pulse" />
-              <img className="w-[80%] h-auto max-w-[50vw] object-contain relative z-10 drop-shadow-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU4l3j3LE0Wlm57XANPIiG4rQG_JT2pxC37O_tX4jxyMZ0qfEKPm4aavTLJmgKJT0fO656DVeaXmLRrr93-OjPT2dzxOp9D6Mb1QHUgdatrGCXxmvqiVIq2fE_tke2g3u_5gcxQ9NIMomeB5KMRRMddy9oZcSdbDAdZt7X9ofROr9Qtd5E3JpMJ62gVB-0kk91d5_n86SChbkO6wa73hhGNkXOOuHIDODDS6N1LRPOz_U5SbYKRYWvJw" alt="SmartHub products" />
+              <Image className="object-contain z-10 drop-shadow-2xl" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBU4l3j3LE0Wlm57XANPIiG4rQG_JT2pxC37O_tX4jxyMZ0qfEKPm4aavTLJmgKJT0fO656DVeaXmLRrr93-OjPT2dzxOp9D6Mb1QHUgdatrGCXxmvqiVIq2fE_tke2g3u_5gcxQ9NIMomeB5KMRRMddy9oZcSdbDAdZt7X9ofROr9Qtd5E3JpMJ62gVB-0kk91d5_n86SChbkO6wa73hhGNkXOOuHIDODDS6N1LRPOz_U5SbYKRYWvJw" alt="SmartHub products" fill />
             </div>
           </div>
           <div className="relative z-10 font-label-md text-label-md lg:text-[1.2vw] xl:text-[1vw] text-on-primary/60">&copy; 2026 {t("common.app_name")}. {t("admin.all_rights")}</div>

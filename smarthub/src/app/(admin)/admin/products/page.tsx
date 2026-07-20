@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useUIStore } from "@/stores/ui-store";
@@ -52,7 +53,12 @@ export default function AdminProductsPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const fetchProducts = useCallback(async () => {
+  const [refetchKey, setRefetchKey] = useState(0);
+  const refetch = useCallback(() => setRefetchKey((k) => k + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
@@ -62,23 +68,17 @@ export default function AdminProductsPage() {
     if (sortBy !== "newest") params.set("sortBy", sortBy);
     params.set("page", String(page));
     params.set("limit", "20");
-
-    try {
-      const [productsRes, categoriesRes] = await Promise.all([
-        fetch(`/api/admin/products?${params}`).then((r) => r.json()),
-        fetch("/api/categories").then((r) => r.json()),
-      ]);
-      setData(productsRes);
-      setCategories(categoriesRes);
-    } catch {
-      // ignore
-    }
-    setLoading(false);
-  }, [search, category, vendor, stockStatus, sortBy, page]);
-
-  useEffect(() => {
-    fetchProducts();
-  }, [fetchProducts]);
+    Promise.all([
+      fetch(`/api/admin/products?${params}`).then((r) => r.json()),
+      fetch("/api/categories").then((r) => r.json()),
+    ])
+      .then(([productsRes, categoriesRes]) => {
+        if (!cancelled) { setData(productsRes); setCategories(categoriesRes); }
+      })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [search, category, vendor, stockStatus, sortBy, page, refetchKey]);
 
   const handleDelete = async (id: string) => {
     setDeleting(true);
@@ -86,7 +86,7 @@ export default function AdminProductsPage() {
       const res = await fetch(`/api/admin/products/${id}`, { method: "DELETE" });
       if (res.ok) {
         setDeleteId(null);
-        fetchProducts();
+        refetch();
       }
     } catch {
       // ignore
@@ -110,10 +110,12 @@ export default function AdminProductsPage() {
               <span className="material-symbols-outlined">notifications</span>
             </button>
             <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
-              <img
+              <Image
                 className="w-full h-full object-cover"
                 src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6jAEv7x888X42BimUArGeWLtS9MnDaHwOqSgTX0c13jeuDFDOGhAMbJwltx7r19TZDkvBAPK8kC_t1LocXTZchBB2ntQe2r16jny3aiQ8pzLUYhEV4mzaxTbMqM0khIbcIdHn4LQUuSo1dfmVr6kRSvYi7HcxcQuRzco7rCMccO_heVE48x3jOW4gGtkgBDmG7yRoL1CLMoByp2g1AcpmouNjLxmSZFNuwWzYlIkowOuD5ljUz-l87A"
                 alt="Admin"
+                width={32}
+                height={32}
               />
             </div>
           </div>
@@ -211,10 +213,12 @@ export default function AdminProductsPage() {
                         <td className="px-lg py-4">
                           <div className="flex items-center gap-3">
                             <div className="w-10 h-10 rounded-lg bg-surface-variant overflow-hidden shrink-0">
-                              <img
+                              <Image
                                 className="w-full h-full object-cover"
                                 src={Array.isArray(product.images) && product.images[0] ? product.images[0] as string : "https://placehold.co/40x40?text=N"}
                                 alt={product.name}
+                                width={40}
+                                height={40}
                               />
                             </div>
                             <div>

@@ -3,6 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { useUIStore } from "@/stores/ui-store";
 
 interface UserData {
@@ -43,22 +44,25 @@ export default function AdminUsersPage() {
   const [deleteId, setDeleteId] = useState<string | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  const fetchUsers = useCallback(async () => {
+  const [refetchKey, setRefetchKey] = useState(0);
+  const refetch = useCallback(() => setRefetchKey((k) => k + 1), []);
+
+  useEffect(() => {
+    let cancelled = false;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setLoading(true);
     const params = new URLSearchParams();
     if (search) params.set("search", search);
     if (roleFilter !== "all") params.set("role", roleFilter);
     params.set("page", String(page));
     params.set("limit", "20");
-
-    try {
-      const res = await fetch(`/api/admin/users?${params}`).then((r) => r.json());
-      setData(res);
-    } catch {}
-    setLoading(false);
-  }, [search, roleFilter, page]);
-
-  useEffect(() => { fetchUsers(); }, [fetchUsers]);
+    fetch(`/api/admin/users?${params}`)
+      .then((r) => r.json())
+      .then((res) => { if (!cancelled) setData(res); })
+      .catch(() => {})
+      .finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [search, roleFilter, page, refetchKey]);
 
   const handleDelete = async (id: string) => {
     setDeleting(true);
@@ -66,7 +70,7 @@ export default function AdminUsersPage() {
       const res = await fetch(`/api/admin/users/${id}`, { method: "DELETE" });
       if (res.ok) {
         setDeleteId(null);
-        fetchUsers();
+        refetch();
       }
     } catch {}
     setDeleting(false);
@@ -86,10 +90,12 @@ export default function AdminUsersPage() {
             <span className="material-symbols-outlined">notifications</span>
           </button>
           <div className="w-8 h-8 rounded-full overflow-hidden border border-outline-variant/30">
-            <img
+            <Image
               className="w-full h-full object-cover"
               src="https://lh3.googleusercontent.com/aida-public/AB6AXuA6jAEv7x888X42BimUArGeWLtS9MnDaHwOqSgTX0c13jeuDFDOGhAMbJwltx7r19TZDkvBAPK8kC_t1LocXTZchBB2ntQe2r16jny3aiQ8pzLUYhEV4mzaxTbMqM0khIbcIdHn4LQUuSo1dfmVr6kRSvYi7HcxcQuRzco7rCMccO_heVE48x3jOW4gGtkgBDmG7yRoL1CLMoByp2g1AcpmouNjLxmSZFNuwWzYlIkowOuD5ljUz-l87A"
               alt="Admin"
+              width={32}
+              height={32}
             />
           </div>
         </div>
