@@ -2,7 +2,6 @@
 
 import { usePathname } from "next/navigation";
 import { useUIStore } from "@/stores/ui-store";
-import { useAuthStore } from "@/stores/auth-store";
 import { useTranslation } from "@/hooks/useTranslation";
 
 const menuItemKeys = [
@@ -19,9 +18,6 @@ export function DrawerMenu() {
   const pathname = usePathname();
   const isOpen = useUIStore((s) => s.isMobileMenuOpen);
   const setOpen = useUIStore((s) => s.setMobileMenuOpen);
-  const user = useAuthStore((s) => s.user);
-  const isAdmin = user?.dbRole === "ADMIN";
-
   if (pathname.startsWith("/admin")) return null;
 
   return (
@@ -53,19 +49,7 @@ export function DrawerMenu() {
               <span className="font-label-md text-label-md">{t(`nav.${item.key}`)}</span>
             </a>
           ))}
-          {isAdmin && (
-            <>
-              <div className="my-2 border-t border-outline-variant/20 dark:border-outline-variant/30" />
-              <a
-                href="/admin/dashboard"
-                className="flex items-center gap-4 px-md py-3 rounded-xl bg-primary-container/10 text-primary dark:text-inverse-primary hover:bg-primary-container/20 transition-all active:scale-[0.98]"
-                onClick={() => setOpen(false)}
-              >
-                <span className="material-symbols-outlined text-[20px]">admin_panel_settings</span>
-                <span className="font-label-md text-label-md">Admin Panel</span>
-              </a>
-            </>
-          )}
+
         </nav>
         <div className="absolute bottom-0 left-0 right-0 p-md border-t border-outline-variant/20 dark:border-outline-variant/30">
           <p className="font-label-sm text-label-sm text-outline dark:text-outline-variant text-center">&copy; 2026 {t("common.app_name")}</p>
