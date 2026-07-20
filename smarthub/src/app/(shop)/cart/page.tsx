@@ -33,7 +33,7 @@ export default function CartPage() {
             items.map((item) => (
               <div key={item.id} className="bg-surface-container-lowest dark:bg-inverse-surface rounded-xl p-md flex flex-col sm:flex-row gap-md shadow-soft dark:shadow-none dark:border dark:border-outline-variant/10 group transition-all hover:scale-[1.01]">
                 <div className="relative w-full sm:w-32 h-32 bg-surface-container dark:bg-surface-variant/15 rounded-lg overflow-hidden shrink-0">
-                  <Image className="object-cover" src={item.image} alt={item.name} fill />
+                  <Image className="object-cover" src={item.image} alt={item.name} fill unoptimized />
                 </div>
                 <div className="flex-grow flex flex-col justify-between py-1">
                   <div className="flex justify-between items-start">

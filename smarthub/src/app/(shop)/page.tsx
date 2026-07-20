@@ -153,7 +153,7 @@ export default function Home() {
                   <span className="material-symbols-outlined">favorite</span>
                 </button>
                 <div className="relative h-40 mb-3 flex items-center justify-center overflow-hidden rounded-xl">
-                  <Image className="object-cover" src={product.images[0] || ""} alt={product.name} fill />
+                  <Image className="object-cover" src={product.images[0] || ""} alt={product.name} fill unoptimized />
                 </div>
                 <p className="font-label-md text-on-surface-variant">{product.brand}</p>
                 <p className="font-headline-md text-[16px] text-on-surface truncate">{product.name}</p>
